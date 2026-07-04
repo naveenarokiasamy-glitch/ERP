@@ -124,12 +124,11 @@ function buildInitialStock() {
     .filter((po) => po.receivedQty > 0)
     .map((po) => {
       const mat = findMaterial(po.materialId);
-      // For PO-1004, some quantity is already issued to cutting
       let availableQty = po.receivedQty;
       let status = "In Stock";
 
       if (po.poNumber === "PO-1004") {
-        availableQty = 20; // 60 received - 40 issued to cutting
+        availableQty = 20;
         status = "Partially Issued";
       }
 
@@ -151,7 +150,7 @@ function buildInitialStock() {
         specification: mat.specification,
         rackLocation: "",
         batchNumber: "",
-        issuedToCutting: po.poNumber === "PO-1004" ? 40 : 0, // Track how much issued
+        issuedToCutting: po.poNumber === "PO-1004" ? 40 : 0,
       };
     });
 }
@@ -198,7 +197,6 @@ const cuttingJobs = [
 
 // -----------------------------------------------------------------------------
 // FINISHED PIECES — production inventory created in Receive From Cutting.
-// This is what "Issue Material To Production" reads from (never raw plates).
 // -----------------------------------------------------------------------------
 const finishedPieces = [
   {
@@ -213,7 +211,7 @@ const finishedPieces = [
     length: 500,
     width: 300,
     quantity: 40,
-    availableQty: 5, // 35 already issued to production (see productionIssues seed)
+    availableQty: 5,
     weight: 47.1,
     warehouse: "WH-A (Raw Material)",
     status: "Partially Issued",
@@ -239,7 +237,6 @@ const finishedPieces = [
 
 // -----------------------------------------------------------------------------
 // CUTTING BALANCE STOCK — leftover parent-plate remnants after cutting.
-// Read-only inventory view (no issue action per spec).
 // -----------------------------------------------------------------------------
 const cuttingBalanceStock = [
   {
@@ -259,21 +256,32 @@ const cuttingBalanceStock = [
 const scrapMaterials = [
   {
     id: nextId("SCR"),
+    jobNumber: "CUT-2001",
+    poNumber: "PO-1004",
     material: "MS Plate",
     grade: "IS 2062 E250",
     sourceJob: "CUT-2001",
     plateNumber: "PL-4501",
+    heatNumber: "HT-2291",
     weight: 38.2,
     quantity: 1,
     reason: "Trim waste from cutting",
+    department: null,
+    remarks: "",
     warehouse: "WH-A (Raw Material)",
+    source: "Cutting",
     status: "Available",
+    date: todayMinus(5),
   },
 ];
 
 const rejectionMaterials = [
   {
     id: nextId("REJ"),
+    jobNumber: "CUT-2001",
+    poNumber: "PO-1004",
+    pieceCode: "PC-2001-A",
+    drawingNumber: "DRG-101",
     material: "MS Plate",
     grade: "IS 2062 E250",
     sourceJob: "CUT-2001",
@@ -282,9 +290,15 @@ const rejectionMaterials = [
     quantity: 1,
     reason: "Wrong Dimension",
     department: "Cutting",
+    status: "Pending",
     date: todayMinus(5),
   },
 ];
+
+// -----------------------------------------------------------------------------
+// REWORK MATERIALS — populated only via "Send For Rework" on a rejection.
+// -----------------------------------------------------------------------------
+const reworkMaterials = [];
 
 // -----------------------------------------------------------------------------
 // ISSUE MATERIAL TO PRODUCTION — sourced from finishedPieces
@@ -311,14 +325,15 @@ const productionIssues = [
 // MOVEMENT HISTORY (audit trail)
 // -----------------------------------------------------------------------------
 const movementHistory = [
-  { id: nextId("MOV"), date: todayMinus(9), material: "MS Plate (PL-4501)", movementType: "Purchase Order Raised", from: "Shree Metaliks Pvt Ltd", to: "PO-1004", quantity: 100, user: "A. Sharma" },
-  { id: nextId("MOV"), date: todayMinus(8), material: "MS Plate (PL-4501)", movementType: "GRN Receipt", from: "Supplier", to: "Material Stock (WH-A)", quantity: 60, user: "A. Sharma" },
-  { id: nextId("MOV"), date: todayMinus(6), material: "MS Plate (PL-4501)", movementType: "Issue to Cutting", from: "Material Stock (WH-A)", to: "CUT-2001", quantity: 40, user: "R. Kumar" },
-  { id: nextId("MOV"), date: todayMinus(5), material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Finished Pieces", from: "CUT-2001", to: "Finished Pieces Inventory", quantity: 60, user: "R. Kumar" },
-  { id: nextId("MOV"), date: todayMinus(5), material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Balance", from: "CUT-2001", to: "Cutting Balance Stock", quantity: 1, user: "R. Kumar" },
-  { id: nextId("MOV"), date: todayMinus(5), material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Scrap", from: "CUT-2001", to: "Scrap Materials", quantity: 38.2, user: "R. Kumar" },
-  { id: nextId("MOV"), date: todayMinus(5), material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Rejection", from: "CUT-2001", to: "Rejection Materials", quantity: 1, user: "R. Kumar" },
-  { id: nextId("MOV"), date: todayMinus(4), material: "MS Plate (PC-2001-A)", movementType: "Issue to Production", from: "Finished Pieces (CUT-2001)", to: "PROD-9001 / JC-7001", quantity: 35, user: "M. Iyer" },
+  { id: nextId("MOV"), date: todayMinus(9), time: "09:15 AM", poNumber: "PO-1004", jobNumber: null, plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Purchase Order Raised", from: "Shree Metaliks Pvt Ltd", to: "PO-1004", quantity: 100, user: "A. Sharma", remarks: "Initial purchase order raised", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(8), time: "11:40 AM", poNumber: "PO-1004", jobNumber: null, plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "GRN Receipt", from: "Supplier", to: "Material Stock (WH-A)", quantity: 60, user: "A. Sharma", remarks: "Partial delivery received", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(8), time: "11:55 AM", poNumber: "PO-1004", jobNumber: null, plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Material Stock Updated", from: "GRN", to: "Material Stock (WH-A)", quantity: 60, user: "A. Sharma", remarks: "Stock lot created", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(6), time: "02:10 PM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Issue to Cutting", from: "Material Stock (WH-A)", to: "CUT-2001", quantity: 40, user: "R. Kumar", remarks: "Issued for bracket cutting - Line 2", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(5), time: "10:05 AM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Finished Pieces (Fully Consumed Plates)", from: "CUT-2001", to: "Finished Pieces Inventory", quantity: 60, user: "R. Kumar", remarks: "", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(5), time: "10:06 AM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Balance", from: "CUT-2001", to: "Cutting Balance Stock", quantity: 1, user: "R. Kumar", remarks: "", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(5), time: "10:07 AM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: null, material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Scrap", from: "CUT-2001", to: "Scrap Materials", quantity: 38.2, user: "R. Kumar", remarks: "Trim waste from cutting", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(5), time: "10:08 AM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: "PC-2001-A", material: "MS Plate (PL-4501)", movementType: "Receive from Cutting - Rejection", from: "CUT-2001", to: "Rejection Materials", quantity: 1, user: "R. Kumar", remarks: "Wrong Dimension", status: "Completed" },
+  { id: nextId("MOV"), date: todayMinus(4), time: "03:30 PM", poNumber: "PO-1004", jobNumber: "CUT-2001", plateNumber: "PL-4501", pieceCode: "PC-2001-A", material: "MS Plate (PC-2001-A)", movementType: "Issue to Production", from: "Finished Pieces (CUT-2001)", to: "PROD-9001 / JC-7001", quantity: 35, user: "M. Iyer", remarks: "Issued for bracket assembly batch #14", status: "Completed" },
 ];
 
 // -----------------------------------------------------------------------------
@@ -333,6 +348,7 @@ let state = {
   cuttingBalanceStock,
   scrapMaterials,
   rejectionMaterials,
+  reworkMaterials,
   productionIssues,
   movementHistory,
 };
@@ -345,10 +361,21 @@ function setState(updater) {
   emit();
 }
 
+function nowTimeStr() {
+  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+}
+
 function logMovement(entry) {
   return {
     id: nextId("MOV"),
     date: todayStr(),
+    time: nowTimeStr(),
+    poNumber: null,
+    jobNumber: null,
+    plateNumber: null,
+    pieceCode: null,
+    remarks: "",
+    status: "Completed",
     user: "Current User",
     ...entry,
   };
@@ -395,7 +422,8 @@ export function receiveGRN(poNumber, qty, extra = {}) {
     ];
 
     const movementHistory = [
-      logMovement({ material: mat.materialType, movementType: "GRN Receipt", from: "Supplier", to: `Material Stock (${po.warehouse})`, quantity: qty }),
+      logMovement({ poNumber, plateNumber: extra.plateNumber || po.plateNumber, material: mat.materialType, movementType: "Material Stock Updated", from: "GRN", to: `Material Stock (${extra.warehouse || po.warehouse})`, quantity: qty, remarks: "Stock lot created" }),
+      logMovement({ poNumber, plateNumber: extra.plateNumber || po.plateNumber, material: mat.materialType, movementType: "GRN Receipt", from: "Supplier", to: `Material Stock (${po.warehouse})`, quantity: qty }),
       ...s.movementHistory,
     ];
 
@@ -453,12 +481,16 @@ export function issueToCutting({ stockId, jobNumber, issuedQty, issuedBy, remark
 
     const movementHistory = [
       logMovement({
+        poNumber: stockRow.poNumber,
+        jobNumber,
+        plateNumber: stockRow.plateNumber,
         material: stockRow.material,
         movementType: "Issue to Cutting",
         from: `Material Stock (${stockRow.warehouse})`,
         to: jobNumber,
         quantity: issuedQty,
         user: issuedBy,
+        remarks,
       }),
       ...s.movementHistory,
     ];
@@ -468,159 +500,349 @@ export function issueToCutting({ stockId, jobNumber, issuedQty, issuedBy, remark
 }
 
 /**
- * Receive From Cutting — closes a cutting job and fans the output into
- * production inventory (finishedPieces), leftover raw material
- * (cuttingBalanceStock), scrap, and rejection.
+ * Receive From Cutting — closes a cutting job using plate-level logic.
  *
  * payload = {
  *   jobNumber: "CUT-2002",
- *   pieces: [{ pieceCode, drawingNumber, length, width, quantity, weight }, ...],
- *   balance: { exists: boolean, remainingLength, remainingWidth, remainingWeight },
- *   scrapWeight: number,
- *   rejectedQty: number,
- *   remarks: string,
+ *   fullyConsumedCount: number,          // how many of the issued plates were 100% used
+ *   fullyConsumedPieces: [                // aggregated output from those plates (no plate-wise detail)
+ *     { pieceCode, drawingNumber, quantity, weight }
+ *   ],
+ *   remainingPlates: [                    // one entry per plate still holding balance material
+ *     {
+ *       plateNumber,
+ *       pieces: [{ pieceCode, drawingNumber, length, width, quantity, weight }],
+ *       remainingLength, remainingWidth, remainingWeight,
+ *       scrapWeight,
+ *       rejectedQty,
+ *       remarks,
+ *     }
+ *   ],
+ *   receivedBy: string,
+ * }
+ */
+/**
+ * Receive From Cutting — closes a cutting job using plate-level logic.
+ *
+ * payload = {
+ *   jobNumber: "CUT-2002",
+ *   fullyConsumedCount: number,
+ *   fullyConsumedPieces: [{ pieceCode, drawingNumber, quantity, weight }],
+ *   remainingPlates: [{
+ *     plateNumber,
+ *     pieces: [{ pieceCode, drawingNumber, length, width, quantity, weight }],
+ *     remainingLength, remainingWidth, remainingWeight,
+ *     scrapWeight,
+ *     rejectedQty,
+ *     remarks,
+ *   }],
+ *   receivedBy: string,
+ * }
+ */
+/**
+ * Receive From Cutting — closes a cutting job using plate-level logic.
+ *
+ * payload = {
+ *   jobNumber: "CUT-2002",
+ *   fullyConsumedCount: number,
+ *   fullyConsumedPieces: [{ pieceCode, drawingNumber, quantity, weight }],
+ *   remainingPlates: [{
+ *     plateNumber,
+ *     pieces: [{ pieceCode, drawingNumber, length, width, quantity, weight }],
+ *     remainingLength, remainingWidth, remainingWeight,
+ *     scrapWeight,
+ *     rejectedQty,
+ *     remarks,
+ *   }],
  *   receivedBy: string,
  * }
  */
 export function receiveFromCutting(payload) {
-  const { jobNumber, pieces = [], balance, scrapWeight = 0, rejectedQty = 0, remarks = "", receivedBy = "Current User" } = payload;
+  const {
+    jobNumber,
+    fullyConsumedCount = 0,
+    fullyConsumedPieces = [],
+    remainingPlates = [],
+    receivedBy = "Current User",
+  } = payload;
+
+  console.log("🔵 receiveFromCutting called with:", {
+    jobNumber,
+    fullyConsumedCount,
+    fullyConsumedPieces: fullyConsumedPieces.length,
+    remainingPlates: remainingPlates.length,
+    receivedBy
+  });
 
   setState((s) => {
     const job = s.cuttingJobs.find((j) => j.jobNumber === jobNumber);
-    if (!job) return s;
+    if (!job) {
+      console.error("❌ Job not found:", jobNumber);
+      return s;
+    }
+
+    console.log("✅ Job found:", job);
 
     // 1. Close the cutting job
     const cuttingJobs = s.cuttingJobs.map((j) =>
       j.jobNumber === jobNumber ? { ...j, status: "Received" } : j
     );
 
-    // 2. Create finished pieces (production inventory)
-    const newFinishedPieces = pieces.map((p) => ({
-      id: nextId("FP"),
-      jobNumber,
-      poNumber: job.poNumber,
-      plateNumber: job.plateNumber,
-      pieceCode: p.pieceCode,
-      drawingNumber: p.drawingNumber,
-      material: job.material,
-      grade: job.grade,
-      length: Number(p.length) || 0,
-      width: Number(p.width) || 0,
-      quantity: Number(p.quantity) || 0,
-      availableQty: Number(p.quantity) || 0,
-      weight: Number(p.weight) || 0,
-      warehouse: job.warehouse,
-      status: "Ready",
-    }));
-    const finishedPieces = [...newFinishedPieces, ...s.finishedPieces];
+    // 2a. Finished pieces from fully consumed plates
+    const fullyConsumedFinishedPieces = fullyConsumedPieces
+      .filter((p) => p.pieceCode && Number(p.quantity) > 0)
+      .map((p) => ({
+        id: nextId("FP"),
+        jobNumber,
+        poNumber: job.poNumber,
+        plateNumber: null,
+        sourceType: "Fully Consumed Plates",
+        fullyConsumedPlateCount: Number(fullyConsumedCount) || 0,
+        pieceCode: p.pieceCode,
+        drawingNumber: p.drawingNumber,
+        material: job.material,
+        grade: job.grade,
+        quantity: Number(p.quantity) || 0,
+        availableQty: Number(p.quantity) || 0,
+        weight: Number(p.weight) || 0,
+        warehouse: job.warehouse,
+        status: "Ready",
+      }));
 
-    // 3. Create cutting balance (if any)
-    const cuttingBalanceStock =
-      balance && balance.exists
-        ? [
-            {
-              id: nextId("CBS"),
-              jobNumber,
-              parentPlate: job.plateNumber,
-              material: job.material,
-              grade: job.grade,
-              remainingLength: Number(balance.remainingLength) || 0,
-              remainingWidth: Number(balance.remainingWidth) || 0,
-              remainingWeight: Number(balance.remainingWeight) || 0,
-              warehouse: job.warehouse,
-              status: "Available",
-            },
-            ...s.cuttingBalanceStock,
-          ]
-        : s.cuttingBalanceStock;
+    // 2b. Process remaining plates
+    const remainingFinishedPieces = [];
+    const newCuttingBalanceStock = [];
+    const newScrapMaterials = [];
+    const newRejectionMaterials = [];
 
-    // 4. Create scrap record (if any)
-    const scrapMaterials =
-      scrapWeight > 0
-        ? [
-            {
-              id: nextId("SCR"),
-              material: job.material,
-              grade: job.grade,
-              sourceJob: jobNumber,
-              plateNumber: job.plateNumber,
-              weight: Number(scrapWeight),
-              quantity: 1,
-              reason: "Trim waste from cutting",
-              warehouse: job.warehouse,
-              status: "Available",
-            },
-            ...s.scrapMaterials,
-          ]
-        : s.scrapMaterials;
+    remainingPlates.forEach((plate, index) => {
+      console.log(`🔍 Processing remaining plate ${index + 1}:`, plate);
+      
+      // Process finished pieces from this plate
+      (plate.pieces || [])
+        .filter((p) => p.pieceCode && Number(p.quantity) > 0)
+        .forEach((p) => {
+          console.log(`  ➕ Adding piece ${p.pieceCode} from plate ${plate.plateNumber}`);
+          remainingFinishedPieces.push({
+            id: nextId("FP"),
+            jobNumber,
+            poNumber: job.poNumber,
+            plateNumber: plate.plateNumber,
+            sourceType: "Partially Consumed Plate",
+            pieceCode: p.pieceCode,
+            drawingNumber: p.drawingNumber,
+            material: job.material,
+            grade: job.grade,
+            length: Number(p.length) || 0,
+            width: Number(p.width) || 0,
+            quantity: Number(p.quantity) || 0,
+            availableQty: Number(p.quantity) || 0,
+            weight: Number(p.weight) || 0,
+            warehouse: job.warehouse,
+            status: "Ready",
+          });
+        });
 
-    // 5. Create rejection record (if any)
-    const rejectionMaterials =
-      rejectedQty > 0
-        ? [
-            {
-              id: nextId("REJ"),
-              material: job.material,
-              grade: job.grade,
-              sourceJob: jobNumber,
-              plateNumber: job.plateNumber,
-              weight: 0,
-              quantity: Number(rejectedQty),
-              reason: "Quality Failure",
-              department: "Cutting",
-              date: todayStr(),
-            },
-            ...s.rejectionMaterials,
-          ]
-        : s.rejectionMaterials;
+      // CRITICAL: Create balance stock record if there's any remaining material
+      const remainingLength = Number(plate.remainingLength) || 0;
+      const remainingWidth = Number(plate.remainingWidth) || 0;
+      const remainingWeight = Number(plate.remainingWeight) || 0;
+      
+      const hasBalance = remainingLength > 0 || remainingWidth > 0 || remainingWeight > 0;
+      
+      console.log(`  📊 Balance check for plate ${plate.plateNumber}:`, {
+        remainingLength,
+        remainingWidth,
+        remainingWeight,
+        hasBalance
+      });
+      
+      if (hasBalance) {
+        const balanceRecord = {
+          id: nextId("CBS"),
+          jobNumber,
+          parentPlate: plate.plateNumber,
+          material: job.material,
+          grade: job.grade,
+          remainingLength: remainingLength,
+          remainingWidth: remainingWidth,
+          remainingWeight: remainingWeight,
+          warehouse: job.warehouse,
+          status: "Available",
+        };
+        
+        console.log(`  ✅ Creating balance stock for plate ${plate.plateNumber}:`, balanceRecord);
+        newCuttingBalanceStock.push(balanceRecord);
+      } else {
+        console.log(`  ⚠️ No balance for plate ${plate.plateNumber}`);
+      }
 
-    // 6. Movement history for every leg of the transaction
-    const totalPieceQty = newFinishedPieces.reduce((sum, p) => sum + p.quantity, 0);
+      // Create scrap record — Source = Cutting. Locked/view-only downstream:
+      // the weight here is what closes the material-traceability equation for
+      // this job, so the Scrap page must never let it be edited.
+      const scrapWeight = Number(plate.scrapWeight) || 0;
+      if (scrapWeight > 0) {
+        console.log(`  ♻️ Creating scrap record: ${scrapWeight}kg`);
+        newScrapMaterials.push({
+          id: nextId("SCR"),
+          jobNumber,
+          poNumber: job.poNumber,
+          material: job.material,
+          grade: job.grade,
+          sourceJob: jobNumber,
+          plateNumber: plate.plateNumber,
+          heatNumber: job.heatNumber,
+          weight: scrapWeight,
+          quantity: 1,
+          reason: plate.remarks || "Cutting scrap",
+          department: null,
+          remarks: plate.remarks || "",
+          warehouse: job.warehouse,
+          source: "Cutting",
+          status: "Available",
+          date: todayStr(),
+        });
+      }
+
+      // Create rejection record — this is the ONLY entry point into the
+      // Rejection module. The record starts life as "Pending" and can then
+      // only be actioned (never manually created) from the Rejection page.
+      const rejectedQty = Number(plate.rejectedQty) || 0;
+      if (rejectedQty > 0) {
+        console.log(`  ❌ Creating rejection record: ${rejectedQty} units`);
+        newRejectionMaterials.push({
+          id: nextId("REJ"),
+          jobNumber,
+          poNumber: job.poNumber,
+          pieceCode: null,
+          drawingNumber: null,
+          material: job.material,
+          grade: job.grade,
+          sourceJob: jobNumber,
+          plateNumber: plate.plateNumber,
+          weight: 0,
+          quantity: rejectedQty,
+          reason: plate.remarks || "Rejected during cutting",
+          department: "Cutting",
+          status: "Pending",
+          date: todayStr(),
+        });
+      }
+    });
+
+    // Combine all finished pieces
+    const finishedPieces = [
+      ...fullyConsumedFinishedPieces,
+      ...remainingFinishedPieces,
+      ...s.finishedPieces,
+    ];
+    
+    // Combine balance stock - IMPORTANT: Keep existing balance stock
+    const cuttingBalanceStock = [
+      ...s.cuttingBalanceStock,
+      ...newCuttingBalanceStock,
+    ];
+    
+    const scrapMaterials = [...newScrapMaterials, ...s.scrapMaterials];
+    const rejectionMaterials = [
+      ...newRejectionMaterials,
+      ...s.rejectionMaterials,
+    ];
+
+    console.log("📦 Final balance stock:", {
+      existing: s.cuttingBalanceStock.length,
+      new: newCuttingBalanceStock.length,
+      total: cuttingBalanceStock.length,
+      records: cuttingBalanceStock
+    });
+
+    // 3. Movement history
+    const totalFullyConsumedQty = fullyConsumedFinishedPieces.reduce(
+      (sum, p) => sum + p.quantity,
+      0,
+    );
+    const totalRemainingQty = remainingFinishedPieces.reduce(
+      (sum, p) => sum + p.quantity,
+      0,
+    );
+
     const movementHistory = [
-      ...(newFinishedPieces.length > 0
+      ...(totalFullyConsumedQty > 0
         ? [
             logMovement({
+              poNumber: job.poNumber,
+              jobNumber,
+              plateNumber: job.plateNumber,
               material: job.material,
-              movementType: "Receive from Cutting - Finished Pieces",
+              movementType:
+                "Receive from Cutting - Finished Pieces (Fully Consumed Plates)",
               from: jobNumber,
               to: "Finished Pieces Inventory",
-              quantity: totalPieceQty,
+              quantity: totalFullyConsumedQty,
               user: receivedBy,
             }),
           ]
         : []),
-      ...(balance && balance.exists
+      ...(totalRemainingQty > 0
         ? [
             logMovement({
+              poNumber: job.poNumber,
+              jobNumber,
+              plateNumber: job.plateNumber,
+              material: job.material,
+              movementType:
+                "Receive from Cutting - Finished Pieces (Remaining Plates)",
+              from: jobNumber,
+              to: "Finished Pieces Inventory",
+              quantity: totalRemainingQty,
+              user: receivedBy,
+            }),
+          ]
+        : []),
+      ...(newCuttingBalanceStock.length > 0
+        ? [
+            logMovement({
+              poNumber: job.poNumber,
+              jobNumber,
+              plateNumber: job.plateNumber,
               material: job.material,
               movementType: "Receive from Cutting - Balance",
               from: jobNumber,
               to: "Cutting Balance Stock",
-              quantity: 1,
+              quantity: newCuttingBalanceStock.length,
               user: receivedBy,
             }),
           ]
         : []),
-      ...(scrapWeight > 0
+      ...(newScrapMaterials.length > 0
         ? [
             logMovement({
+              poNumber: job.poNumber,
+              jobNumber,
+              plateNumber: job.plateNumber,
               material: job.material,
               movementType: "Receive from Cutting - Scrap",
               from: jobNumber,
               to: "Scrap Materials",
-              quantity: Number(scrapWeight),
+              quantity: newScrapMaterials.reduce((sum, r) => sum + r.weight, 0),
               user: receivedBy,
             }),
           ]
         : []),
-      ...(rejectedQty > 0
+      ...(newRejectionMaterials.length > 0
         ? [
             logMovement({
+              poNumber: job.poNumber,
+              jobNumber,
+              plateNumber: job.plateNumber,
               material: job.material,
               movementType: "Receive from Cutting - Rejection",
               from: jobNumber,
               to: "Rejection Materials",
-              quantity: Number(rejectedQty),
+              quantity: newRejectionMaterials.reduce(
+                (sum, r) => sum + r.quantity,
+                0,
+              ),
               user: receivedBy,
             }),
           ]
@@ -628,21 +850,31 @@ export function receiveFromCutting(payload) {
       ...s.movementHistory,
     ];
 
-    return { cuttingJobs, finishedPieces, cuttingBalanceStock, scrapMaterials, rejectionMaterials, movementHistory };
+    const newState = {
+      cuttingJobs,
+      finishedPieces,
+      cuttingBalanceStock,
+      scrapMaterials,
+      rejectionMaterials,
+      movementHistory,
+    };
+
+    console.log("✅ State updated:", {
+      cuttingBalanceStock: newState.cuttingBalanceStock.length,
+      finishedPieces: newState.finishedPieces.length,
+    });
+
+    return newState;
   });
 }
 
-/**
- * Issue Material To Production — issues qty from a finished piece
- * (production inventory), never from raw plates.
- */
 export function issueToProduction({ pieceId, productionOrder, jobCard, issuedQty, department, issuedBy, remarks }) {
   setState((s) => {
     const piece = s.finishedPieces.find((p) => p.id === pieceId);
     if (!piece) return s;
 
     const qty = Number(issuedQty) || 0;
-    if (qty <= 0 || qty > piece.availableQty) return s; // guard, UI validates too
+    if (qty <= 0 || qty > piece.availableQty) return s;
 
     const newAvailableQty = piece.availableQty - qty;
     const newStatus = newAvailableQty === 0 ? "Fully Issued" : "Partially Issued";
@@ -672,18 +904,508 @@ export function issueToProduction({ pieceId, productionOrder, jobCard, issuedQty
 
     const movementHistory = [
       logMovement({
+        poNumber: piece.poNumber,
+        jobNumber: piece.jobNumber,
+        plateNumber: piece.plateNumber,
+        pieceCode: piece.pieceCode,
         material: `${piece.material} (${piece.pieceCode})`,
         movementType: "Issue to Production",
         from: "Finished Pieces Inventory",
         to: `${productionOrder} / ${jobCard}`,
         quantity: qty,
         user: issuedBy,
+        remarks,
       }),
       ...s.movementHistory,
     ];
 
     return { finishedPieces, productionIssues, movementHistory };
   });
+}
+
+// -----------------------------------------------------------------------------
+// SCRAP MODULE — Manual Scrap Entry
+// -----------------------------------------------------------------------------
+
+/**
+ * Create a Manual scrap record (Source = Manual, editable).
+ * Material / Grade / Plate Number / Heat Number / Warehouse are auto-fetched
+ * from the selected PO — the user only supplies weight/department/reason/remarks.
+ */
+export function createManualScrap({ poNumber, weight, department, reason, remarks }) {
+  setState((s) => {
+    const po = s.purchaseOrders.find((p) => p.poNumber === poNumber);
+    if (!po) return s;
+
+    const scrapWeight = Number(weight) || 0;
+
+    const scrapRecord = {
+      id: nextId("SCR"),
+      jobNumber: null,
+      poNumber: po.poNumber,
+      material: po.material,
+      grade: po.grade,
+      sourceJob: null,
+      plateNumber: po.plateNumber,
+      heatNumber: po.heatNumber,
+      weight: scrapWeight,
+      quantity: 1,
+      reason: reason || "",
+      department: department || "",
+      remarks: remarks || "",
+      warehouse: po.warehouse,
+      source: "Manual",
+      status: "Available",
+      date: todayStr(),
+    };
+
+    const scrapMaterials = [scrapRecord, ...s.scrapMaterials];
+
+    const movementHistory = [
+      logMovement({
+        poNumber: po.poNumber,
+        plateNumber: po.plateNumber,
+        material: po.material,
+        movementType: "Manual Scrap Entry",
+        from: department || "Production",
+        to: "Scrap Inventory",
+        quantity: scrapWeight,
+        remarks: remarks || "",
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { scrapMaterials, movementHistory };
+  });
+}
+
+/** Edit a Manual scrap record. Cutting / Rejection / Rework sourced scrap is locked. */
+export function updateManualScrap(scrapId, updates = {}) {
+  setState((s) => {
+    const record = s.scrapMaterials.find((r) => r.id === scrapId);
+    if (!record || record.source !== "Manual") return s;
+
+    const scrapMaterials = s.scrapMaterials.map((r) =>
+      r.id === scrapId
+        ? {
+            ...r,
+            weight: updates.weight !== undefined ? Number(updates.weight) || 0 : r.weight,
+            department: updates.department !== undefined ? updates.department : r.department,
+            reason: updates.reason !== undefined ? updates.reason : r.reason,
+            remarks: updates.remarks !== undefined ? updates.remarks : r.remarks,
+            status: updates.status !== undefined ? updates.status : r.status,
+          }
+        : r
+    );
+
+    return { scrapMaterials };
+  });
+}
+
+/** Delete a Manual scrap record. Cutting / Rejection / Rework sourced scrap is locked. */
+export function deleteManualScrap(scrapId) {
+  setState((s) => {
+    const record = s.scrapMaterials.find((r) => r.id === scrapId);
+    if (!record || record.source !== "Manual") return s;
+
+    const scrapMaterials = s.scrapMaterials.filter((r) => r.id !== scrapId);
+
+    const movementHistory = [
+      logMovement({
+        poNumber: record.poNumber,
+        jobNumber: record.jobNumber,
+        plateNumber: record.plateNumber,
+        material: record.material,
+        movementType: "Manual Scrap Deleted",
+        from: "Scrap Inventory",
+        to: "-",
+        quantity: record.weight,
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { scrapMaterials, movementHistory };
+  });
+}
+
+// -----------------------------------------------------------------------------
+// REJECTION MODULE — process (never manually create) a Pending rejection
+// -----------------------------------------------------------------------------
+
+/** Move a Pending rejection into the Rework Inventory. */
+export function sendRejectionToRework(rejectId) {
+  setState((s) => {
+    const rejection = s.rejectionMaterials.find((r) => r.id === rejectId);
+    if (!rejection || rejection.status !== "Pending") return s; // no double-processing
+
+    const reworkRecord = {
+      id: nextId("RWK"),
+      rejectId: rejection.id,
+      jobNumber: rejection.jobNumber,
+      poNumber: rejection.poNumber,
+      pieceCode: rejection.pieceCode,
+      drawingNumber: rejection.drawingNumber,
+      material: rejection.material,
+      grade: rejection.grade,
+      quantity: rejection.quantity,
+      reason: rejection.reason,
+      assignedTo: "",
+      status: "Pending",
+      date: todayStr(),
+    };
+
+    const reworkMaterials = [reworkRecord, ...s.reworkMaterials];
+    const rejectionMaterials = s.rejectionMaterials.map((r) =>
+      r.id === rejectId ? { ...r, status: "Sent for Rework" } : r
+    );
+
+    const movementHistory = [
+      logMovement({
+        poNumber: rejection.poNumber,
+        jobNumber: rejection.jobNumber,
+        plateNumber: rejection.plateNumber,
+        pieceCode: rejection.pieceCode,
+        material: rejection.material,
+        movementType: "Sent To Rework",
+        from: "Rejection Materials",
+        to: "Rework Inventory",
+        quantity: rejection.quantity,
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { reworkMaterials, rejectionMaterials, movementHistory };
+  });
+}
+
+/** Convert a Pending rejection directly into a Scrap record (Source = Rejection). */
+export function convertRejectionToScrap(rejectId) {
+  setState((s) => {
+    const rejection = s.rejectionMaterials.find((r) => r.id === rejectId);
+    if (!rejection || rejection.status !== "Pending") return s; // no double-processing
+
+    const scrapRecord = {
+      id: nextId("SCR"),
+      jobNumber: rejection.jobNumber,
+      poNumber: rejection.poNumber,
+      material: rejection.material,
+      grade: rejection.grade,
+      sourceJob: rejection.jobNumber,
+      plateNumber: rejection.plateNumber || null,
+      heatNumber: rejection.heatNumber || null,
+      weight: rejection.weight || 0,
+      quantity: rejection.quantity,
+      reason: rejection.reason,
+      department: rejection.department || "Rejection",
+      remarks: `Converted from ${rejection.id}`,
+      warehouse: rejection.warehouse || null,
+      source: "Rejection",
+      status: "Available",
+      date: todayStr(),
+    };
+
+    const scrapMaterials = [scrapRecord, ...s.scrapMaterials];
+    const rejectionMaterials = s.rejectionMaterials.map((r) =>
+      r.id === rejectId ? { ...r, status: "Converted to Scrap" } : r
+    );
+
+    const movementHistory = [
+      logMovement({
+        poNumber: rejection.poNumber,
+        jobNumber: rejection.jobNumber,
+        plateNumber: rejection.plateNumber,
+        pieceCode: rejection.pieceCode,
+        material: rejection.material,
+        movementType: "Converted To Scrap",
+        from: "Rejection Materials",
+        to: "Scrap Inventory",
+        quantity: rejection.quantity,
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { scrapMaterials, rejectionMaterials, movementHistory };
+  });
+}
+
+// -----------------------------------------------------------------------------
+// REWORK MODULE — only reachable via "Send For Rework" on a rejection
+// -----------------------------------------------------------------------------
+
+/** Pending -> In Progress */
+export function startRework(reworkId, assignedTo = "") {
+  setState((s) => {
+    const rework = s.reworkMaterials.find((r) => r.id === reworkId);
+    if (!rework || rework.status !== "Pending") return s;
+
+    const reworkMaterials = s.reworkMaterials.map((r) =>
+      r.id === reworkId
+        ? { ...r, status: "In Progress", assignedTo: assignedTo || r.assignedTo }
+        : r
+    );
+
+    const movementHistory = [
+      logMovement({
+        poNumber: rework.poNumber,
+        jobNumber: rework.jobNumber,
+        pieceCode: rework.pieceCode,
+        material: rework.material,
+        movementType: "Rework Started",
+        from: "Rework Inventory (Pending)",
+        to: "Rework Inventory (In Progress)",
+        quantity: rework.quantity,
+        ...(assignedTo ? { user: assignedTo } : {}),
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { reworkMaterials, movementHistory };
+  });
+}
+
+/** In Progress -> Completed. Repaired pieces return to Finished Pieces inventory. */
+export function completeRework(reworkId) {
+  setState((s) => {
+    const rework = s.reworkMaterials.find((r) => r.id === reworkId);
+    if (!rework || rework.status !== "In Progress") return s;
+
+    const reworkMaterials = s.reworkMaterials.map((r) =>
+      r.id === reworkId ? { ...r, status: "Completed" } : r
+    );
+
+    // Bump availableQty on the matching finished piece if it still exists,
+    // otherwise create a new finished-piece row for the repaired quantity.
+    const existingPiece = s.finishedPieces.find(
+      (p) => p.pieceCode === rework.pieceCode && p.jobNumber === rework.jobNumber
+    );
+
+    const finishedPieces = existingPiece
+      ? s.finishedPieces.map((p) =>
+          p.id === existingPiece.id
+            ? {
+                ...p,
+                quantity: p.quantity + rework.quantity,
+                availableQty: p.availableQty + rework.quantity,
+                status: "Ready",
+              }
+            : p
+        )
+      : [
+          {
+            id: nextId("FP"),
+            jobNumber: rework.jobNumber,
+            poNumber: rework.poNumber,
+            plateNumber: null,
+            sourceType: "Reworked",
+            pieceCode: rework.pieceCode,
+            drawingNumber: rework.drawingNumber,
+            material: rework.material,
+            grade: rework.grade,
+            quantity: rework.quantity,
+            availableQty: rework.quantity,
+            weight: 0,
+            warehouse: "",
+            status: "Ready",
+          },
+          ...s.finishedPieces,
+        ];
+
+    const rejectionMaterials = s.rejectionMaterials.map((r) =>
+      r.id === rework.rejectId ? { ...r, status: "Closed" } : r
+    );
+
+    const reworkCompletedEntry = logMovement({
+      poNumber: rework.poNumber,
+      jobNumber: rework.jobNumber,
+      pieceCode: rework.pieceCode,
+      material: rework.material,
+      movementType: "Rework Completed",
+      from: "Rework Inventory (In Progress)",
+      to: "Rework Inventory (Completed)",
+      quantity: rework.quantity,
+    });
+    const returnedToFinishedEntry = logMovement({
+      poNumber: rework.poNumber,
+      jobNumber: rework.jobNumber,
+      pieceCode: rework.pieceCode,
+      material: rework.material,
+      movementType: "Returned To Finished Pieces",
+      from: "Rework Inventory",
+      to: "Finished Pieces Inventory",
+      quantity: rework.quantity,
+    });
+
+    const movementHistory = [
+      returnedToFinishedEntry,
+      reworkCompletedEntry,
+      ...s.movementHistory,
+    ];
+
+    return { reworkMaterials, finishedPieces, rejectionMaterials, movementHistory };
+  });
+}
+
+/** In Progress -> Failed. Failed rework becomes Scrap (Source = Rework). */
+export function scrapFromRework(reworkId) {
+  setState((s) => {
+    const rework = s.reworkMaterials.find((r) => r.id === reworkId);
+    if (!rework || rework.status !== "In Progress") return s;
+
+    const reworkMaterials = s.reworkMaterials.map((r) =>
+      r.id === reworkId ? { ...r, status: "Failed" } : r
+    );
+
+    const scrapRecord = {
+      id: nextId("SCR"),
+      jobNumber: rework.jobNumber,
+      poNumber: rework.poNumber,
+      material: rework.material,
+      grade: rework.grade,
+      sourceJob: rework.jobNumber,
+      plateNumber: null,
+      heatNumber: null,
+      weight: 0,
+      quantity: rework.quantity,
+      reason: "Rework Failed",
+      department: "Rework",
+      remarks: `Scrapped from ${rework.id} (Reject ${rework.rejectId})`,
+      warehouse: "",
+      source: "Rework",
+      status: "Available",
+      date: todayStr(),
+    };
+
+    const scrapMaterials = [scrapRecord, ...s.scrapMaterials];
+
+    const rejectionMaterials = s.rejectionMaterials.map((r) =>
+      r.id === rework.rejectId ? { ...r, status: "Converted to Scrap" } : r
+    );
+
+    const movementHistory = [
+      logMovement({
+        poNumber: rework.poNumber,
+        jobNumber: rework.jobNumber,
+        pieceCode: rework.pieceCode,
+        material: rework.material,
+        movementType: "Rework Failed - Scrapped",
+        from: "Rework Inventory",
+        to: "Scrap Inventory",
+        quantity: rework.quantity,
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { reworkMaterials, scrapMaterials, rejectionMaterials, movementHistory };
+  });
+}
+
+// -----------------------------------------------------------------------------
+// READ-ONLY SELECTORS — used by Material Movement History & Reports pages.
+// Pure functions operating on a store snapshot (from useMaterialStore()).
+// These do not mutate state and do not belong to the write-path business
+// logic above; they only derive/aggregate data that already exists.
+// -----------------------------------------------------------------------------
+
+// Friendlier display labels for the raw movementType strings written above.
+const TIMELINE_LABELS = {
+  "Purchase Order Raised": "PO Created",
+  "GRN Receipt": "GRN Received",
+  "Material Stock Updated": "Material Stock",
+  "Issue to Cutting": "Issue To Cutting",
+  "Receive from Cutting - Finished Pieces (Fully Consumed Plates)": "Finished Pieces Created",
+  "Receive from Cutting - Finished Pieces (Remaining Plates)": "Finished Pieces Created",
+  "Receive from Cutting - Balance": "Cutting Balance Created",
+  "Receive from Cutting - Scrap": "Scrap Created",
+  "Receive from Cutting - Rejection": "Rejection Created",
+  "Sent To Rework": "Sent To Rework",
+  "Rework Started": "Rework Started",
+  "Rework Completed": "Rework Completed",
+  "Returned To Finished Pieces": "Returned To Finished Pieces",
+  "Converted To Scrap": "Converted To Scrap",
+  "Rework Failed - Scrapped": "Converted To Scrap",
+  "Issue to Production": "Issue To Production",
+  "Manual Scrap Entry": "Manual Scrap Entry",
+  "Manual Scrap Deleted": "Manual Scrap Deleted",
+};
+
+/** Summary stats for the Material Movement History dashboard cards. */
+export function getMovementStats(store) {
+  return {
+    totalMovements: store.movementHistory.length,
+    totalPurchaseOrders: store.purchaseOrders.length,
+    openJobs: store.cuttingJobs.filter((j) => j.status === "Open").length,
+    completedJobs: store.cuttingJobs.filter((j) => j.status === "Received").length,
+  };
+}
+
+/**
+ * Builds the full chronological lifecycle timeline for one PO, dynamically
+ * from movementHistory (plus a synthesized "PO Created" entry when no
+ * explicit "Purchase Order Raised" movement exists for older seed POs).
+ * Events that never happened for this PO simply never appear.
+ */
+export function buildPOTimeline(store, poNumber) {
+  const po = store.purchaseOrders.find((p) => p.poNumber === poNumber);
+  if (!po) return [];
+
+  const jobNumbers = new Set(
+    store.cuttingJobs.filter((j) => j.poNumber === poNumber).map((j) => j.jobNumber)
+  );
+
+  const relevant = store.movementHistory.filter((m) => {
+    if (m.poNumber === poNumber) return true;
+    if (m.jobNumber && jobNumbers.has(m.jobNumber)) return true;
+    return false;
+  });
+
+  // MOV ids are assigned in creation order (MOV-1, MOV-2, ...), and rows are
+  // always prepended to movementHistory, so sorting by numeric id ascending
+  // recovers the true chronological order regardless of same-day dates.
+  const idNum = (m) => parseInt(String(m.id).split("-")[1], 10) || 0;
+  const sorted = [...relevant].sort((a, b) => idNum(a) - idNum(b));
+
+  const timeline = sorted.map((m) => ({
+    ...m,
+    stageLabel: TIMELINE_LABELS[m.movementType] || m.movementType,
+  }));
+
+  const hasCreatedEvent = sorted.some((m) => m.movementType === "Purchase Order Raised");
+  if (!hasCreatedEvent) {
+    timeline.unshift({
+      id: `PO-CREATED-${poNumber}`,
+      poNumber,
+      jobNumber: null,
+      plateNumber: po.plateNumber,
+      pieceCode: null,
+      material: po.material,
+      movementType: "Purchase Order Raised",
+      stageLabel: "PO Created",
+      from: po.supplier,
+      to: poNumber,
+      quantity: po.orderedQty,
+      date: "—",
+      time: "—",
+      user: "System",
+      remarks: `Ordered ${po.orderedQty} unit(s) of ${po.material} from ${po.supplier}`,
+      status: po.status,
+    });
+  }
+
+  return timeline;
+}
+
+/** Dashboard summary totals for the Reports page. */
+export function getReportTotals(store) {
+  return {
+    totalPurchaseOrders: store.purchaseOrders.length,
+    totalMaterialStock: store.materialStock.reduce((sum, r) => sum + (Number(r.availableQty) || 0), 0),
+    totalFinishedPieces: store.finishedPieces.reduce((sum, p) => sum + (Number(p.availableQty) || 0), 0),
+    totalCuttingBalance: store.cuttingBalanceStock.length,
+    totalScrapWeight: store.scrapMaterials.reduce((sum, r) => sum + (Number(r.weight) || 0), 0),
+    totalRejections: store.rejectionMaterials.reduce((sum, r) => sum + (Number(r.quantity) || 0), 0),
+    totalRework: store.reworkMaterials.length,
+    totalProductionIssues: store.productionIssues.reduce((sum, p) => sum + (Number(p.issuedQty) || 0), 0),
+  };
 }
 
 // ---- Hook ----------------------------------------------------------------
@@ -701,7 +1423,10 @@ export function useMaterialStore() {
 export const statusOptions = {
   po: ["Pending", "Partial", "Completed"],
   scrap: ["Available", "Sold", "Disposed"],
+  scrapSource: ["Cutting", "Manual", "Rejection", "Rework"],
   rejection: ["Wrong Dimension", "Bent", "Rust", "Quality Failure", "Damaged"],
+  rejectionStatus: ["Pending", "Sent for Rework", "Converted to Scrap", "Closed"],
+  rework: ["Pending", "In Progress", "Completed", "Failed"],
   finishedPiece: ["Ready", "Partially Issued", "Fully Issued"],
   cuttingBalance: ["Available", "Issued to Production", "Consumed"],
 };

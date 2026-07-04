@@ -20,7 +20,11 @@ import IssueMaterialToCutting from "./pages/material-planning/issuematerialtocut
 import ReceiveFromCutting from "./pages/material-planning/Receivefromcutting";
 import CuttingBalanceStock from "./pages/material-planning/Cuttingbalancestock";
 import IssueToProduction from "./pages/material-planning/issuetoprod";
-
+import Scrap from "./pages/material-planning/Scrap";
+import Rejection from "./pages/material-planning/Rejection";
+import Rework from "./pages/material-planning/Rework";
+import MaterialMovementHistory from "./pages/material-planning/MaterialMovementHistory";
+import Reports from "./pages/material-planning/Reports";
 export default function App() {
   return (
     <AuthProvider>
@@ -119,6 +123,57 @@ export default function App() {
           element={
             <ProtectedRoute>
               <IssueToProduction />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/material/rework"
+          element={
+            <ProtectedRoute>
+              <Rework />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/material/scrap"
+          element={
+            <ProtectedRoute>
+              <Scrap />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/material/rejection"
+          element={
+            <ProtectedRoute>
+              <Rejection />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/material/rework"
+          element={
+            <ProtectedRoute>
+              <Rework />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/material/movement-history"
+          element={
+            <ProtectedRoute>
+              <MaterialMovementHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/material/reports"
+          element={
+            <ProtectedRoute>
+              <Reports />
             </ProtectedRoute>
           }
         />

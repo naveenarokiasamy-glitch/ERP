@@ -13,13 +13,6 @@ import "./Material.css";
 import Header from "../../components/Header";
 const materialActions = [
   {
-    code: "MM",
-    title: "Material Master",
-    description: "Manage all material master records.",
-    icon: Layers,
-    path: "/inventory/material/master",
-  },
-  {
     code: "GRN",
     title: "GRN (Goods Receipt Note)",
     description: "Receive new raw materials from suppliers.",
@@ -85,6 +78,14 @@ const materialActions = [
     description: "Store materials rejected for quality issues or damage.",
     icon: Ban,
     path: "/inventory/material/rejection",
+  },
+  {
+    code: "RWK",
+    title: "Rework Materials",
+    description:
+      "Manage rejected materials sent for rework and return completed items back to finished inventory.",
+    icon: Factory,
+    path: "/inventory/material/rework",
   },
   {
     code: "MOV",

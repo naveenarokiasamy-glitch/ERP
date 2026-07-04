@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMaterialStore, receiveFromCutting } from "../../data/materialStore";
 import "./Receivefromcutting.css";
-import { useNavigate } from "react-router-dom"; // If using React Router
+import { useNavigate } from "react-router-dom";
+
 const badgeClass = (status) => {
   switch (status) {
     case "Open":
@@ -13,28 +14,49 @@ const badgeClass = (status) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// Row / plate factories
+// ---------------------------------------------------------------------------
 let pieceRowId = 1;
-const newPieceRow = () => ({
+const newPieceRow = (withDimensions = false) => ({
   rowId: pieceRowId++,
   pieceCode: "",
   drawingNumber: "",
-  length: "",
-  width: "",
+  ...(withDimensions ? { length: "", width: "" } : {}),
   quantity: "",
   weight: "",
 });
 
-const emptyForm = () => ({
-  pieces: [newPieceRow()],
-  balanceExists: "no",
+let plateRowId = 1;
+const newRemainingPlate = () => ({
+  id: plateRowId++,
+  plateNumber: "",
+  pieces: [newPieceRow(true)],
   remainingLength: "",
   remainingWidth: "",
   remainingWeight: "",
   scrapWeight: "",
   rejectedQty: "",
   remarks: "",
+});
+
+const emptyForm = () => ({
+  fullyConsumedCount: "",
+  fullyConsumedPieces: [newPieceRow(false)],
+  remainingPlates: [],
   receivedBy: "",
 });
+
+// Keep existing plate rows when the remaining count changes; add/trim as needed.
+const reconcileRemainingPlates = (existing, targetCount) => {
+  const count = Math.max(0, targetCount);
+  if (count === existing.length) return existing;
+  if (count < existing.length) return existing.slice(0, count);
+  const extra = Array.from({ length: count - existing.length }, () =>
+    newRemainingPlate(),
+  );
+  return [...existing, ...extra];
+};
 
 export default function ReceiveFromCutting() {
   const { cuttingJobs } = useMaterialStore();
@@ -43,6 +65,13 @@ export default function ReceiveFromCutting() {
   const [activeJob, setActiveJob] = useState(null);
   const [form, setForm] = useState(emptyForm());
   const [error, setError] = useState("");
+
+  const issuedQty = activeJob ? Number(activeJob.issuedQty) || 0 : 0;
+  const fullyConsumedCount = Math.min(
+    Number(form.fullyConsumedCount) || 0,
+    issuedQty,
+  );
+  const remainingCount = Math.max(issuedQty - fullyConsumedCount, 0);
 
   const openModal = (job) => {
     setActiveJob(job);
@@ -54,68 +83,172 @@ export default function ReceiveFromCutting() {
     setError("");
   };
 
-  const updatePiece = (rowId, field, value) => {
+  // -------------------------------------------------------------------------
+  // Step 1: completely consumed plate count
+  // -------------------------------------------------------------------------
+  const handleFullyConsumedChange = (raw) => {
+    const value = raw === "" ? "" : Math.max(0, Math.min(Number(raw), issuedQty));
+    const newRemainingCount = issuedQty - (Number(value) || 0);
     setForm((f) => ({
       ...f,
-      pieces: f.pieces.map((p) =>
+      fullyConsumedCount: value,
+      remainingPlates: reconcileRemainingPlates(f.remainingPlates, newRemainingCount),
+    }));
+  };
+
+  // -------------------------------------------------------------------------
+  // Fully consumed plates — aggregated finished-piece output
+  // -------------------------------------------------------------------------
+  const updateFullyConsumedPiece = (rowId, field, value) => {
+    setForm((f) => ({
+      ...f,
+      fullyConsumedPieces: f.fullyConsumedPieces.map((p) =>
         p.rowId === rowId ? { ...p, [field]: value } : p,
       ),
     }));
   };
-  const addPieceRow = () =>
-    setForm((f) => ({ ...f, pieces: [...f.pieces, newPieceRow()] }));
-  const removePieceRow = (rowId) =>
+  const addFullyConsumedPiece = () =>
     setForm((f) => ({
       ...f,
-      pieces:
-        f.pieces.length > 1
-          ? f.pieces.filter((p) => p.rowId !== rowId)
-          : f.pieces,
+      fullyConsumedPieces: [...f.fullyConsumedPieces, newPieceRow(false)],
     }));
+  const removeFullyConsumedPiece = (rowId) =>
+    setForm((f) => ({
+      ...f,
+      fullyConsumedPieces:
+        f.fullyConsumedPieces.length > 1
+          ? f.fullyConsumedPieces.filter((p) => p.rowId !== rowId)
+          : f.fullyConsumedPieces,
+    }));
+
+  // -------------------------------------------------------------------------
+  // Remaining plates — full detail per plate
+  // -------------------------------------------------------------------------
+  const updateRemainingPlateField = (plateId, field, value) =>
+    setForm((f) => ({
+      ...f,
+      remainingPlates: f.remainingPlates.map((pl) =>
+        pl.id === plateId ? { ...pl, [field]: value } : pl,
+      ),
+    }));
+
+  const updateRemainingPiece = (plateId, rowId, field, value) =>
+    setForm((f) => ({
+      ...f,
+      remainingPlates: f.remainingPlates.map((pl) =>
+        pl.id === plateId
+          ? {
+              ...pl,
+              pieces: pl.pieces.map((p) =>
+                p.rowId === rowId ? { ...p, [field]: value } : p,
+              ),
+            }
+          : pl,
+      ),
+    }));
+
+  const addRemainingPiece = (plateId) =>
+    setForm((f) => ({
+      ...f,
+      remainingPlates: f.remainingPlates.map((pl) =>
+        pl.id === plateId
+          ? { ...pl, pieces: [...pl.pieces, newPieceRow(true)] }
+          : pl,
+      ),
+    }));
+
+  const removeRemainingPiece = (plateId, rowId) =>
+    setForm((f) => ({
+      ...f,
+      remainingPlates: f.remainingPlates.map((pl) =>
+        pl.id === plateId
+          ? {
+              ...pl,
+              pieces:
+                pl.pieces.length > 1
+                  ? pl.pieces.filter((p) => p.rowId !== rowId)
+                  : pl.pieces,
+            }
+          : pl,
+      ),
+    }));
+
+  // -------------------------------------------------------------------------
+  // Validation + save
+  // -------------------------------------------------------------------------
+  const validate = () => {
+    if (form.fullyConsumedCount === "" ) {
+      return "Please enter the number of completely consumed plates.";
+    }
+    if (fullyConsumedCount < 0 || fullyConsumedCount > issuedQty) {
+      return `Completely Consumed Plates must be between 0 and ${issuedQty}.`;
+    }
+
+    const validFullyConsumedPieces = form.fullyConsumedPieces.filter(
+      (p) => p.pieceCode.trim() && Number(p.quantity) > 0,
+    );
+    if (fullyConsumedCount > 0 && validFullyConsumedPieces.length === 0) {
+      return "Add at least one finished piece for the fully consumed plates.";
+    }
+
+    if (form.remainingPlates.length !== remainingCount) {
+      return "Remaining plate sections don't match the remaining plate count.";
+    }
+
+    for (const plate of form.remainingPlates) {
+      if (!plate.plateNumber.trim()) {
+        return "Enter a Plate Number for every remaining plate.";
+      }
+      const validPieces = plate.pieces.filter(
+        (p) => p.pieceCode.trim() && Number(p.quantity) > 0,
+      );
+      if (validPieces.length === 0) {
+        return `Add at least one finished piece for plate ${plate.plateNumber}.`;
+      }
+    }
+
+    if (!form.receivedBy.trim()) {
+      return "Please enter Received By.";
+    }
+    return "";
+  };
 
   const handleSave = () => {
     if (!activeJob) return;
 
-    const validPieces = form.pieces.filter(
-      (p) => p.pieceCode.trim() && Number(p.quantity) > 0,
-    );
-    if (validPieces.length === 0) {
-      setError(
-        "Add at least one finished piece with a Piece Code and Quantity.",
-      );
-      return;
-    }
-    if (!form.receivedBy.trim()) {
-      setError("Please enter Received By.");
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     receiveFromCutting({
       jobNumber: activeJob.jobNumber,
-      pieces: validPieces,
-      balance:
-        form.balanceExists === "yes"
-          ? {
-              exists: true,
-              remainingLength: form.remainingLength,
-              remainingWidth: form.remainingWidth,
-              remainingWeight: form.remainingWeight,
-            }
-          : { exists: false },
-      scrapWeight: form.scrapWeight,
-      rejectedQty: form.rejectedQty,
-      remarks: form.remarks,
+      fullyConsumedCount,
+      fullyConsumedPieces: form.fullyConsumedPieces.filter(
+        (p) => p.pieceCode.trim() && Number(p.quantity) > 0,
+      ),
+      remainingPlates: form.remainingPlates.map((plate) => ({
+        plateNumber: plate.plateNumber,
+        pieces: plate.pieces.filter(
+          (p) => p.pieceCode.trim() && Number(p.quantity) > 0,
+        ),
+        remainingLength: plate.remainingLength,
+        remainingWidth: plate.remainingWidth,
+        remainingWeight: plate.remainingWeight,
+        scrapWeight: plate.scrapWeight,
+        rejectedQty: plate.rejectedQty,
+        remarks: plate.remarks,
+      })),
       receivedBy: form.receivedBy,
     });
 
     closeModal();
   };
 
-  const navigate = useNavigate();
-  const handleBack = () => {
-    // Navigate back - adjust the path according to your routing structure
-    navigate("/inventory"); // or navigate(-1) for browser back
-  };
+const navigate = useNavigate();
+const handleBack = () => navigate("/inventory/material");
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -125,7 +258,7 @@ export default function ReceiveFromCutting() {
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Close open cutting jobs and record finished pieces, leftover
-            balance, scrap and rejection.
+            balance, scrap and rejection — plate by plate.
           </p>
         </div>
         <button
@@ -216,8 +349,9 @@ export default function ReceiveFromCutting() {
 
       {activeJob && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+            {/* Fixed header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
               <h2 className="text-lg font-semibold text-slate-800">
                 Receive From Cutting — {activeJob.jobNumber}
               </h2>
@@ -229,7 +363,8 @@ export default function ReceiveFromCutting() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Readonly job details */}
               <div className="grid grid-cols-3 gap-4 bg-slate-50 rounded-lg p-4">
                 <ReadonlyField label="Job Number" value={activeJob.jobNumber} />
@@ -260,176 +395,372 @@ export default function ReceiveFromCutting() {
                 />
               </div>
 
-              {/* Finished pieces */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-slate-700">
-                    Finished Pieces
-                  </h3>
-                  <button
-                    onClick={addPieceRow}
-                    className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                  >
-                    + Add Piece
-                  </button>
+              {/* Summary strip */}
+              <div className="grid grid-cols-3 gap-4">
+                <SummaryCard label="Total Issued Plates" value={issuedQty} tone="slate" />
+                <SummaryCard
+                  label="Fully Consumed Plates"
+                  value={fullyConsumedCount}
+                  tone="emerald"
+                />
+                <SummaryCard
+                  label="Remaining Plates"
+                  value={remainingCount}
+                  tone="amber"
+                />
+              </div>
+
+              {/* Step 1: completely consumed plates */}
+              <div className="bg-white ring-1 ring-slate-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-slate-700 mb-1">
+                  Step 1 — Completely Consumed Plates
+                </h3>
+                <p className="text-xs text-slate-500 mb-3">
+                  Out of the {issuedQty} issued plates, how many were
+                  completely consumed (100% used)?
+                </p>
+                <div className="max-w-xs">
+                  <FormField
+                    label="Completely Consumed Plates"
+                    type="number"
+                    value={form.fullyConsumedCount}
+                    onChange={handleFullyConsumedChange}
+                  />
                 </div>
-                <div className="space-y-3">
-                  {form.pieces.map((piece, idx) => (
-                    <div
-                      key={piece.rowId}
-                      className="grid grid-cols-12 gap-2 items-end bg-white ring-1 ring-slate-200 rounded-lg p-3"
+              </div>
+
+              {/* Fully consumed plates — aggregated output */}
+              {fullyConsumedCount > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-700">
+                        Finished Piece Output — Fully Consumed Plates
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Total output from the {fullyConsumedCount} fully
+                        consumed plate(s). No plate-wise detail needed.
+                      </p>
+                    </div>
+                    <button
+                      onClick={addFullyConsumedPiece}
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
                     >
-                      <div className="col-span-12 text-xs font-medium text-slate-500">
-                        Piece {idx + 1}
+                      + Add Piece
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {form.fullyConsumedPieces.map((piece, idx) => (
+                      <div
+                        key={piece.rowId}
+                        className="grid grid-cols-12 gap-2 items-end bg-white ring-1 ring-slate-200 rounded-lg p-3"
+                      >
+                        <div className="col-span-12 text-xs font-medium text-slate-500">
+                          Piece {idx + 1}
+                        </div>
+                        <FormField
+                          className="col-span-4"
+                          label="Piece Code"
+                          value={piece.pieceCode}
+                          onChange={(v) =>
+                            updateFullyConsumedPiece(piece.rowId, "pieceCode", v)
+                          }
+                        />
+                        <FormField
+                          className="col-span-3"
+                          label="Drawing No"
+                          value={piece.drawingNumber}
+                          onChange={(v) =>
+                            updateFullyConsumedPiece(
+                              piece.rowId,
+                              "drawingNumber",
+                              v,
+                            )
+                          }
+                        />
+                        <FormField
+                          className="col-span-2"
+                          label="Total Quantity"
+                          type="number"
+                          value={piece.quantity}
+                          onChange={(v) =>
+                            updateFullyConsumedPiece(piece.rowId, "quantity", v)
+                          }
+                        />
+                        <FormField
+                          className="col-span-2"
+                          label="Weight (kg)"
+                          type="number"
+                          value={piece.weight}
+                          onChange={(v) =>
+                            updateFullyConsumedPiece(piece.rowId, "weight", v)
+                          }
+                        />
+                        <div className="col-span-1 flex justify-end">
+                          <button
+                            onClick={() => removeFullyConsumedPiece(piece.rowId)}
+                            disabled={form.fullyConsumedPieces.length === 1}
+                            className="text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+                            title="Remove piece"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </div>
-                      <FormField
-                        className="col-span-3"
-                        label="Piece Code"
-                        value={piece.pieceCode}
-                        onChange={(v) =>
-                          updatePiece(piece.rowId, "pieceCode", v)
-                        }
-                      />
-                      <FormField
-                        className="col-span-3"
-                        label="Drawing Number"
-                        value={piece.drawingNumber}
-                        onChange={(v) =>
-                          updatePiece(piece.rowId, "drawingNumber", v)
-                        }
-                      />
-                      <FormField
-                        className="col-span-1"
-                        label="Length"
-                        type="number"
-                        value={piece.length}
-                        onChange={(v) => updatePiece(piece.rowId, "length", v)}
-                      />
-                      <FormField
-                        className="col-span-1"
-                        label="Width"
-                        type="number"
-                        value={piece.width}
-                        onChange={(v) => updatePiece(piece.rowId, "width", v)}
-                      />
-                      <FormField
-                        className="col-span-1"
-                        label="Qty"
-                        type="number"
-                        value={piece.quantity}
-                        onChange={(v) =>
-                          updatePiece(piece.rowId, "quantity", v)
-                        }
-                      />
-                      <FormField
-                        className="col-span-2"
-                        label="Weight (kg)"
-                        type="number"
-                        value={piece.weight}
-                        onChange={(v) => updatePiece(piece.rowId, "weight", v)}
-                      />
-                      <div className="col-span-1 flex justify-end">
-                        <button
-                          onClick={() => removePieceRow(piece.rowId)}
-                          disabled={form.pieces.length === 1}
-                          className="text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                          title="Remove piece"
-                        >
-                          ✕
-                        </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Remaining plates — full detail, dynamically generated */}
+              {remainingCount > 0 && (
+                <div className="space-y-5">
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-700">
+                      Remaining Plates — Detailed Entry ({remainingCount})
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      These plates still hold balance material. Enter details
+                      for each one individually.
+                    </p>
+                  </div>
+
+                  {form.remainingPlates.map((plate, plateIdx) => (
+                    <div
+                      key={plate.id}
+                      className="bg-slate-50/60 ring-1 ring-slate-200 rounded-xl p-4 space-y-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                          Remaining Plate {plateIdx + 1}
+                        </span>
+                      </div>
+
+                      <div className="max-w-xs">
+                        <FormField
+                          label="Plate Number"
+                          value={plate.plateNumber}
+                          onChange={(v) =>
+                            updateRemainingPlateField(plate.id, "plateNumber", v)
+                          }
+                        />
+                      </div>
+
+                      {/* Finished pieces for this plate */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-xs font-semibold text-slate-600">
+                            Finished Pieces
+                          </h4>
+                          <button
+                            onClick={() => addRemainingPiece(plate.id)}
+                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            + Add Piece
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {plate.pieces.map((piece, idx) => (
+                            <div
+                              key={piece.rowId}
+                              className="grid grid-cols-12 gap-2 items-end bg-white ring-1 ring-slate-200 rounded-lg p-3"
+                            >
+                              <div className="col-span-12 text-xs font-medium text-slate-500">
+                                Piece {idx + 1}
+                              </div>
+                              <FormField
+                                className="col-span-3"
+                                label="Piece Code"
+                                value={piece.pieceCode}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "pieceCode",
+                                    v,
+                                  )
+                                }
+                              />
+                              <FormField
+                                className="col-span-3"
+                                label="Drawing Number"
+                                value={piece.drawingNumber}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "drawingNumber",
+                                    v,
+                                  )
+                                }
+                              />
+                              <FormField
+                                className="col-span-1"
+                                label="Length"
+                                type="number"
+                                value={piece.length}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "length",
+                                    v,
+                                  )
+                                }
+                              />
+                              <FormField
+                                className="col-span-1"
+                                label="Width"
+                                type="number"
+                                value={piece.width}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "width",
+                                    v,
+                                  )
+                                }
+                              />
+                              <FormField
+                                className="col-span-1"
+                                label="Qty"
+                                type="number"
+                                value={piece.quantity}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "quantity",
+                                    v,
+                                  )
+                                }
+                              />
+                              <FormField
+                                className="col-span-2"
+                                label="Weight (kg)"
+                                type="number"
+                                value={piece.weight}
+                                onChange={(v) =>
+                                  updateRemainingPiece(
+                                    plate.id,
+                                    piece.rowId,
+                                    "weight",
+                                    v,
+                                  )
+                                }
+                              />
+                              <div className="col-span-1 flex justify-end">
+                                <button
+                                  onClick={() =>
+                                    removeRemainingPiece(plate.id, piece.rowId)
+                                  }
+                                  disabled={plate.pieces.length === 1}
+                                  className="text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
+                                  title="Remove piece"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Balance plate for this plate */}
+                      <div>
+                        <h4 className="text-xs font-semibold text-slate-600 mb-2">
+                          Balance Plate
+                        </h4>
+                        <div className="grid grid-cols-3 gap-3">
+                          <FormField
+                            label="Length"
+                            type="number"
+                            value={plate.remainingLength}
+                            onChange={(v) =>
+                              updateRemainingPlateField(
+                                plate.id,
+                                "remainingLength",
+                                v,
+                              )
+                            }
+                          />
+                          <FormField
+                            label="Width"
+                            type="number"
+                            value={plate.remainingWidth}
+                            onChange={(v) =>
+                              updateRemainingPlateField(
+                                plate.id,
+                                "remainingWidth",
+                                v,
+                              )
+                            }
+                          />
+                          <FormField
+                            label="Weight (kg)"
+                            type="number"
+                            value={plate.remainingWeight}
+                            onChange={(v) =>
+                              updateRemainingPlateField(
+                                plate.id,
+                                "remainingWeight",
+                                v,
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      {/* Scrap / rejection / remarks for this plate */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <FormField
+                          label="Scrap Weight (kg)"
+                          type="number"
+                          value={plate.scrapWeight}
+                          onChange={(v) =>
+                            updateRemainingPlateField(plate.id, "scrapWeight", v)
+                          }
+                        />
+                        <FormField
+                          label="Rejected Quantity"
+                          type="number"
+                          value={plate.rejectedQty}
+                          onChange={(v) =>
+                            updateRemainingPlateField(plate.id, "rejectedQty", v)
+                          }
+                        />
+                        <div className="col-span-2">
+                          <label className="text-xs font-medium text-slate-500 mb-1 block">
+                            Remarks
+                          </label>
+                          <textarea
+                            value={plate.remarks}
+                            onChange={(e) =>
+                              updateRemainingPlateField(
+                                plate.id,
+                                "remarks",
+                                e.target.value,
+                              )
+                            }
+                            rows={2}
+                            className="w-full rounded-lg ring-1 ring-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
 
-              {/* Balance plate */}
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-2">
-                  Balance Plate Exists?
-                </h3>
-                <div className="flex gap-4 mb-3">
-                  {["yes", "no"].map((opt) => (
-                    <label
-                      key={opt}
-                      className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="balanceExists"
-                        checked={form.balanceExists === opt}
-                        onChange={() =>
-                          setForm((f) => ({ ...f, balanceExists: opt }))
-                        }
-                        className="accent-blue-600"
-                      />
-                      {opt === "yes" ? "Yes" : "No"}
-                    </label>
-                  ))}
-                </div>
-                {form.balanceExists === "yes" && (
-                  <div className="grid grid-cols-3 gap-3">
-                    <FormField
-                      label="Remaining Length"
-                      type="number"
-                      value={form.remainingLength}
-                      onChange={(v) =>
-                        setForm((f) => ({ ...f, remainingLength: v }))
-                      }
-                    />
-                    <FormField
-                      label="Remaining Width"
-                      type="number"
-                      value={form.remainingWidth}
-                      onChange={(v) =>
-                        setForm((f) => ({ ...f, remainingWidth: v }))
-                      }
-                    />
-                    <FormField
-                      label="Remaining Weight (kg)"
-                      type="number"
-                      value={form.remainingWeight}
-                      onChange={(v) =>
-                        setForm((f) => ({ ...f, remainingWeight: v }))
-                      }
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Scrap / Rejection / Remarks */}
+              {/* Received By */}
               <div className="grid grid-cols-2 gap-3">
-                <FormField
-                  label="Scrap Weight (kg)"
-                  type="number"
-                  value={form.scrapWeight}
-                  onChange={(v) => setForm((f) => ({ ...f, scrapWeight: v }))}
-                />
-                <FormField
-                  label="Rejected Quantity"
-                  type="number"
-                  value={form.rejectedQty}
-                  onChange={(v) => setForm((f) => ({ ...f, rejectedQty: v }))}
-                />
                 <FormField
                   className="col-span-2"
                   label="Received By"
                   value={form.receivedBy}
                   onChange={(v) => setForm((f) => ({ ...f, receivedBy: v }))}
                 />
-                <div className="col-span-2">
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">
-                    Remarks
-                  </label>
-                  <textarea
-                    value={form.remarks}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, remarks: e.target.value }))
-                    }
-                    rows={2}
-                    className="w-full rounded-lg ring-1 ring-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
               </div>
 
               {error && (
@@ -439,7 +770,8 @@ export default function ReceiveFromCutting() {
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 sticky bottom-0 bg-white">
+            {/* Fixed footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 flex-shrink-0 bg-white rounded-b-xl">
               <button
                 onClick={closeModal}
                 className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
@@ -465,6 +797,20 @@ function ReadonlyField({ label, value }) {
     <div>
       <div className="text-xs font-medium text-slate-500">{label}</div>
       <div className="text-sm text-slate-800 mt-0.5">{value}</div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value, tone }) {
+  const toneClass = {
+    slate: "bg-slate-50 ring-slate-200 text-slate-700",
+    emerald: "bg-emerald-50 ring-emerald-200 text-emerald-700",
+    amber: "bg-amber-50 ring-amber-200 text-amber-700",
+  }[tone];
+  return (
+    <div className={`rounded-xl ring-1 p-4 ${toneClass}`}>
+      <div className="text-xs font-medium opacity-80">{label}</div>
+      <div className="text-2xl font-semibold mt-1">{value}</div>
     </div>
   );
 }

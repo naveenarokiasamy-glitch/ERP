@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from "react";
 const AuthContext = createContext(null);
 
 const CREDENTIALS = {
-  username: "mohan",
+  username: "1234",
   password: "1234",
 };
 

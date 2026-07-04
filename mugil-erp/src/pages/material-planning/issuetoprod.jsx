@@ -81,7 +81,7 @@ export default function IssueToProduction() {
   const navigate = useNavigate();
   const handleBack = () => {
     // Navigate back - adjust the path according to your routing structure
-    navigate("/inventory"); // or navigate(-1) for browser back
+    navigate("/inventory/material"); // or navigate(-1) for browser back
   };
 
   return (
