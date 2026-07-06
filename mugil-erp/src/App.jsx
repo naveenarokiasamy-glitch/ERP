@@ -25,6 +25,11 @@ import Rejection from "./pages/material-planning/Rejection";
 import Rework from "./pages/material-planning/Rework";
 import MaterialMovementHistory from "./pages/material-planning/MaterialMovementHistory";
 import Reports from "./pages/material-planning/Reports";
+import ConsumableGRN from "./pages/material-planning/ConsumableGRN";
+import ConsumableStock from "./pages/material-planning/ConsumableStock";
+import IssueConsumable from "./pages/material-planning/IssueConsumable";
+import ReturnConsumable from "./pages/material-planning/ReturnConsumable";
+import ConsumableReports from "./pages/material-planning/ConsumableReports";
 export default function App() {
   return (
     <AuthProvider>
@@ -174,6 +179,49 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/consumable/grn"
+          element={
+            <ProtectedRoute>
+              <ConsumableGRN />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/consumable/stock"
+          element={
+            <ProtectedRoute>
+              <ConsumableStock />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventory/consumable/issue"
+          element={
+            <ProtectedRoute>
+              <IssueConsumable />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/consumable/return"
+          element={
+            <ProtectedRoute>
+              <ReturnConsumable />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory/consumable/reports"
+          element={
+            <ProtectedRoute>
+              <ConsumableReports />
             </ProtectedRoute>
           }
         />

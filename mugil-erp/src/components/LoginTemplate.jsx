@@ -131,11 +131,7 @@ function ArrowRight() {
 
 function BriefcaseIcon() {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
       <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
     </svg>
@@ -254,7 +250,7 @@ export default function LoginTemplate({
   };
 
   return (
-    <div className={`login-root ${darkMode ? "dark-theme" : "light-theme"}`}>
+    <div className={`login-root ${"light-theme"}`}>
       <div className="theme-toggle">
         <input
           id="checkbox"
@@ -264,11 +260,11 @@ export default function LoginTemplate({
           aria-label="Toggle dark and light theme"
         />
 
-        <label htmlFor="checkbox" className="switch">
+        {/* <label htmlFor="checkbox" className="switch">
           <svg viewBox="0 0 512 512" aria-hidden="true" focusable="false">
             <path d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48z" />
           </svg>
-        </label>
+        </label> */}
       </div>
 
       <div className="login-brand">
