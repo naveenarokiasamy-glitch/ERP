@@ -16,6 +16,7 @@ import {
 } from "../../data/materialStore";
 import "./Scrap.css";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header";
 const emptyEntryForm = {
   poNumber: "",
   weight: "",
@@ -253,6 +254,8 @@ export default function Scrap() {
 const navigate = useNavigate();
 const handleBack = () => navigate("/inventory/material");
   return (
+    <>
+      <Header />
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -771,5 +774,6 @@ const handleBack = () => navigate("/inventory/material");
         </Modal>
       )}
     </div>
+    </>
   );
 }

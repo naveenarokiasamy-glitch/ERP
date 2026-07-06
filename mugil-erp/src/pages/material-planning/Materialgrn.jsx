@@ -12,7 +12,7 @@ import {
   statusOptions,
 } from "../../data/materialStore";
 import "./MaterialGRN.css";
-
+import Header from "../../components/Header";
 export default function MaterialGRN() {
   const { purchaseOrders } = useMaterialStore();
   const [search, setSearch] = useState("");
@@ -159,6 +159,8 @@ export default function MaterialGRN() {
   };
 
   return (
+    <>
+          <Header />
     <div className="grn-page">
       {/* Back Button */}
       <button className="grn-back-btn" onClick={goBack}>
@@ -638,5 +640,6 @@ export default function MaterialGRN() {
         </div>
       )}
     </div>
+    </>
   );
 }

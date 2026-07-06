@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useMaterialStore, issueToCutting } from "../../data/materialStore";
 import "./IssueMaterialToCutting.css";
-
+import Header from "../../components/Header";
 let jobSeq = 2003;
 
 export default function IssueMaterialToCutting() {
@@ -195,6 +195,8 @@ export default function IssueMaterialToCutting() {
   };
 
   return (
+    <>
+      <Header />
     <div className="imtc-page">
       {/* Back Button */}
       <button className="imtc-back-btn" onClick={goBack}>
@@ -554,5 +556,6 @@ export default function IssueMaterialToCutting() {
         </div>
       )}
     </div>
+    </>
   );
 }

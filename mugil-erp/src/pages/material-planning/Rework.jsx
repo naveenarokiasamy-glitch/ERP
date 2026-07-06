@@ -16,6 +16,7 @@ import {
 } from "../../data/materialStore";
 import "./Rework.css";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header";
 
 const STATUS_STYLES = {
   Pending: "bg-amber-50 text-amber-700",
@@ -145,6 +146,8 @@ export default function Rework() {
   const navigate = useNavigate();
   const handleBack = () => navigate("/inventory/material");
   return (
+    <>
+      <Header />
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">Rework</h1>
@@ -402,5 +405,6 @@ export default function Rework() {
         </Modal>
       )}
     </div>
+    </>
   );
 }

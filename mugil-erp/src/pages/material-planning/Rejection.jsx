@@ -15,7 +15,7 @@ import {
 } from "../../data/materialStore";
 import "./Rejection.css";
 import { useNavigate } from "react-router-dom";
-
+import Header from "../../components/Header";
 const STATUS_STYLES = {
   Pending: "bg-amber-50 text-amber-700",
   "Sent for Rework": "bg-purple-50 text-purple-700",
@@ -133,6 +133,8 @@ export default function Rejection() {
   const navigate = useNavigate();
   const handleBack = () => navigate("/inventory/material");
   return (
+    <>
+          <Header />
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">Rejection</h1>
@@ -383,5 +385,6 @@ export default function Rejection() {
         </Modal>
       )}
     </div>
+    </>
   );
 }

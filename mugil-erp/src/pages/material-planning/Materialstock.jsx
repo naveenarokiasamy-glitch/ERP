@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useMaterialStore } from "../../data/materialStore";
 import "./MaterialStock.css";
-
+import Header from "../../components/Header";
 export default function MaterialStock() {
   const { materialStock } = useMaterialStore();
   const [search, setSearch] = useState("");
@@ -71,6 +71,8 @@ export default function MaterialStock() {
   };
 
   return (
+    <>
+          <Header />
     <div className="ms-page">
       {/* Back Button */}
       <button className="ms-back-btn" onClick={goBack}>
@@ -292,5 +294,6 @@ export default function MaterialStock() {
         </div>
       </div>
     </div>
+    </>
   );
 }

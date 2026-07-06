@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useMaterialStore, receiveFromCutting } from "../../data/materialStore";
 import "./Receivefromcutting.css";
 import { useNavigate } from "react-router-dom";
-
+import Header from "../../components/Header";
 const badgeClass = (status) => {
   switch (status) {
     case "Open":
@@ -250,6 +250,8 @@ const navigate = useNavigate();
 const handleBack = () => navigate("/inventory/material");
 
   return (
+    <>
+          <Header />
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -789,6 +791,7 @@ const handleBack = () => navigate("/inventory/material");
         </div>
       )}
     </div>
+    </>
   );
 }
 

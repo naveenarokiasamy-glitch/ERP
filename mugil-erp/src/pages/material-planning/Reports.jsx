@@ -8,6 +8,9 @@
 import { useMemo, useState } from "react";
 import { useMaterialStore, getReportTotals } from "../../data/materialStore";
 import "./Reports.css";
+import Header from "../../components/Header";
+import { useNavigate } from "react-router-dom";
+
 const REPORT_VIEWS = [
   {
     key: "grn",
@@ -304,220 +307,254 @@ export default function Reports() {
     else if (type === "pdf" || type === "print")
       exportPDFOrPrint(columns, filteredRows, title);
   };
-
+  const navigate = useNavigate();
+  const handleBack = () => navigate("/inventory/material");
   return (
-    <div
-      style={{
-        padding: 20,
-        fontFamily: "Inter, system-ui, sans-serif",
-        color: "#0f172a",
-      }}
-    >
-      <h2 style={{ margin: "0 0 4px" }}>Material Reports</h2>
-      <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
-        Live dashboard and exportable reports generated from current material
-        data.
-      </p>
-
-      {/* ---- Dashboard Summary ---- */}
+    <>
+      <Header />
       <div
-        style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 22 }}
+        style={{
+          padding: 20,
+          fontFamily: "Inter, system-ui, sans-serif",
+          color: "#0f172a",
+        }}
       >
-        <div style={card}>
-          <div style={label}>Total Purchase Orders</div>
-          <div style={value}>{totals.totalPurchaseOrders}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Material Stock</div>
-          <div style={value}>{totals.totalMaterialStock}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Finished Pieces</div>
-          <div style={value}>{totals.totalFinishedPieces}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Cutting Balance</div>
-          <div style={value}>{totals.totalCuttingBalance}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Scrap Weight</div>
-          <div style={value}>{totals.totalScrapWeight.toFixed(1)}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Rejections</div>
-          <div style={value}>{totals.totalRejections}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Rework</div>
-          <div style={value}>{totals.totalRework}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Total Production Issues</div>
-          <div style={value}>{totals.totalProductionIssues}</div>
-        </div>
-      </div>
-
-      {/* ---- Report View Tabs ---- */}
-      <div
-        style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}
-      >
-        {REPORT_VIEWS.map((v) => (
-          <button
-            key={v.key}
-            style={tabBtn(v.key === activeView)}
-            onClick={() => setActiveView(v.key)}
+        <h2 style={{ margin: "0 0 4px" }}>Material Reports</h2>
+        <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
+          Live dashboard and exportable reports generated from current material
+          data.
+        </p>
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            {v.label}
-          </button>
-        ))}
-      </div>
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
 
-      {/* ---- Filters ---- */}
-      <div
-        style={{
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap",
-          alignItems: "center",
-          marginBottom: 16,
-          background: "#f8fafc",
-          padding: 14,
-          borderRadius: 10,
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <input
-          style={{ ...inputStyle, minWidth: 220 }}
-          placeholder="Search..."
-          value={filters.search}
-          onChange={setFilter("search")}
-        />
-        <label style={{ fontSize: 12, color: "#64748b" }}>
-          From{" "}
-          <input
-            type="date"
-            style={inputStyle}
-            value={filters.dateFrom}
-            onChange={setFilter("dateFrom")}
-            disabled={!view.dateField}
-          />
-        </label>
-        <label style={{ fontSize: 12, color: "#64748b" }}>
-          To{" "}
-          <input
-            type="date"
-            style={inputStyle}
-            value={filters.dateTo}
-            onChange={setFilter("dateTo")}
-            disabled={!view.dateField}
-          />
-        </label>
-        <select
-          style={inputStyle}
-          value={filters.material}
-          onChange={setFilter("material")}
-        >
-          <option value="">All Materials</option>
-          {materialOptions.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-        <input
-          style={inputStyle}
-          placeholder="PO Number"
-          value={filters.poNumber}
-          onChange={setFilter("poNumber")}
-        />
-        <select
-          style={inputStyle}
-          value={filters.status}
-          onChange={setFilter("status")}
-        >
-          <option value="">All Statuses</option>
-          {statusOptions.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <button onClick={resetFilters} style={{ ...exportBtn }}>
-          Clear Filters
-        </button>
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b" }}>
-          {filteredRows.length} of {rawRows.length} records
-        </span>
-      </div>
-
-      {/* ---- Export Bar ---- */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-        <button style={exportBtn} onClick={() => handleExport("pdf")}>
-          Export PDF
-        </button>
-        <button style={exportBtn} onClick={() => handleExport("excel")}>
-          Export Excel
-        </button>
-        <button style={exportBtn} onClick={() => handleExport("csv")}>
-          Export CSV
-        </button>
-        <button style={exportBtn} onClick={() => handleExport("print")}>
-          Print
-        </button>
-      </div>
-
-      {/* ---- Table ---- */}
-      <div
-        style={{
-          overflowX: "auto",
-          border: "1px solid #e2e8f0",
-          borderRadius: 10,
-        }}
-      >
-        <table
+        {/* ---- Dashboard Summary ---- */}
+        <div
           style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "#fff",
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+            marginBottom: 22,
           }}
         >
-          <thead>
-            <tr>
-              {columns.map((c) => (
-                <th key={c} style={th}>
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRows.length === 0 && (
+          <div style={card}>
+            <div style={label}>Total Purchase Orders</div>
+            <div style={value}>{totals.totalPurchaseOrders}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Material Stock</div>
+            <div style={value}>{totals.totalMaterialStock}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Finished Pieces</div>
+            <div style={value}>{totals.totalFinishedPieces}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Cutting Balance</div>
+            <div style={value}>{totals.totalCuttingBalance}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Scrap Weight</div>
+            <div style={value}>{totals.totalScrapWeight.toFixed(1)}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Rejections</div>
+            <div style={value}>{totals.totalRejections}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Rework</div>
+            <div style={value}>{totals.totalRework}</div>
+          </div>
+          <div style={card}>
+            <div style={label}>Total Production Issues</div>
+            <div style={value}>{totals.totalProductionIssues}</div>
+          </div>
+        </div>
+
+        {/* ---- Report View Tabs ---- */}
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            flexWrap: "wrap",
+            marginBottom: 16,
+          }}
+        >
+          {REPORT_VIEWS.map((v) => (
+            <button
+              key={v.key}
+              style={tabBtn(v.key === activeView)}
+              onClick={() => setActiveView(v.key)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ---- Filters ---- */}
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+            alignItems: "center",
+            marginBottom: 16,
+            background: "#f8fafc",
+            padding: 14,
+            borderRadius: 10,
+            border: "1px solid #e2e8f0",
+          }}
+        >
+          <input
+            style={{ ...inputStyle, minWidth: 220 }}
+            placeholder="Search..."
+            value={filters.search}
+            onChange={setFilter("search")}
+          />
+          <label style={{ fontSize: 12, color: "#64748b" }}>
+            From{" "}
+            <input
+              type="date"
+              style={inputStyle}
+              value={filters.dateFrom}
+              onChange={setFilter("dateFrom")}
+              disabled={!view.dateField}
+            />
+          </label>
+          <label style={{ fontSize: 12, color: "#64748b" }}>
+            To{" "}
+            <input
+              type="date"
+              style={inputStyle}
+              value={filters.dateTo}
+              onChange={setFilter("dateTo")}
+              disabled={!view.dateField}
+            />
+          </label>
+          <select
+            style={inputStyle}
+            value={filters.material}
+            onChange={setFilter("material")}
+          >
+            <option value="">All Materials</option>
+            {materialOptions.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <input
+            style={inputStyle}
+            placeholder="PO Number"
+            value={filters.poNumber}
+            onChange={setFilter("poNumber")}
+          />
+          <select
+            style={inputStyle}
+            value={filters.status}
+            onChange={setFilter("status")}
+          >
+            <option value="">All Statuses</option>
+            {statusOptions.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <button onClick={resetFilters} style={{ ...exportBtn }}>
+            Clear Filters
+          </button>
+          <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b" }}>
+            {filteredRows.length} of {rawRows.length} records
+          </span>
+        </div>
+
+        {/* ---- Export Bar ---- */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+          <button style={exportBtn} onClick={() => handleExport("pdf")}>
+            Export PDF
+          </button>
+          <button style={exportBtn} onClick={() => handleExport("excel")}>
+            Export Excel
+          </button>
+          <button style={exportBtn} onClick={() => handleExport("csv")}>
+            Export CSV
+          </button>
+          <button style={exportBtn} onClick={() => handleExport("print")}>
+            Print
+          </button>
+        </div>
+
+        {/* ---- Table ---- */}
+        <div
+          style={{
+            overflowX: "auto",
+            border: "1px solid #e2e8f0",
+            borderRadius: 10,
+          }}
+        >
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              background: "#fff",
+            }}
+          >
+            <thead>
               <tr>
-                <td style={td} colSpan={Math.max(columns.length, 1)}>
-                  <div
-                    style={{
-                      padding: "24px 0",
-                      textAlign: "center",
-                      color: "#94a3b8",
-                    }}
-                  >
-                    No records match the selected filters.
-                  </div>
-                </td>
-              </tr>
-            )}
-            {filteredRows.map((r, i) => (
-              <tr key={r.id ?? i}>
                 {columns.map((c) => (
-                  <td key={c} style={td}>
-                    {formatCell(r[c])}
-                  </td>
+                  <th key={c} style={th}>
+                    {c}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredRows.length === 0 && (
+                <tr>
+                  <td style={td} colSpan={Math.max(columns.length, 1)}>
+                    <div
+                      style={{
+                        padding: "24px 0",
+                        textAlign: "center",
+                        color: "#94a3b8",
+                      }}
+                    >
+                      No records match the selected filters.
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {filteredRows.map((r, i) => (
+                <tr key={r.id ?? i}>
+                  {columns.map((c) => (
+                    <td key={c} style={td}>
+                      {formatCell(r[c])}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useMaterialStore } from "../../data/materialStore";
 import "./Cuttingbalancestock.css";
 import { useNavigate } from "react-router-dom"; // If using React Router
+import Header from "../../components/Header";
 
 const badgeClass = (status) => {
   switch (status) {
@@ -78,6 +79,8 @@ export default function CuttingBalanceStock() {
   };
 
   return (
+    <>
+      <Header />
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -217,5 +220,6 @@ export default function CuttingBalanceStock() {
         </table>
       </div>
     </div>
+    </>
   );
 }

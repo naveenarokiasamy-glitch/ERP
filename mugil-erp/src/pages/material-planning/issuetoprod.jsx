@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMaterialStore, issueToProduction } from "../../data/materialStore";
 import "./issuetoprod.css";
 import { useNavigate } from "react-router-dom"; // If using React Router
+import Header from "../../components/Header";
 
 const badgeClass = (status) => {
   switch (status) {
@@ -85,6 +86,8 @@ export default function IssueToProduction() {
   };
 
   return (
+    <>
+      <Header />
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-800">
@@ -285,6 +288,7 @@ export default function IssueToProduction() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

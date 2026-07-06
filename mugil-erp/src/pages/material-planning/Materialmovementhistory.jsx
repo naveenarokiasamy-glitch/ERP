@@ -7,12 +7,14 @@
 // -----------------------------------------------------------------------------
 
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useMaterialStore,
   buildPOTimeline,
   getMovementStats,
 } from "../../data/materialStore";
 import "./MaterialMovementHistory.css";
+import Header from "../../components/Header";
 const card = {
   border: "1px solid #e2e8f0",
   borderRadius: 10,
@@ -189,8 +191,11 @@ export default function MaterialMovementHistory() {
     () => (timelinePO ? buildPOTimeline(store, timelinePO) : []),
     [store, timelinePO],
   );
-
+const navigate = useNavigate();
+const handleBack = () => navigate("/inventory/material");
   return (
+    <>
+          <Header />
     <div
       style={{
         padding: 20,
@@ -203,6 +208,26 @@ export default function MaterialMovementHistory() {
         Complete, read-only traceability of every material movement across the
         module.
       </p>
+       <button
+          onClick={handleBack}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
 
       {/* ---- Stats ---- */}
       <div
@@ -542,5 +567,6 @@ export default function MaterialMovementHistory() {
         </div>
       )}
     </div>
+    </>
   );
 }
