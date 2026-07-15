@@ -1,0 +1,7 @@
+/* Purchase-Order-specific overrides. Base primitives live in
+   src/styles/form.css and src/styles/print.css — this file only holds
+   tweaks unique to the PO module. */
+
+.form-page .step-number {
+  background: var(--brand-blue-tint);
+}

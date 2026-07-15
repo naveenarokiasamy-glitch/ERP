@@ -1,0 +1,95 @@
+* {
+  box-sizing: border-box;
+}
+
+.accounts-page {
+  min-height: 100vh;
+  background: #f3f6fa;
+  padding: 50px;
+}
+
+.accounts-container {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.accounts-container h1 {
+  font-size: 34px;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.accounts-container > p {
+  color: #6b7280;
+  margin-bottom: 40px;
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+.accounts-card {
+  background: white;
+  border-radius: 18px;
+  padding: 35px;
+  cursor: pointer;
+  transition: .25s;
+  box-shadow: 0 10px 25px rgba(0,0,0,.08);
+  border: 1px solid #e5e7eb;
+}
+
+.accounts-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,.12);
+}
+
+.accounts-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 22px;
+}
+
+.accounts-card h2 {
+  font-size: 24px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.accounts-card p {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.accounts-card button {
+  border: none;
+  background: #111827;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.accounts-card button:hover {
+  background: #000;
+}
+
+@media (max-width: 768px) {
+  .accounts-page {
+    padding: 25px;
+  }
+
+  .accounts-container h1 {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,7 @@
+/* Quotation-specific overrides. Base primitives live in
+   src/styles/form.css and src/styles/print.css. */
+
+.form-page .step-number {
+  background: #fdf0e7;
+  color: var(--brand-orange);
+}

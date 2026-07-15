@@ -1,0 +1,344 @@
+/* SalarySettings.css */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+
+/* Design Tokens */
+:root {
+  --bg: #F2F3EF;
+  --surface: #FFFFFF;
+  --ink: #1B2430;
+  --ink-muted: #5B6472;
+  --ink-faint: #8B92A0;
+  --line: #DEE1DB;
+  --accent: #2C5F7C;
+  --accent-hover: #1e445a;
+  --accent-soft: #E3ECF0;
+  --amber: #C98A1D;
+  --amber-soft: #F6ECD8;
+  --success: #2F7A4F;
+  --success-hover: #1f5a37;
+  --success-soft: #E4F1E9;
+  --danger: #B23A3A;
+  --danger-hover: #8a2c2c;
+  --danger-soft: #F6E4E4;
+  --radius: 10px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 8px rgba(27, 36, 48, 0.08);
+  --shadow-hover: 0 6px 18px rgba(27, 36, 48, 0.12);
+  --display-font: 'Barlow Semi Condensed', 'Arial Narrow', sans-serif;
+  --body-font: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  --mono-font: 'Roboto Mono', 'Courier New', monospace;
+  --transition: 0.2s ease;
+}
+
+/* Page Container */
+.salary-settings-page {
+  background: var(--bg);
+  min-height: 100vh;
+  padding: 28px 32px 60px;
+  font-family: var(--body-font);
+}
+
+/* Page Header */
+.salary-settings-page .page-header {
+  margin-bottom: 28px;
+}
+
+.salary-settings-page .page-header-title h1 {
+  font-family: var(--display-font);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.salary-settings-page .page-header-subtitle {
+  font-family: var(--body-font);
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+
+/* Notice Banner */
+.notice-banner {
+  background: var(--accent-soft);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--body-font);
+  font-size: 14px;
+  color: var(--ink);
+  animation: slideDown 0.3s ease;
+}
+
+.notice-banner-success {
+  background: var(--success-soft);
+  border-left-color: var(--success);
+}
+
+.notice-banner-error {
+  background: var(--danger-soft);
+  border-left-color: var(--danger);
+}
+
+.notice-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color var(--transition);
+}
+
+.notice-close:hover {
+  color: var(--ink);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Settings Card */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  transition: box-shadow var(--transition);
+}
+
+.settings-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.settings-card-title {
+  font-family: var(--display-font);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 20px 0;
+  letter-spacing: 0.01em;
+}
+
+/* Employee Picker */
+.settings-employee-picker {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.settings-employee-meta {
+  font-family: var(--body-font);
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin: 0 0 20px 0;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+
+/* Form Fields */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-family: var(--body-font);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.form-field input,
+.form-field select {
+  font-family: var(--body-font);
+  font-size: 14px;
+  color: var(--ink);
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(44, 95, 124, 0.1);
+}
+
+.form-field input:hover,
+.form-field select:hover {
+  border-color: var(--accent);
+}
+
+.form-field input::placeholder {
+  color: var(--ink-faint);
+}
+
+.form-field input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-field input[type="number"]::-webkit-outer-spin-button,
+.form-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Settings Form Grid */
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px 20px;
+  margin-bottom: 24px;
+}
+
+/* Settings Actions */
+.settings-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--body-font);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(44, 95, 124, 0.3);
+}
+
+.btn-secondary {
+  background: var(--line);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: #c8ccc4;
+  box-shadow: 0 4px 12px rgba(27, 36, 48, 0.08);
+}
+
+.btn-tertiary {
+  background: transparent;
+  color: var(--ink-muted);
+  border: 1px solid var(--line);
+}
+
+.btn-tertiary:hover {
+  background: var(--bg);
+  border-color: var(--ink-muted);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover {
+  background: var(--success-hover);
+  box-shadow: 0 4px 12px rgba(47, 122, 79, 0.3);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--danger-hover);
+  box-shadow: 0 4px 12px rgba(178, 58, 58, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .salary-settings-page {
+    padding: 20px 16px 40px;
+  }
+
+  .settings-card {
+    padding: 18px 16px;
+  }
+
+  .settings-employee-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .salary-settings-page .page-header-title h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .salary-settings-page {
+    padding: 16px 12px 32px;
+  }
+
+  .settings-card {
+    padding: 14px 12px;
+  }
+
+  .notice-banner {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}

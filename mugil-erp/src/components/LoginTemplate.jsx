@@ -224,7 +224,11 @@ export default function LoginTemplate({
 
         if (department === "material-planning") {
           navigate("/inventory", { replace: true });
-        } else {
+        } else if (department === "hr") {
+          navigate("/hr", { replace: true });
+        } else if (department === "accounts") {
+          navigate("/accounts", { replace: true });
+        }else {
           navigate("/welcome", { replace: true });
         }
 
