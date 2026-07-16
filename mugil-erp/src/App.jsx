@@ -45,6 +45,8 @@ import Repoort from "./pages/hr/Report";
 import PO from "./pages/accounts/PurchaseOrderForm";
 import QO from "./pages/accounts/QuotationForm";
 import AccountsHome from "./pages/accounts/AccountsHome";
+import TaxInvoice from "./pages/accounts/Taxinvoiceform";
+import DeliveryChallan from "./pages/accounts/Deliverychallanform";
 export default function App() {
   return (
     <AuthProvider>
@@ -364,6 +366,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <QO />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts/TaxInvoice"
+          element={
+            <ProtectedRoute>
+              <TaxInvoice />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts/DeliveryChallan"
+          element={
+            <ProtectedRoute>
+              <DeliveryChallan />
             </ProtectedRoute>
           }
         />

@@ -11,6 +11,7 @@ import { summarizePOItems } from "../../utils/calculations";
 import "./PurchaseOrder.css";
 import "../../styles/form.css";
 import "../../styles/print.css";
+import { useNavigate } from "react-router-dom";
 
 const DRAFT_KEY = "mei-erp-po-draft";
 const DRAFT_VERSION = 2;
@@ -51,6 +52,7 @@ export default function PurchaseOrderForm() {
   const [newColLabel, setNewColLabel] = useState("");
   const [newColType, setNewColType] = useState("text");
   const [newColOptions, setNewColOptions] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -233,10 +235,35 @@ export default function PurchaseOrderForm() {
     );
   }
 
+  const handleBack = () => {
+    navigate("/accounts");
+  };
   return (
     <div className="form-page">
+      
       <div className="form-page__header">
+         <button
+            onClick={handleBack}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
         <div className="form-page__heading">
+
           <h1>Purchase Order</h1>
           <p>Fill in the details below, then preview the official document.</p>
         </div>

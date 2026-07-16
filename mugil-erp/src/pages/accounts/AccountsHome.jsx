@@ -19,6 +19,20 @@ export default function AccountsHome() {
       path: "/accounts/QO",
       color: "#1d4ed8",
     },
+    {
+      title: "Tax Invoice",
+      short: "TI",
+      description: "Create and manage Tax Invoices.",
+      path: "/accounts/TaxInvoice",
+      color: "#b45309",
+    },
+    {
+      title: "Delivery Challan",
+      short: "DC",
+      description: "Create and manage Delivery Challans.",
+      path: "/accounts/DeliveryChallan",
+      color: "#7c3aed",
+    },
   ];
 
   return (
