@@ -187,10 +187,6 @@ function DeleteModal({ employee, onCancel, onConfirm, isDeleting }) {
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [onCancel]);
-  const navigate = useNavigate();
-  const handleBack = () => {
-    navigate("/hr");
-  };
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
@@ -603,6 +599,10 @@ export default function EmployeeProfile() {
       </div>
     );
   }
+
+  const handleBack = () => {
+    navigate("/hr");
+  };
 
   const statusClass =
     employee.status === "Active" ? "status-active" : "status-inactive";

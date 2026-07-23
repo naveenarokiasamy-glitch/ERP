@@ -129,10 +129,6 @@ function EmployeeDetailModal({ employee, onClose, onSave }) {
     }
     setIsEditing(!isEditing);
   }
-const navigate = useNavigate();
-const handleBack = () => {
-    navigate("/hr");
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -527,231 +523,234 @@ export default function Employees() {
     setVersion((v) => v + 1);
     setPage(1);
   }
-
+  const navigate = useNavigate();
+  const handleBack = () => {
+    navigate("/hr");
+  };
   return (
     <>
-          <Header />
+      <Header />
 
-    <div className="employees-container">
-       <button
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+      <div className="employees-container">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-      {/* Header */}
-      <div className="header">
-        <div className="header-subtitle">Workforce Registry</div>
-        <h1 className="header-title">Employees</h1>
-        <div className="header-count">{totalRecords} matching records</div>
-      </div>
-
-      {/* Filters */}
-      <div className="filters">
-        <input
-          className="input"
-          placeholder="Search name, code, mobile, email…"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        <select
-          className="input select"
-          value={department}
-          onChange={(e) => {
-            setDepartment(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Departments</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.name}>
-              {d.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input select"
-          value={shift}
-          onChange={(e) => {
-            setShift(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Shifts</option>
-          {shifts.map((s) => (
-            <option key={s.id} value={s.name}>
-              {s.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input select"
-          value={salaryType}
-          onChange={(e) => {
-            setSalaryType(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Salary Types</option>
-          {SALARY_TYPES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select
-          className="input select"
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="">All Status</option>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <button className="btn btn-secondary" onClick={clearFilters}>
-          Clear Filters
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back
         </button>
-      </div>
-
-      {/* Table */}
-      <div className="table-container">
-        <div className="table-wrapper">
-          <table className="table">
-            <thead>
-              <tr>
-                {[
-                  "Code",
-                  "Name",
-                  "Department",
-                  "Designation",
-                  "Shift",
-                  "Salary Type",
-                  "Salary",
-                  "Status",
-                  "Actions",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className={
-                      h === "Actions" || h === "Salary"
-                        ? "text-right"
-                        : "text-left"
-                    }
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((emp) => (
-                <tr key={emp.id} className="table-row">
-                  <td className="cell-code">{emp.employeeCode}</td>
-                  <td>
-                    <Link to={`/employee/${emp.id}`} className="name-link">
-                      {emp.name}
-                    </Link>
-                  </td>
-                  <td>{emp.department}</td>
-                  <td>{emp.designation}</td>
-                  <td>{emp.shift}</td>
-                  <td>{emp.salaryType}</td>
-                  <td className="text-right cell-salary">
-                    ₹{calculateMonthlySalary(emp).toLocaleString("en-IN")}
-                  </td>
-                  <td>
-                    <Badge status={emp.status} />
-                  </td>
-                  <td className="text-right cell-actions">
-                    <Link
-                      to={`/hr/employee/${emp.id}`}
-                      className="btn btn-view"
-                    >
-                      View
-                    </Link>
-                    <button
-                      className="btn btn-delete"
-                      onClick={() => setDeleting(emp)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {data.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="empty-state">
-                    No employees match the current filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Header */}
+        <div className="header">
+          <div className="header-subtitle">Workforce Registry</div>
+          <h1 className="header-title">Employees</h1>
+          <div className="header-count">{totalRecords} matching records</div>
         </div>
 
-        {/* Pagination */}
-        <div className="pagination">
-          <span className="pagination-info">
-            Page {currentPage} of {totalPages || 1}
-          </span>
-          <div className="pagination-buttons">
-            <button
-              className="btn btn-secondary"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Previous
-            </button>
-            <button
-              className="btn btn-secondary"
-              disabled={currentPage >= totalPages}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              Next
-            </button>
+        {/* Filters */}
+        <div className="filters">
+          <input
+            className="input"
+            placeholder="Search name, code, mobile, email…"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+          <select
+            className="input select"
+            value={department}
+            onChange={(e) => {
+              setDepartment(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All Departments</option>
+            {departments.map((d) => (
+              <option key={d.id} value={d.name}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input select"
+            value={shift}
+            onChange={(e) => {
+              setShift(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All Shifts</option>
+            {shifts.map((s) => (
+              <option key={s.id} value={s.name}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input select"
+            value={salaryType}
+            onChange={(e) => {
+              setSalaryType(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All Salary Types</option>
+            {SALARY_TYPES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input select"
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All Status</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <button className="btn btn-secondary" onClick={clearFilters}>
+            Clear Filters
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="table-container">
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  {[
+                    "Code",
+                    "Name",
+                    "Department",
+                    "Designation",
+                    "Shift",
+                    "Salary Type",
+                    "Salary",
+                    "Status",
+                    "Actions",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className={
+                        h === "Actions" || h === "Salary"
+                          ? "text-right"
+                          : "text-left"
+                      }
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((emp) => (
+                  <tr key={emp.id} className="table-row">
+                    <td className="cell-code">{emp.employeeCode}</td>
+                    <td>
+                      <Link to={`/employee/${emp.id}`} className="name-link">
+                        {emp.name}
+                      </Link>
+                    </td>
+                    <td>{emp.department}</td>
+                    <td>{emp.designation}</td>
+                    <td>{emp.shift}</td>
+                    <td>{emp.salaryType}</td>
+                    <td className="text-right cell-salary">
+                      ₹{calculateMonthlySalary(emp).toLocaleString("en-IN")}
+                    </td>
+                    <td>
+                      <Badge status={emp.status} />
+                    </td>
+                    <td className="text-right cell-actions">
+                      <Link
+                        to={`/hr/employee/${emp.id}`}
+                        className="btn btn-view"
+                      >
+                        View
+                      </Link>
+                      <button
+                        className="btn btn-delete"
+                        onClick={() => setDeleting(emp)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {data.length === 0 && (
+                  <tr>
+                    <td colSpan={9} className="empty-state">
+                      No employees match the current filters.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="pagination">
+            <span className="pagination-info">
+              Page {currentPage} of {totalPages || 1}
+            </span>
+            <div className="pagination-buttons">
+              <button
+                className="btn btn-secondary"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </button>
+              <button
+                className="btn btn-secondary"
+                disabled={currentPage >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Modals */}
-      {deleting && (
-        <DeleteConfirm
-          employee={deleting}
-          onCancel={() => setDeleting(null)}
-          onConfirm={handleDelete}
-        />
-      )}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
+        {/* Modals */}
+        {deleting && (
+          <DeleteConfirm
+            employee={deleting}
+            onCancel={() => setDeleting(null)}
+            onConfirm={handleDelete}
+          />
+        )}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </div>
     </>
   );
 }
