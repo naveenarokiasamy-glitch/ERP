@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import DeliveryChallanPreview from './DeliveryChallanPreview';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import DeliveryChallanPreview from "./DeliveryChallanPreview";
 
 // NOTE: Adjust these paths to match your project structure.
 // These files already exist in your project and are reused as-is —
@@ -14,9 +14,9 @@ import DeliveryChallanPreview from './DeliveryChallanPreview';
 // either, but print.css's own buttons rely on them). If those classes
 // don't exist yet, this form will be functional but unstyled until
 // you add them.
-import '../../styles/variables.css';
-import '../../styles/form.css';
-
+import "../../styles/variables.css";
+import "../../styles/form.css";
+import { useNavigate } from "react-router-dom";
 /* ========================================================================
    DELIVERY CHALLAN NUMBER GENERATION
    ------------------------------------------------------------------------
@@ -34,16 +34,17 @@ import '../../styles/form.css';
    ======================================================================== */
 
 const DC_NUMBER_CONFIG = {
-  storageKey: 'deliveryChallanLastNumber',
-  seedNumber: 458,  // first number issued if localStorage has nothing yet
-  prefix: '',
-  suffix: '',
-  padLength: 0,     // e.g. 4 -> "0459". 0 disables padding.
+  storageKey: "deliveryChallanLastNumber",
+  seedNumber: 458, // first number issued if localStorage has nothing yet
+  prefix: "",
+  suffix: "",
+  padLength: 0, // e.g. 4 -> "0459". 0 disables padding.
 };
 
 function formatChallanNumber(num) {
   const { prefix, suffix, padLength } = DC_NUMBER_CONFIG;
-  const numStr = padLength > 0 ? String(num).padStart(padLength, '0') : String(num);
+  const numStr =
+    padLength > 0 ? String(num).padStart(padLength, "0") : String(num);
   return `${prefix}${numStr}${suffix}`;
 }
 
@@ -60,14 +61,14 @@ async function generateDeliveryChallanNumber() {
    DRAFT PERSISTENCE (localStorage)
    ======================================================================== */
 
-const DRAFT_STORAGE_KEY = 'deliveryChallanDraft';
+const DRAFT_STORAGE_KEY = "deliveryChallanDraft";
 
 function loadDraft() {
   try {
     const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (err) {
-    console.error('Failed to load Delivery Challan draft:', err);
+    console.error("Failed to load Delivery Challan draft:", err);
     return null;
   }
 }
@@ -77,7 +78,7 @@ function saveDraft(data) {
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(data));
     return true;
   } catch (err) {
-    console.error('Failed to save Delivery Challan draft:', err);
+    console.error("Failed to save Delivery Challan draft:", err);
     return false;
   }
 }
@@ -87,7 +88,7 @@ function saveDraft(data) {
    ======================================================================== */
 
 function generateItemId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   return `item-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -96,10 +97,10 @@ function generateItemId() {
 function createEmptyItem() {
   return {
     id: generateItemId(),
-    description: '',
-    quantity: '',
-    rate: '',
-    remarks: '',
+    description: "",
+    quantity: "",
+    rate: "",
+    remarks: "",
   };
 }
 
@@ -109,23 +110,23 @@ function getTodayISO() {
 
 function createEmptyFormData() {
   return {
-    dcNumber: '',          // filled in on mount via generateDeliveryChallanNumber()
+    dcNumber: "", // filled in on mount via generateDeliveryChallanNumber()
     dcDate: getTodayISO(),
-    poNumber: '',
-    poDate: '',
-    billNumber: '',
-    billDate: '',
-    deliveryAt: '',
+    poNumber: "",
+    poDate: "",
+    billNumber: "",
+    billDate: "",
+    deliveryAt: "",
     customer: {
-      companyName: '',
-      address: '',
-      contactPerson: '',
-      phone: '',
-      gstNumber: '',
+      companyName: "",
+      address: "",
+      contactPerson: "",
+      phone: "",
+      gstNumber: "",
     },
     items: [createEmptyItem()],
-    amountInWords: '',
-    preparedBy: '',
+    amountInWords: "",
+    preparedBy: "",
   };
 }
 
@@ -134,9 +135,10 @@ function createEmptyFormData() {
    ======================================================================== */
 
 export default function DeliveryChallanForm() {
-  const [view, setView] = useState('form'); // 'form' | 'preview'
+  const navigate = useNavigate();
+  const [view, setView] = useState("form"); // 'form' | 'preview'
   const [formData, setFormData] = useState(createEmptyFormData);
-  const [draftStatus, setDraftStatus] = useState('');
+  const [draftStatus, setDraftStatus] = useState("");
   const hasLoadedRef = useRef(false);
 
   // On mount: resume a saved draft (keeping its already-issued DC number)
@@ -171,13 +173,16 @@ export default function DeliveryChallanForm() {
     setFormData((prev) => ({
       ...prev,
       items: prev.items.map((item) =>
-        item.id === id ? { ...item, [field]: value } : item
+        item.id === id ? { ...item, [field]: value } : item,
       ),
     }));
   }, []);
 
   const addRow = useCallback(() => {
-    setFormData((prev) => ({ ...prev, items: [...prev.items, createEmptyItem()] }));
+    setFormData((prev) => ({
+      ...prev,
+      items: [...prev.items, createEmptyItem()],
+    }));
   }, []);
 
   const duplicateRow = useCallback((id) => {
@@ -200,15 +205,19 @@ export default function DeliveryChallanForm() {
 
   const handleSaveDraft = useCallback(() => {
     const ok = saveDraft(formData);
-    setDraftStatus(ok ? `Draft saved at ${new Date().toLocaleTimeString()}` : 'Could not save draft');
-    window.setTimeout(() => setDraftStatus(''), 3000);
+    setDraftStatus(
+      ok
+        ? `Draft saved at ${new Date().toLocaleTimeString()}`
+        : "Could not save draft",
+    );
+    window.setTimeout(() => setDraftStatus(""), 3000);
   }, [formData]);
 
-  const handlePreview = useCallback(() => setView('preview'), []);
-  const handleBackToForm = useCallback(() => setView('form'), []);
+  const handlePreview = useCallback(() => setView("preview"), []);
+  const handleBackToForm = useCallback(() => setView("form"), []);
   const handlePrint = useCallback(() => window.print(), []);
 
-  if (view === 'preview') {
+  if (view === "preview") {
     return (
       <DeliveryChallanPreview
         data={formData}
@@ -217,10 +226,32 @@ export default function DeliveryChallanForm() {
       />
     );
   }
-
+  const handleBack = () => {
+    navigate(-1);
+  };
   return (
     <div className="form-page">
       <div className="form-header">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
         <h2>Delivery Challan</h2>
         {draftStatus && <span className="form-status">{draftStatus}</span>}
       </div>
@@ -239,9 +270,9 @@ export default function DeliveryChallanForm() {
               disabled
               title="Auto-generated — cannot be edited"
               style={{
-                backgroundColor: 'var(--bg-surface-muted)',
-                color: 'var(--text-secondary)',
-                cursor: 'not-allowed',
+                backgroundColor: "var(--bg-surface-muted)",
+                color: "var(--text-secondary)",
+                cursor: "not-allowed",
               }}
             />
           </div>
@@ -251,7 +282,7 @@ export default function DeliveryChallanForm() {
               type="date"
               className="form-input"
               value={formData.dcDate}
-              onChange={(e) => updateField('dcDate', e.target.value)}
+              onChange={(e) => updateField("dcDate", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -260,7 +291,7 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.poNumber}
-              onChange={(e) => updateField('poNumber', e.target.value)}
+              onChange={(e) => updateField("poNumber", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -269,7 +300,7 @@ export default function DeliveryChallanForm() {
               type="date"
               className="form-input"
               value={formData.poDate}
-              onChange={(e) => updateField('poDate', e.target.value)}
+              onChange={(e) => updateField("poDate", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -278,7 +309,7 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.billNumber}
-              onChange={(e) => updateField('billNumber', e.target.value)}
+              onChange={(e) => updateField("billNumber", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -287,7 +318,7 @@ export default function DeliveryChallanForm() {
               type="date"
               className="form-input"
               value={formData.billDate}
-              onChange={(e) => updateField('billDate', e.target.value)}
+              onChange={(e) => updateField("billDate", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -296,7 +327,7 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.deliveryAt}
-              onChange={(e) => updateField('deliveryAt', e.target.value)}
+              onChange={(e) => updateField("deliveryAt", e.target.value)}
             />
           </div>
         </div>
@@ -312,7 +343,9 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.customer.companyName}
-              onChange={(e) => updateCustomerField('companyName', e.target.value)}
+              onChange={(e) =>
+                updateCustomerField("companyName", e.target.value)
+              }
             />
           </div>
           <div className="form-group form-group-wide">
@@ -321,7 +354,7 @@ export default function DeliveryChallanForm() {
               className="form-textarea"
               rows={2}
               value={formData.customer.address}
-              onChange={(e) => updateCustomerField('address', e.target.value)}
+              onChange={(e) => updateCustomerField("address", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -330,7 +363,9 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.customer.contactPerson}
-              onChange={(e) => updateCustomerField('contactPerson', e.target.value)}
+              onChange={(e) =>
+                updateCustomerField("contactPerson", e.target.value)
+              }
             />
           </div>
           <div className="form-group">
@@ -339,7 +374,7 @@ export default function DeliveryChallanForm() {
               type="tel"
               className="form-input"
               value={formData.customer.phone}
-              onChange={(e) => updateCustomerField('phone', e.target.value)}
+              onChange={(e) => updateCustomerField("phone", e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -348,7 +383,7 @@ export default function DeliveryChallanForm() {
               type="text"
               className="form-input"
               value={formData.customer.gstNumber}
-              onChange={(e) => updateCustomerField('gstNumber', e.target.value)}
+              onChange={(e) => updateCustomerField("gstNumber", e.target.value)}
             />
           </div>
         </div>
@@ -377,7 +412,9 @@ export default function DeliveryChallanForm() {
                     type="text"
                     className="form-input"
                     value={item.description}
-                    onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "description", e.target.value)
+                    }
                   />
                 </td>
                 <td>
@@ -385,7 +422,9 @@ export default function DeliveryChallanForm() {
                     type="number"
                     className="form-input"
                     value={item.quantity}
-                    onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "quantity", e.target.value)
+                    }
                   />
                 </td>
                 <td>
@@ -393,7 +432,9 @@ export default function DeliveryChallanForm() {
                     type="number"
                     className="form-input"
                     value={item.rate}
-                    onChange={(e) => updateItem(item.id, 'rate', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "rate", e.target.value)
+                    }
                   />
                 </td>
                 <td>
@@ -401,7 +442,9 @@ export default function DeliveryChallanForm() {
                     type="text"
                     className="form-input"
                     value={item.remarks}
-                    onChange={(e) => updateItem(item.id, 'remarks', e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "remarks", e.target.value)
+                    }
                   />
                 </td>
                 <td className="form-table-actions">
@@ -437,7 +480,7 @@ export default function DeliveryChallanForm() {
           className="form-textarea"
           rows={3}
           value={formData.amountInWords}
-          onChange={(e) => updateField('amountInWords', e.target.value)}
+          onChange={(e) => updateField("amountInWords", e.target.value)}
           placeholder="e.g. Rupees Twelve Thousand Five Hundred Only"
         />
       </section>
@@ -450,16 +493,24 @@ export default function DeliveryChallanForm() {
             type="text"
             className="form-input"
             value={formData.preparedBy}
-            onChange={(e) => updateField('preparedBy', e.target.value)}
+            onChange={(e) => updateField("preparedBy", e.target.value)}
           />
         </div>
       </section>
 
       <div className="form-actions">
-        <button type="button" className="btn btn-secondary" onClick={handleSaveDraft}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={handleSaveDraft}
+        >
           Save Draft
         </button>
-        <button type="button" className="btn btn-primary" onClick={handlePreview}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handlePreview}
+        >
           Preview
         </button>
       </div>

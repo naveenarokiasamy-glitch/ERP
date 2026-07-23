@@ -19,6 +19,18 @@
 // - `issueToProduction` now operates on `finishedPieces` (piece-level
 //   production inventory) instead of raw cutting-balance plates, matching
 //   the "Issue Material To Production" spec.
+//
+// NEW (Outsourcing workflow)
+// - Added `outsourcingJobs` collection. When material is issued for
+//   Outsourcing (instead of In House cutting) a record is created here via
+//   `issueToOutsourcing()` — NOT in `cuttingJobs` and NOT via
+//   `issueToCutting()`.
+// - `receiveFromCutting()` is reused UNCHANGED in its business logic for
+//   both In House and Outsourcing jobs. It now looks up the job in either
+//   `cuttingJobs` OR `outsourcingJobs` (whichever has that jobNumber), and
+//   only closes/updates the collection the job actually belongs to. Every
+//   other line of finished-pieces / cutting-balance / scrap / rejection
+//   logic is 100% shared — no duplicated code path for Outsourcing.
 // -----------------------------------------------------------------------------
 
 import { useSyncExternalStore } from "react";
@@ -196,6 +208,19 @@ const cuttingJobs = [
 ];
 
 // -----------------------------------------------------------------------------
+// OUTSOURCING JOBS (Issue Material to Cutting -> "Outsourcing" option)
+// -----------------------------------------------------------------------------
+// Same lifecycle shape as `cuttingJobs` (jobNumber, poNumber, material,
+// grade, heatNumber, plateNumber, thickness, originalLength, originalWidth,
+// warehouse, issuedQty, issuedBy, issueDate, remarks, status) so that
+// `receiveFromCutting()` can operate on either collection without any
+// branching business logic — plus outsourcing-only fields (dcNumber,
+// dcDate, vendor, deliveryAddress, vehicleNumber, driver) captured from the
+// Delivery Challan form. No seed records; populated only via
+// `issueToOutsourcing()`.
+const outsourcingJobs = [];
+
+// -----------------------------------------------------------------------------
 // FINISHED PIECES — production inventory created in Receive From Cutting.
 // -----------------------------------------------------------------------------
 const finishedPieces = [
@@ -344,6 +369,7 @@ let state = {
   purchaseOrders,
   materialStock: buildInitialStock(),
   cuttingJobs,
+  outsourcingJobs,
   finishedPieces,
   cuttingBalanceStock,
   scrapMaterials,
@@ -500,6 +526,121 @@ export function issueToCutting({ stockId, jobNumber, issuedQty, issuedBy, remark
 }
 
 /**
+ * Issue Material to Outsourcing — the "Outsourcing" branch of the Issue
+ * Material to Cutting screen. Mirrors `issueToCutting()`'s stock-reduction
+ * logic exactly, but:
+ *   - creates a record in `outsourcingJobs` (NOT `cuttingJobs`)
+ *   - does NOT call issueToCutting()
+ *   - additionally captures Delivery Challan details (dcNumber, dcDate,
+ *     vendor, deliveryAddress, vehicleNumber, driver)
+ *
+ * Does NOT create Finished Pieces / Cutting Balance / Scrap — those are
+ * only created later, when this job is received via receiveFromCutting()
+ * (reused as-is) from the Receive From Cutting page.
+ */
+export function issueToOutsourcing({
+  stockId,
+  jobNumber,
+  issuedQty,
+  issuedBy,
+  remarks,
+  dcNumber,
+  dcDate,
+  vendor,
+  deliveryAddress,
+  vehicleNumber,
+  driver,
+}) {
+  setState((s) => {
+    const stockRow = s.materialStock.find((r) => r.id === stockId);
+    if (!stockRow) return s;
+
+    // Same stock-reduction math as issueToCutting() — one shared meaning of
+    // "issued out of Material Stock", regardless of destination.
+    const newAvailableQty = stockRow.availableQty - issuedQty;
+    const newIssuedToCutting = (stockRow.issuedToCutting || 0) + issuedQty;
+
+    let newStatus = "In Stock";
+    if (newAvailableQty === 0) {
+      newStatus = "Fully Issued";
+    } else if (newAvailableQty < stockRow.availableQty) {
+      newStatus = "Partially Issued";
+    }
+
+    const materialStock = s.materialStock.map((r) =>
+      r.id === stockId
+        ? {
+            ...r,
+            availableQty: newAvailableQty,
+            reservedQty: (r.reservedQty || 0) + issuedQty,
+            issuedToCutting: newIssuedToCutting,
+            status: newStatus,
+          }
+        : r
+    );
+
+    const outsourcingJobs = [
+      {
+        jobNumber,
+        source: "Outsourcing",
+        poNumber: stockRow.poNumber,
+        material: stockRow.material,
+        grade: stockRow.grade,
+        heatNumber: stockRow.heatNumber,
+        plateNumber: stockRow.plateNumber,
+        thickness: stockRow.thickness,
+        originalLength: stockRow.length,
+        originalWidth: stockRow.width,
+        warehouse: stockRow.warehouse,
+        issuedQty,
+        issuedBy,
+        issueDate: todayStr(),
+        remarks,
+        status: "Open",
+        // Delivery Challan details captured at issue time
+        dcNumber,
+        dcDate,
+        vendor,
+        deliveryAddress,
+        vehicleNumber,
+        driver,
+      },
+      ...s.outsourcingJobs,
+    ];
+
+    const movementHistory = [
+      logMovement({
+        poNumber: stockRow.poNumber,
+        jobNumber,
+        plateNumber: stockRow.plateNumber,
+        material: stockRow.material,
+        movementType: "Issue to Outsourcing",
+        from: `Material Stock (${stockRow.warehouse})`,
+        to: jobNumber,
+        quantity: issuedQty,
+        user: issuedBy,
+        remarks,
+      }),
+      logMovement({
+        poNumber: stockRow.poNumber,
+        jobNumber,
+        plateNumber: stockRow.plateNumber,
+        material: stockRow.material,
+        movementType: "Delivery Challan Generated",
+        from: jobNumber,
+        to: `DC ${dcNumber || "-"}`,
+        quantity: issuedQty,
+        user: issuedBy,
+        remarks: `Vendor: ${vendor || "-"}`,
+      }),
+      ...s.movementHistory,
+    ];
+
+    return { materialStock, outsourcingJobs, movementHistory };
+  });
+}
+
+/**
  * Receive From Cutting — closes a cutting job using plate-level logic.
  *
  * payload = {
@@ -575,7 +716,12 @@ export function receiveFromCutting(payload) {
   });
 
   setState((s) => {
-    const job = s.cuttingJobs.find((j) => j.jobNumber === jobNumber);
+    // A job may live in either `cuttingJobs` (In House) or `outsourcingJobs`
+    // (Outsourcing) — everything below this point is 100% shared logic for
+    // both sources, exactly as before.
+    const cuttingJob = s.cuttingJobs.find((j) => j.jobNumber === jobNumber);
+    const outsourcingJob = s.outsourcingJobs.find((j) => j.jobNumber === jobNumber);
+    const job = cuttingJob || outsourcingJob;
     if (!job) {
       console.error("❌ Job not found:", jobNumber);
       return s;
@@ -583,10 +729,22 @@ export function receiveFromCutting(payload) {
 
     console.log("✅ Job found:", job);
 
-    // 1. Close the cutting job
-    const cuttingJobs = s.cuttingJobs.map((j) =>
-      j.jobNumber === jobNumber ? { ...j, status: "Received" } : j
-    );
+    const isOutsourcing = !cuttingJob && !!outsourcingJob;
+    // Friendly label used only for movement-history text below (e.g.
+    // "Receive from Outsourcing - Scrap" vs "Receive from Cutting - Scrap").
+    const sourceLabel = isOutsourcing ? "Outsourcing" : "Cutting";
+
+    // 1. Close the job in whichever collection it actually belongs to.
+    const cuttingJobs = isOutsourcing
+      ? s.cuttingJobs
+      : s.cuttingJobs.map((j) =>
+          j.jobNumber === jobNumber ? { ...j, status: "Received" } : j
+        );
+    const outsourcingJobs = isOutsourcing
+      ? s.outsourcingJobs.map((j) =>
+          j.jobNumber === jobNumber ? { ...j, status: "Received" } : j
+        )
+      : s.outsourcingJobs;
 
     // 2a. Finished pieces from fully consumed plates
     const fullyConsumedFinishedPieces = fullyConsumedPieces
@@ -775,7 +933,7 @@ export function receiveFromCutting(payload) {
               plateNumber: job.plateNumber,
               material: job.material,
               movementType:
-                "Receive from Cutting - Finished Pieces (Fully Consumed Plates)",
+                `Receive from ${sourceLabel} - Finished Pieces (Fully Consumed Plates)`,
               from: jobNumber,
               to: "Finished Pieces Inventory",
               quantity: totalFullyConsumedQty,
@@ -791,7 +949,7 @@ export function receiveFromCutting(payload) {
               plateNumber: job.plateNumber,
               material: job.material,
               movementType:
-                "Receive from Cutting - Finished Pieces (Remaining Plates)",
+                `Receive from ${sourceLabel} - Finished Pieces (Remaining Plates)`,
               from: jobNumber,
               to: "Finished Pieces Inventory",
               quantity: totalRemainingQty,
@@ -806,7 +964,7 @@ export function receiveFromCutting(payload) {
               jobNumber,
               plateNumber: job.plateNumber,
               material: job.material,
-              movementType: "Receive from Cutting - Balance",
+              movementType: `Receive from ${sourceLabel} - Balance`,
               from: jobNumber,
               to: "Cutting Balance Stock",
               quantity: newCuttingBalanceStock.length,
@@ -821,7 +979,7 @@ export function receiveFromCutting(payload) {
               jobNumber,
               plateNumber: job.plateNumber,
               material: job.material,
-              movementType: "Receive from Cutting - Scrap",
+              movementType: `Receive from ${sourceLabel} - Scrap`,
               from: jobNumber,
               to: "Scrap Materials",
               quantity: newScrapMaterials.reduce((sum, r) => sum + r.weight, 0),
@@ -836,7 +994,7 @@ export function receiveFromCutting(payload) {
               jobNumber,
               plateNumber: job.plateNumber,
               material: job.material,
-              movementType: "Receive from Cutting - Rejection",
+              movementType: `Receive from ${sourceLabel} - Rejection`,
               from: jobNumber,
               to: "Rejection Materials",
               quantity: newRejectionMaterials.reduce(
@@ -852,6 +1010,7 @@ export function receiveFromCutting(payload) {
 
     const newState = {
       cuttingJobs,
+      outsourcingJobs,
       finishedPieces,
       cuttingBalanceStock,
       scrapMaterials,
@@ -1312,11 +1471,18 @@ const TIMELINE_LABELS = {
   "GRN Receipt": "GRN Received",
   "Material Stock Updated": "Material Stock",
   "Issue to Cutting": "Issue To Cutting",
+  "Issue to Outsourcing": "Issue To Outsourcing",
+  "Delivery Challan Generated": "Delivery Challan Generated",
   "Receive from Cutting - Finished Pieces (Fully Consumed Plates)": "Finished Pieces Created",
   "Receive from Cutting - Finished Pieces (Remaining Plates)": "Finished Pieces Created",
   "Receive from Cutting - Balance": "Cutting Balance Created",
   "Receive from Cutting - Scrap": "Scrap Created",
   "Receive from Cutting - Rejection": "Rejection Created",
+  "Receive from Outsourcing - Finished Pieces (Fully Consumed Plates)": "Finished Pieces Created",
+  "Receive from Outsourcing - Finished Pieces (Remaining Plates)": "Finished Pieces Created",
+  "Receive from Outsourcing - Balance": "Cutting Balance Created",
+  "Receive from Outsourcing - Scrap": "Scrap Created",
+  "Receive from Outsourcing - Rejection": "Rejection Created",
   "Sent To Rework": "Sent To Rework",
   "Rework Started": "Rework Started",
   "Rework Completed": "Rework Completed",
@@ -1333,8 +1499,12 @@ export function getMovementStats(store) {
   return {
     totalMovements: store.movementHistory.length,
     totalPurchaseOrders: store.purchaseOrders.length,
-    openJobs: store.cuttingJobs.filter((j) => j.status === "Open").length,
-    completedJobs: store.cuttingJobs.filter((j) => j.status === "Received").length,
+    openJobs:
+      store.cuttingJobs.filter((j) => j.status === "Open").length +
+      store.outsourcingJobs.filter((j) => j.status === "Open").length,
+    completedJobs:
+      store.cuttingJobs.filter((j) => j.status === "Received").length +
+      store.outsourcingJobs.filter((j) => j.status === "Received").length,
   };
 }
 
@@ -1348,9 +1518,10 @@ export function buildPOTimeline(store, poNumber) {
   const po = store.purchaseOrders.find((p) => p.poNumber === poNumber);
   if (!po) return [];
 
-  const jobNumbers = new Set(
-    store.cuttingJobs.filter((j) => j.poNumber === poNumber).map((j) => j.jobNumber)
-  );
+  const jobNumbers = new Set([
+    ...store.cuttingJobs.filter((j) => j.poNumber === poNumber).map((j) => j.jobNumber),
+    ...store.outsourcingJobs.filter((j) => j.poNumber === poNumber).map((j) => j.jobNumber),
+  ]);
 
   const relevant = store.movementHistory.filter((m) => {
     if (m.poNumber === poNumber) return true;

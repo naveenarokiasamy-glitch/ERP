@@ -7,18 +7,29 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  Factory,
+  Truck,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useMaterialStore, issueToCutting } from "../../data/materialStore";
 import "./IssueMaterialToCutting.css";
 import Header from "../../components/Header";
 let jobSeq = 2003;
+// Separate sequence for Outsourcing jobs so job numbers never collide with
+// In House cutting job numbers (CUT-xxxx).
+let outJobSeq = 5001;
 
 export default function IssueMaterialToCutting() {
   const { materialStock } = useMaterialStore();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("");
   const [materialFilter, setMaterialFilter] = useState("");
   const [activeRow, setActiveRow] = useState(null);
+  // Row waiting on the "Where do you want to issue the material?" choice,
+  // shown before either the existing In House modal opens or we redirect
+  // to the Delivery Challan form for Outsourcing.
+  const [choiceRow, setChoiceRow] = useState(null);
   const [form, setForm] = useState({
     jobNumber: "",
     issuedQty: "",
@@ -114,6 +125,49 @@ export default function IssueMaterialToCutting() {
     setErrors({});
     setSuccessMessage("");
     setIsSubmitting(false);
+  };
+
+  // Step 0 — clicking "Issue" in the table now asks where the material
+  // should go, instead of opening the In House modal directly.
+  const handleIssueClick = (row) => {
+    setChoiceRow(row);
+  };
+
+  const closeChoiceModal = () => setChoiceRow(null);
+
+  // Option 1: In House — unchanged current behaviour, just triggered one
+  // click later (after the choice is made).
+  const chooseInHouse = () => {
+    const row = choiceRow;
+    setChoiceRow(null);
+    openIssue(row);
+  };
+
+  // Option 2: Outsourcing — do NOT open the cutting modal / create a
+  // cutting job. Instead, hand off to the existing Delivery Challan form
+  // with the selected material's details auto-filled via route state.
+  const chooseOutsourcing = () => {
+    const row = choiceRow;
+    setChoiceRow(null);
+    const jobNumber = `OUT-${outJobSeq++}`;
+    navigate("/accounts/DeliveryChallan", {
+      state: {
+        outsourcingIssue: {
+          stockId: row.id,
+          jobNumber,
+          poNumber: row.poNumber,
+          material: row.material,
+          grade: row.grade,
+          thickness: row.thickness,
+          width: row.width,
+          length: row.length,
+          plateNumber: row.plateNumber,
+          heatNumber: row.heatNumber,
+          availableQty: row.availableQty,
+          warehouse: row.warehouse,
+        },
+      },
+    });
   };
 
   const closeModal = () => {
@@ -354,7 +408,7 @@ export default function IssueMaterialToCutting() {
                   <td className="imtc-col-action">
                     <button
                       className="imtc-btn imtc-btn-accent"
-                      onClick={() => openIssue(r)}
+                      onClick={() => handleIssueClick(r)}
                       disabled={r.availableQty <= 0}
                     >
                       <Scissors size={14} /> Issue
@@ -389,6 +443,53 @@ export default function IssueMaterialToCutting() {
           </button>
         </div>
       </div>
+
+      {/* Choice Modal — "Where do you want to issue the material?" */}
+      {choiceRow && (
+        <div className="imtc-modal-backdrop" onClick={closeChoiceModal}>
+          <div className="imtc-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="imtc-modal-header">
+              <h3>Where do you want to issue the material?</h3>
+              <button className="imtc-btn-icon" onClick={closeChoiceModal}>
+                <X size={20} />
+              </button>
+            </div>
+            <div className="imtc-modal-body">
+              <p className="imtc-subtitle" style={{ marginBottom: "1rem" }}>
+                {choiceRow.material} ({choiceRow.grade}) — Plate{" "}
+                {choiceRow.plateNumber}, {choiceRow.availableQty} units
+                available.
+              </p>
+              <div className="imtc-grid-issue">
+                <button
+                  type="button"
+                  className="imtc-btn imtc-btn-outline imtc-full-width"
+                  onClick={chooseInHouse}
+                  style={{ justifyContent: "flex-start", padding: "1rem" }}
+                >
+                  <Factory size={18} /> In House
+                </button>
+                <button
+                  type="button"
+                  className="imtc-btn imtc-btn-outline imtc-full-width"
+                  onClick={chooseOutsourcing}
+                  style={{ justifyContent: "flex-start", padding: "1rem" }}
+                >
+                  <Truck size={18} /> Outsourcing
+                </button>
+              </div>
+            </div>
+            <div className="imtc-modal-actions">
+              <button
+                className="imtc-btn imtc-btn-outline"
+                onClick={closeChoiceModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal */}
       {activeRow && (

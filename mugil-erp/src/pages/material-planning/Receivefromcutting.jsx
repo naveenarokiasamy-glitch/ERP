@@ -14,6 +14,13 @@ const badgeClass = (status) => {
   }
 };
 
+// Small "In House" / "Outsourcing" source badge — this is the ONLY visible
+// difference between the two job types on this page, exactly as specced.
+const sourceBadgeClass = (source) =>
+  source === "Outsourcing"
+    ? "bg-purple-50 text-purple-700 ring-1 ring-purple-200"
+    : "bg-blue-50 text-blue-700 ring-1 ring-blue-200";
+
 // ---------------------------------------------------------------------------
 // Row / plate factories
 // ---------------------------------------------------------------------------
@@ -59,8 +66,17 @@ const reconcileRemainingPlates = (existing, targetCount) => {
 };
 
 export default function ReceiveFromCutting() {
-  const { cuttingJobs } = useMaterialStore();
-  const openJobs = cuttingJobs.filter((j) => j.status === "Open");
+  const { cuttingJobs, outsourcingJobs } = useMaterialStore();
+
+  // Show BOTH In House and Outsourcing jobs in the same table/queue. The
+  // user can't tell the two apart except via the Source badge below —
+  // everything else (opening the modal, validating, saving) is identical
+  // and goes through the same receiveFromCutting() call either way.
+  const allJobs = [
+    ...cuttingJobs.map((j) => ({ ...j, source: j.source || "In House" })),
+    ...outsourcingJobs.map((j) => ({ ...j, source: j.source || "Outsourcing" })),
+  ];
+  const openJobs = allJobs.filter((j) => j.status === "Open");
 
   const [activeJob, setActiveJob] = useState(null);
   const [form, setForm] = useState(emptyForm());
@@ -289,6 +305,7 @@ const handleBack = () => navigate("/inventory/material");
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-slate-50 text-slate-600 text-left">
+              <th className="px-4 py-3 font-medium">Source</th>
               <th className="px-4 py-3 font-medium">Job Number</th>
               <th className="px-4 py-3 font-medium">PO Number</th>
               <th className="px-4 py-3 font-medium">Plate Number</th>
@@ -306,15 +323,22 @@ const handleBack = () => navigate("/inventory/material");
             {openJobs.length === 0 && (
               <tr>
                 <td
-                  colSpan={11}
+                  colSpan={12}
                   className="px-4 py-10 text-center text-slate-400"
                 >
-                  No open cutting jobs. Every job has been received.
+                  No open jobs. Every job has been received.
                 </td>
               </tr>
             )}
             {openJobs.map((job) => (
               <tr key={job.jobNumber} className="hover:bg-slate-50/60">
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${sourceBadgeClass(job.source)}`}
+                  >
+                    {job.source}
+                  </span>
+                </td>
                 <td className="px-4 py-3 font-medium text-slate-800">
                   {job.jobNumber}
                 </td>
@@ -354,8 +378,13 @@ const handleBack = () => navigate("/inventory/material");
           <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
             {/* Fixed header */}
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                 Receive From Cutting — {activeJob.jobNumber}
+                <span
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium ${sourceBadgeClass(activeJob.source)}`}
+                >
+                  {activeJob.source}
+                </span>
               </h2>
               <button
                 onClick={closeModal}

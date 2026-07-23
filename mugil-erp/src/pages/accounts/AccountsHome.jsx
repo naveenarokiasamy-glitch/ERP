@@ -33,6 +33,13 @@ export default function AccountsHome() {
       path: "/accounts/DeliveryChallan",
       color: "#7c3aed",
     },
+    {
+    title: "Proforma Invoice",
+    short: "PI",
+    description: "Create and manage Proforma Invoices.",
+    path: "/accounts/ProformaInvoice",
+    color: "#dc2626",
+  },
   ];
 
   return (

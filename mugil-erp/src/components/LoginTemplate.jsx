@@ -228,7 +228,12 @@ export default function LoginTemplate({
           navigate("/hr", { replace: true });
         } else if (department === "accounts") {
           navigate("/accounts", { replace: true });
-        }else {
+        }  else if (department === "production") {
+          navigate("/inventory", { replace: true });
+
+        } else if (department === "supervisor") {
+          navigate("/inventory", { replace: true });
+        } else {
           navigate("/welcome", { replace: true });
         }
 

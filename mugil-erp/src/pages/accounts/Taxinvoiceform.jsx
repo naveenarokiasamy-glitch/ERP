@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import TaxInvoicePreview from "./TaxInvoicePreview";
 import "../../styles/form.css";
+import { useNavigate } from "react-router-dom";
 
 const COMPANY = {
   name: "MUGIL ENGINEERING INDUSTRY",
@@ -301,7 +302,7 @@ export default function TaxInvoiceForm() {
   const grandTotalRaw = beforeRounding + (parseFloat(formData.roundedOff) || 0);
   const grandTotal = Math.round(grandTotalRaw);
   const roundedOffAuto = grandTotal - beforeRounding;
-
+  const navigate = useNavigate();
   const amountInWords = numberToWordsIndian(grandTotal) + " Rupees Only";
   const previewData = {
     company: COMPANY,
@@ -331,9 +332,31 @@ export default function TaxInvoiceForm() {
       <TaxInvoicePreview data={previewData} onBack={() => setView("form")} />
     );
   }
-
+  const handleBack = () => {
+    navigate("/accounts");
+  };
   return (
     <div className="form-page">
+      <button
+        onClick={handleBack}
+        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+        Back
+      </button>
       <h1 style={{ margin: 0 }}>Tax Invoice</h1>
 
       {/* 1. Invoice Details */}

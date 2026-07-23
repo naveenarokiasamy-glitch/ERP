@@ -47,6 +47,7 @@ import QO from "./pages/accounts/QuotationForm";
 import AccountsHome from "./pages/accounts/AccountsHome";
 import TaxInvoice from "./pages/accounts/Taxinvoiceform";
 import DeliveryChallan from "./pages/accounts/Deliverychallanform";
+import ProformaInvoiceForm from "./pages/accounts/Proformainvoiceform";
 export default function App() {
   return (
     <AuthProvider>
@@ -382,6 +383,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <DeliveryChallan />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts/ProformaInvoice"
+          element={
+            <ProtectedRoute>
+              <ProformaInvoiceForm />
             </ProtectedRoute>
           }
         />
