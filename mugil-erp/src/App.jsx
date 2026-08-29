@@ -23,7 +23,7 @@ import IssueToProduction from "./pages/material-planning/issuetoprod";
 import Scrap from "./pages/material-planning/Scrap";
 import Rejection from "./pages/material-planning/Rejection";
 import Rework from "./pages/material-planning/Rework";
-import MaterialMovementHistory from "./pages/material-planning/MaterialMovementHistory";
+import MaterialMovementHistory from "./pages/material-planning/Materialmovementhistory";
 import Reports from "./pages/material-planning/Reports";
 import ConsumableGRN from "./pages/material-planning/ConsumableGRN";
 import ConsumableStock from "./pages/material-planning/ConsumableStock";
