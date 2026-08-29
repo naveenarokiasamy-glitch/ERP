@@ -277,7 +277,7 @@ export default function LoginTemplate({
 
       <div className="login-brand">
   <h1 className="brand-name">
-    Mugil Engineering Industries
+    Mugil Engineering Industry
   </h1>
 </div>
 
