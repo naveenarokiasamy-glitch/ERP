@@ -133,7 +133,7 @@ export default function Header() {
         <span className="erp-brand-line"></span>
 
         <span className="erp-brand-name">
-          Mugil Engineering Industries
+          Mugil Engineering Industry
         </span>
       </div>
 
