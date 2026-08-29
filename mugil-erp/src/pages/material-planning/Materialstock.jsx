@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useMaterialStore } from "../../data/materialStore";
-import "./MaterialStock.css";
+import "./Materialstock.css";
 import Header from "../../components/Header";
 export default function MaterialStock() {
   const { materialStock } = useMaterialStore();
