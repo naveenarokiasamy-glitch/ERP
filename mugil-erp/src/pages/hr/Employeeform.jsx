@@ -5,7 +5,7 @@ import {
   GENDERS, BLOOD_GROUPS, MARITAL_STATUSES, COUNTRIES, STATES, DOCUMENT_TYPES,
 } from './Employees.jsx'
 
-/* ==========================================================================
+/* =========================================================================
    EmployeeForm — used for both CREATE and EDIT.
    Renders as a modal with tabbed sections. Validation covers only the
    fields called out as required in the spec; everything else is optional.
