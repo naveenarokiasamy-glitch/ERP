@@ -12,7 +12,7 @@ import {
   receiveGRN,
   statusOptions,
 } from "../../data/materialStore";
-import "./MaterialGRN.css";
+import "./Materialgrn.css";
 import Header from "../../components/Header";
 export default function MaterialGRN() {
   const { purchaseOrders } = useMaterialStore();
