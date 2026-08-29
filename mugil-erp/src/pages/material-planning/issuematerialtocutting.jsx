@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMaterialStore, issueToCutting } from "../../data/materialStore";
-import "./IssueMaterialToCutting.css";
+import "./issuematerialtocutting.css";
 import Header from "../../components/Header";
 import { Link } from "react-router-dom";
 let jobSeq = 2003;
