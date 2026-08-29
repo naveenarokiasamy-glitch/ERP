@@ -39,7 +39,7 @@ import ProformaInvoiceForm from "./pages/accounts/Proformainvoiceform";
 import Employees, { EmployeesProvider } from "./pages/hr/Employees.jsx";
 import Profile from "./components/Profile.jsx";
 
-import EmployeeProfile from "./pages/hr/Employeeprofile.jsx";
+import EmployeeProfile from "./pages/hr/EmployeeProfile.jsx";
 export default function App() {
   return (
     <AuthProvider>
