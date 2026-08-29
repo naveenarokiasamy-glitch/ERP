@@ -4,6 +4,8 @@ import { useEmployees, StatusBadge } from "./Employees.jsx";
 import EmployeeForm from "./EmployeeForm.jsx";
 import "./Employee.css";
 
+
+
 const TABS = [
   "Overview",
   "Work Information",
