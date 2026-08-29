@@ -6,7 +6,7 @@ import {
   useCallback,
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import EmployeeForm from "./EmployeeForm.jsx";
+import EmployeeForm from "./Employeeform.jsx";
 import "./Employee.css";
 
 /* ==========================================================================
