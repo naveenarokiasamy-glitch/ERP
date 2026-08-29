@@ -58,14 +58,14 @@ body {
 }
 
 button {
-  font-family: var(--font-body);
+  font-family: inherit;
   cursor: pointer;
-  border: none;
-  outline: none;
 }
 
-input {
-  font-family: var(--font-body);
+input,
+textarea,
+select {
+    font-family: inherit;
 }
 
 a {
@@ -100,3 +100,14 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+
+  background-image: none !important;
+  background-repeat: no-repeat !important;
+}
+

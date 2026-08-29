@@ -91,44 +91,73 @@ export default function IssueConsumable() {
     closeIssueModal();
   }
 
-  return (
-    <>
-      <Header />
-      <div className="consumable-stock-page">
-        <Link to="/inventory/consumable" className="consumable-back">
+return (
+  <>
+    <Header />
+
+    <div className="issue-consumable-page">
+      <div className="issue-consumable-container">
+        <Link
+          to="/inventory/consumable"
+          className="issue-consumable-back-link"
+        >
           <ArrowLeft size={15} />
-          Consumables
+          <span>Consumables</span>
         </Link>
 
-        <header className="consumable-stock-header">
-          <span className="consumable-eyebrow">Consumables</span>
-          <h1 className="consumable-title">Issue Consumables</h1>
-          <p className="consumable-subtitle">
-            Issue available consumable stock to a department, employee, or job
-            card / production order.
-          </p>
-        </header>
+        <section className="issue-consumable-hero">
+          <div className="issue-consumable-hero-content">
+            <span className="issue-consumable-eyebrow">
+              Consumables
+            </span>
 
-        <div className="consumable-stock-stats">
-          <div className="stat-card">
-            <Boxes size={20} />
-            <div>
-              <span className="stat-value">{totalAvailableItems}</span>
-              <span className="stat-label">Consumables Available</span>
+            <h1 className="issue-consumable-title">
+              Issue Consumables
+            </h1>
+
+            <p className="issue-consumable-description">
+              Issue available consumable stock to a department, employee, or job
+              card / production order.
+            </p>
+          </div>
+        </section>
+
+        <section className="issue-consumable-summary-grid">
+          <div className="issue-consumable-summary-card">
+            <div className="issue-consumable-summary-icon">
+              <Boxes size={20} />
+            </div>
+
+            <div className="issue-consumable-summary-content">
+              <span className="issue-consumable-summary-value">
+                {totalAvailableItems}
+              </span>
+              <span className="issue-consumable-summary-label">
+                Consumables Available
+              </span>
             </div>
           </div>
-          <div className="stat-card">
-            <Send size={20} />
-            <div>
-              <span className="stat-value">{totalAvailableQty}</span>
-              <span className="stat-label">Total Available Quantity</span>
+
+          <div className="issue-consumable-summary-card">
+            <div className="issue-consumable-summary-icon">
+              <Send size={20} />
+            </div>
+
+            <div className="issue-consumable-summary-content">
+              <span className="issue-consumable-summary-value">
+                {totalAvailableQty}
+              </span>
+              <span className="issue-consumable-summary-label">
+                Total Available Quantity
+              </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="consumable-stock-toolbar">
-          <div className="consumable-search">
+        <section className="issue-consumable-toolbar">
+          <div className="issue-consumable-search-box">
             <Search size={16} />
+
             <input
               type="text"
               placeholder="Search consumable, reference, category, warehouse..."
@@ -136,152 +165,217 @@ export default function IssueConsumable() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-        </div>
+        </section>
 
-        <div className="consumable-table-wrapper">
-          <table className="consumable-table">
-            <thead>
-              <tr>
-                <th>Reference Number</th>
-                <th>Consumable</th>
-                <th>Category</th>
-                <th>Warehouse</th>
-                <th>Available Quantity</th>
-                <th>Unit</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStock.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.referenceNumber}</td>
-                  <td>{item.consumableName}</td>
-                  <td>{item.category}</td>
-                  <td>{item.warehouse}</td>
-                  <td>{item.availableQty}</td>
-                  <td>{item.unit}</td>
-                  <td>
-                    <button
-                      className="btn-primary"
-                      onClick={() => openIssueModal(item)}
-                    >
-                      Issue
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredStock.length === 0 && (
+        <section className="issue-consumable-table-card">
+          <div className="issue-consumable-table-scroll">
+            <table className="issue-consumable-table">
+              <thead>
                 <tr>
-                  <td colSpan={7} className="consumable-empty-row">
-                    No available consumable stock to issue.
-                  </td>
+                  <th>Reference Number</th>
+                  <th>Consumable</th>
+                  <th>Category</th>
+                  <th>Warehouse</th>
+                  <th>Available Quantity</th>
+                  <th>Unit</th>
+                  <th>Action</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
 
+              <tbody>
+                {filteredStock.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.referenceNumber}</td>
+
+                    <td>
+                      <div className="issue-consumable-name-cell">
+                        <span className="issue-consumable-name">
+                          {item.consumableName}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span className="issue-consumable-category-badge">
+                        {item.category}
+                      </span>
+                    </td>
+
+                    <td>{item.warehouse}</td>
+
+                    <td>
+                      <span className="issue-consumable-stock-value">
+                        {item.availableQty}
+                      </span>
+                    </td>
+
+                    <td>{item.unit}</td>
+
+                    <td>
+                      <button
+                        className="issue-consumable-issue-button"
+                        onClick={() => openIssueModal(item)}
+                      >
+                        Issue
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredStock.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="issue-consumable-empty-state"
+                    >
+                      No available consumable stock to issue.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
         {selectedStock && (
-          <div className="modal-overlay" onClick={closeIssueModal}>
-            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Issue Consumable</h3>
-                <button className="modal-close" onClick={closeIssueModal}>
+          <div
+            className="issue-consumable-modal-overlay"
+            onClick={closeIssueModal}
+          >
+            <div
+              className="issue-consumable-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="issue-consumable-modal-header">
+                <div>
+                  <h3 className="issue-consumable-modal-title">
+                    Issue Consumable
+                  </h3>
+                </div>
+
+                <button
+                  className="issue-consumable-modal-close"
+                  onClick={closeIssueModal}
+                >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className="modal-body">
-                <div className="modal-info-grid">
-                  <div>
-                    <span className="modal-info-label">Consumable</span>
-                    <span className="modal-info-value">
+              <div className="issue-consumable-modal-body">
+                <div className="issue-consumable-info-panel">
+                  <div className="issue-consumable-info-item">
+                    <span className="issue-consumable-info-label">
+                      Consumable
+                    </span>
+
+                    <span className="issue-consumable-info-value">
                       {selectedStock.consumableName}
                     </span>
                   </div>
-                  <div>
-                    <span className="modal-info-label">Available Quantity</span>
-                    <span className="modal-info-value">
+
+                  <div className="issue-consumable-info-item">
+                    <span className="issue-consumable-info-label">
+                      Available Quantity
+                    </span>
+
+                    <span className="issue-consumable-info-value">
                       {selectedStock.availableQty} {selectedStock.unit}
                     </span>
                   </div>
-                  <div>
-                    <span className="modal-info-label">Warehouse</span>
-                    <span className="modal-info-value">
+
+                  <div className="issue-consumable-info-item">
+                    <span className="issue-consumable-info-label">
+                      Warehouse
+                    </span>
+
+                    <span className="issue-consumable-info-value">
                       {selectedStock.warehouse}
                     </span>
                   </div>
                 </div>
 
-                <form className="modal-form" onSubmit={handleIssueSubmit}>
-                  <label>
-                    Department
-                    <input
-                      type="text"
-                      value={issueForm.department}
-                      onChange={(e) =>
-                        handleIssueChange("department", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
+                <form
+                  className="issue-consumable-form"
+                  onSubmit={handleIssueSubmit}
+                >
+                  <div className="issue-consumable-form-grid">
+                    <label className="issue-consumable-field">
+                      <span>Department</span>
 
-                  <label>
-                    Employee Name
-                    <input
-                      type="text"
-                      value={issueForm.employeeName}
-                      onChange={(e) =>
-                        handleIssueChange("employeeName", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
+                      <input
+                        type="text"
+                        value={issueForm.department}
+                        onChange={(e) =>
+                          handleIssueChange("department", e.target.value)
+                        }
+                        required
+                      />
+                    </label>
 
-                  <label>
-                    Job Card / Production Order
-                    <input
-                      type="text"
-                      value={issueForm.jobCard}
-                      onChange={(e) =>
-                        handleIssueChange("jobCard", e.target.value)
-                      }
-                    />
-                  </label>
+                    <label className="issue-consumable-field">
+                      <span>Employee Name</span>
 
-                  <label>
-                    Quantity
-                    <input
-                      type="number"
-                      min="1"
-                      max={selectedStock.availableQty}
-                      value={issueForm.quantity}
-                      onChange={(e) =>
-                        handleIssueChange("quantity", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
+                      <input
+                        type="text"
+                        value={issueForm.employeeName}
+                        onChange={(e) =>
+                          handleIssueChange("employeeName", e.target.value)
+                        }
+                        required
+                      />
+                    </label>
 
-                  <label>
-                    Remarks
-                    <textarea
-                      value={issueForm.remarks}
-                      onChange={(e) =>
-                        handleIssueChange("remarks", e.target.value)
-                      }
-                    />
-                  </label>
+                    <label className="issue-consumable-field">
+                      <span>Job Card / Production Order</span>
 
-                  <div className="modal-actions">
+                      <input
+                        type="text"
+                        value={issueForm.jobCard}
+                        onChange={(e) =>
+                          handleIssueChange("jobCard", e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="issue-consumable-field">
+                      <span>Quantity</span>
+
+                      <input
+                        type="number"
+                        min="1"
+                        max={selectedStock.availableQty}
+                        value={issueForm.quantity}
+                        onChange={(e) =>
+                          handleIssueChange("quantity", e.target.value)
+                        }
+                        required
+                      />
+                    </label>
+
+                    <label className="issue-consumable-field issue-consumable-field-full">
+                      <span>Remarks</span>
+
+                      <textarea
+                        value={issueForm.remarks}
+                        onChange={(e) =>
+                          handleIssueChange("remarks", e.target.value)
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  <div className="issue-consumable-modal-actions">
                     <button
                       type="button"
-                      className="btn-secondary"
+                      className="issue-consumable-cancel-button"
                       onClick={closeIssueModal}
                     >
                       Cancel
                     </button>
-                    <button type="submit" className="btn-primary">
+
+                    <button
+                      type="submit"
+                      className="issue-consumable-save-button"
+                    >
                       Save
                     </button>
                   </div>
@@ -291,6 +385,7 @@ export default function IssueConsumable() {
           </div>
         )}
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }

@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useMaterialStore, issueToCutting } from "../../data/materialStore";
 import "./IssueMaterialToCutting.css";
 import Header from "../../components/Header";
+import { Link } from "react-router-dom";
 let jobSeq = 2003;
 // Separate sequence for Outsourcing jobs so job numbers never collide with
 // In House cutting job numbers (CUT-xxxx).
@@ -259,10 +260,18 @@ export default function IssueMaterialToCutting() {
 
       {/* Breadcrumb */}
       <div className="imtc-breadcrumb">
-        <span className="imtc-breadcrumb-item">Inventory</span>
+        <Link to="/inventory" className="imtc-breadcrumb-item">
+            Inventory
+        </Link>
+
         <span className="imtc-breadcrumb-sep">/</span>
-        <span className="imtc-breadcrumb-item">Material</span>
+
+        <Link to="/inventory/material" className="imtc-breadcrumb-item">
+          Material
+        </Link>
+
         <span className="imtc-breadcrumb-sep">/</span>
+
         <span className="imtc-breadcrumb-item">Issue to Cutting</span>
       </div>
 

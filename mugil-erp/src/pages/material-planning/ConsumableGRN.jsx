@@ -154,359 +154,608 @@ export default function ConsumableGRN() {
     <>
       <Header />
       <div className="consumable-grn-page">
-        <Link to="/inventory/consumable" className="consumable-back">
-          <ArrowLeft size={15} />
-          Consumables
-        </Link>
+      <Link to="/inventory/consumable" className="consumable-grn-back">
+  <ArrowLeft size={15} />
+  <span>Consumables</span>
+</Link>
 
-        <header className="consumable-grn-header">
-          <span className="consumable-eyebrow">Consumables</span>
-          <h1 className="consumable-title">Consumable GRN</h1>
-          <p className="consumable-subtitle">
-            Receive consumables against Purchase Orders, or record a Direct GRN
-            for local purchases.
+<header className="consumable-grn-header">
+
+  <div className="consumable-grn-header-content">
+
+    <div className="consumable-grn-title-section">
+
+      <span className="consumable-grn-eyebrow">
+        Consumables
+      </span>
+
+      <h1 className="consumable-grn-title">
+        Consumable GRN
+      </h1>
+
+      <p className="consumable-grn-subtitle">
+        Receive consumables against Purchase Orders or create Direct GRNs for
+        local purchases.
+      </p>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+{/* ================= KPI ================= */}
+
+<div className="consumable-grn-summary-grid">
+
+  <div className="consumable-grn-summary-card consumable-grn-total-card">
+
+    <div className="consumable-grn-summary-icon">
+      <ClipboardList size={22} />
+    </div>
+
+    <div className="consumable-grn-summary-content">
+
+      <span className="consumable-grn-summary-label">
+        Total Purchase Orders
+      </span>
+
+      <span className="consumable-grn-summary-value">
+        {stats.total}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div className="consumable-grn-summary-card consumable-grn-pending-card">
+
+    <div className="consumable-grn-summary-icon">
+      <Clock size={22} />
+    </div>
+
+    <div className="consumable-grn-summary-content">
+
+      <span className="consumable-grn-summary-label">
+        Pending
+      </span>
+
+      <span className="consumable-grn-summary-value">
+        {stats.pending}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div className="consumable-grn-summary-card consumable-grn-partial-card">
+
+    <div className="consumable-grn-summary-icon">
+      <Clock size={22} />
+    </div>
+
+    <div className="consumable-grn-summary-content">
+
+      <span className="consumable-grn-summary-label">
+        Partially Received
+      </span>
+
+      <span className="consumable-grn-summary-value">
+        {stats.partial}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div className="consumable-grn-summary-card consumable-grn-completed-card">
+
+    <div className="consumable-grn-summary-icon">
+      <CheckCircle2 size={22} />
+    </div>
+
+    <div className="consumable-grn-summary-content">
+
+      <span className="consumable-grn-summary-label">
+        Completed
+      </span>
+
+      <span className="consumable-grn-summary-value">
+        {stats.completed}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+    {/* ================= TOOLBAR ================= */}
+
+<div className="consumable-grn-toolbar">
+
+  <div className="consumable-grn-search">
+
+    <Search size={17} />
+
+    <input
+      type="text"
+      className="consumable-grn-search-input"
+      placeholder="Search by PO Number, Supplier, Consumable or Category..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+
+  </div>
+
+  <button
+    className="consumable-grn-add-btn"
+    onClick={openDirectModal}
+  >
+    <PackagePlus size={17} />
+    <span>New Direct GRN</span>
+  </button>
+
+</div>
+
+{/* ================= PURCHASE ORDER TABLE ================= */}
+
+<div className="consumable-grn-table-card">
+
+  <div className="consumable-grn-table-header">
+
+    <div>
+      <h3 className="consumable-grn-table-title">
+        Purchase Orders
+      </h3>
+
+      <p className="consumable-grn-table-subtitle">
+        Receive consumables against approved purchase orders.
+      </p>
+    </div>
+
+  </div>
+
+  <div className="consumable-grn-table-wrapper">
+
+    <table className="consumable-grn-table">
+
+      <thead>
+
+        <tr>
+          <th>PO Number</th>
+          <th>Supplier</th>
+          <th>Consumable</th>
+          <th>Category</th>
+          <th>Unit</th>
+          <th>Ordered Qty</th>
+          <th>Received Qty</th>
+          <th>Pending Qty</th>
+          <th>Warehouse</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        {filteredPOs.map((po) => (
+
+          <tr key={po.id}>
+
+            <td>{po.poNumber}</td>
+
+            <td>{po.supplier}</td>
+
+            <td>{po.consumableName}</td>
+
+            <td>{po.category}</td>
+
+            <td>{po.unit}</td>
+
+            <td>{po.orderedQty}</td>
+
+            <td>{po.receivedQty}</td>
+
+            <td>{po.pendingQty}</td>
+
+            <td>{po.warehouse}</td>
+
+            <td>
+
+              <span
+                className={`consumable-grn-status consumable-grn-status-${po.status
+                  .replace(/\s+/g, "-")
+                  .toLowerCase()}`}
+              >
+                {po.status}
+              </span>
+
+            </td>
+
+            <td>
+
+              <button
+                className="consumable-grn-receive-btn"
+                disabled={po.status === "Completed"}
+                onClick={() => openReceiveModal(po)}
+              >
+                Receive
+              </button>
+
+            </td>
+
+          </tr>
+
+        ))}
+
+        {filteredPOs.length === 0 && (
+
+          <tr>
+
+            <td
+              colSpan={11}
+              className="consumable-grn-empty-row"
+            >
+              No purchase orders found.
+            </td>
+
+          </tr>
+
+        )}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+{/* ================= RECEIVE MODAL ================= */}
+
+{selectedPO && (
+  <div
+    className="consumable-grn-modal-overlay"
+    onClick={closeReceiveModal}
+  >
+    <div
+      className="consumable-grn-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      <div className="consumable-grn-modal-header">
+
+        <div>
+
+          <h2 className="consumable-grn-modal-title">
+            Receive Consumable
+          </h2>
+
+          <p className="consumable-grn-modal-subtitle">
+            Update the received quantity for this Purchase Order.
           </p>
-        </header>
 
-        <div className="consumable-grn-stats">
-          <div className="stat-card">
-            <ClipboardList size={20} />
-            <div>
-              <span className="stat-value">{stats.total}</span>
-              <span className="stat-label">Total Purchase Orders</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <Clock size={20} />
-            <div>
-              <span className="stat-value">{stats.pending}</span>
-              <span className="stat-label">Pending</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <Clock size={20} />
-            <div>
-              <span className="stat-value">{stats.partial}</span>
-              <span className="stat-label">Partially Received</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <CheckCircle2 size={20} />
-            <div>
-              <span className="stat-value">{stats.completed}</span>
-              <span className="stat-label">Completed</span>
-            </div>
-          </div>
         </div>
 
-        <div className="consumable-grn-toolbar">
-          <div className="consumable-search">
-            <Search size={16} />
+        <button
+          className="consumable-grn-modal-close"
+          onClick={closeReceiveModal}
+        >
+          <X size={18} />
+        </button>
+
+      </div>
+
+      <div className="consumable-grn-modal-body">
+
+        <div className="consumable-grn-info-grid">
+
+          <div className="consumable-grn-info-card">
+            <span className="consumable-grn-info-label">
+              PO Number
+            </span>
+
+            <span className="consumable-grn-info-value">
+              {selectedPO.poNumber}
+            </span>
+          </div>
+
+          <div className="consumable-grn-info-card">
+            <span className="consumable-grn-info-label">
+              Consumable
+            </span>
+
+            <span className="consumable-grn-info-value">
+              {selectedPO.consumableName}
+            </span>
+          </div>
+
+          <div className="consumable-grn-info-card">
+            <span className="consumable-grn-info-label">
+              Ordered Qty
+            </span>
+
+            <span className="consumable-grn-info-value">
+              {selectedPO.orderedQty}
+            </span>
+          </div>
+
+          <div className="consumable-grn-info-card">
+            <span className="consumable-grn-info-label">
+              Received Qty
+            </span>
+
+            <span className="consumable-grn-info-value">
+              {selectedPO.receivedQty}
+            </span>
+          </div>
+
+          <div className="consumable-grn-info-card">
+            <span className="consumable-grn-info-label">
+              Pending Qty
+            </span>
+
+            <span className="consumable-grn-info-value">
+              {selectedPO.pendingQty}
+            </span>
+          </div>
+
+        </div>
+
+        <form
+          className="consumable-grn-form"
+          onSubmit={handleReceiveSubmit}
+        >
+
+          <div className="consumable-grn-form-group">
+
+            <label>Quantity Received</label>
+
+            <input
+              type="number"
+              min="1"
+              max={selectedPO.pendingQty}
+              value={receiveForm.quantityReceived}
+              onChange={(e) =>
+                setReceiveForm((prev) => ({
+                  ...prev,
+                  quantityReceived: e.target.value,
+                }))
+              }
+              required
+            />
+
+          </div>
+
+          <div className="consumable-grn-form-group">
+
+            <label>Received By</label>
+
             <input
               type="text"
-              placeholder="Search PO, supplier, consumable, category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={receiveForm.receivedBy}
+              onChange={(e) =>
+                setReceiveForm((prev) => ({
+                  ...prev,
+                  receivedBy: e.target.value,
+                }))
+              }
+              required
+            />
+
+          </div>
+
+          <div className="consumable-grn-form-group">
+
+            <label>Remarks</label>
+
+            <textarea
+              value={receiveForm.remarks}
+              onChange={(e) =>
+                setReceiveForm((prev) => ({
+                  ...prev,
+                  remarks: e.target.value,
+                }))
+              }
+            />
+
+          </div>
+
+          <div className="consumable-grn-form-actions">
+
+            <button
+              type="button"
+              className="consumable-grn-cancel-btn"
+              onClick={closeReceiveModal}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="consumable-grn-save-btn"
+            >
+              Save
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+)}
+
+{/* ================= DIRECT GRN MODAL ================= */}
+
+{showDirectModal && (
+  <div
+    className="consumable-grn-modal-overlay"
+    onClick={closeDirectModal}
+  >
+    <div
+      className="consumable-grn-modal consumable-grn-modal-large"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="consumable-grn-modal-header">
+
+        <div>
+
+          <h2 className="consumable-grn-modal-title">
+            New Direct GRN
+          </h2>
+
+          <p className="consumable-grn-modal-subtitle">
+            Record consumables received directly from a supplier without a Purchase Order.
+          </p>
+
+        </div>
+
+        <button
+          className="consumable-grn-modal-close"
+          onClick={closeDirectModal}
+        >
+          <X size={18} />
+        </button>
+
+      </div>
+
+      <div className="consumable-grn-modal-body">
+
+        <form
+          className="consumable-grn-form consumable-grn-form-grid"
+          onSubmit={handleDirectSubmit}
+        >
+
+          <div className="consumable-grn-form-group">
+            <label>Supplier</label>
+            <input
+              type="text"
+              value={directForm.supplier}
+              onChange={(e) =>
+                handleDirectChange("supplier", e.target.value)
+              }
+              required
             />
           </div>
 
-          <button className="btn-primary" onClick={openDirectModal}>
-            <PackagePlus size={16} />
-            New Direct GRN
-          </button>
-        </div>
-
-        <div className="consumable-table-wrapper">
-          <table className="consumable-table">
-            <thead>
-              <tr>
-                <th>PO Number</th>
-                <th>Supplier</th>
-                <th>Consumable</th>
-                <th>Category</th>
-                <th>Unit</th>
-                <th>Ordered Qty</th>
-                <th>Received Qty</th>
-                <th>Pending Qty</th>
-                <th>Warehouse</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPOs.map((po) => (
-                <tr key={po.id}>
-                  <td>{po.poNumber}</td>
-                  <td>{po.supplier}</td>
-                  <td>{po.consumableName}</td>
-                  <td>{po.category}</td>
-                  <td>{po.unit}</td>
-                  <td>{po.orderedQty}</td>
-                  <td>{po.receivedQty}</td>
-                  <td>{po.pendingQty}</td>
-                  <td>{po.warehouse}</td>
-                  <td>
-                    <span
-                      className={`status-badge status-${po.status.replace(/\s+/g, "-").toLowerCase()}`}
-                    >
-                      {po.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="btn-secondary"
-                      disabled={po.status === "Completed"}
-                      onClick={() => openReceiveModal(po)}
-                    >
-                      Receive
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredPOs.length === 0 && (
-                <tr>
-                  <td colSpan={11} className="consumable-empty-row">
-                    No purchase orders found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {selectedPO && (
-          <div className="modal-overlay" onClick={closeReceiveModal}>
-            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>Receive Consumable</h3>
-                <button className="modal-close" onClick={closeReceiveModal}>
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="modal-body">
-                <div className="modal-info-grid">
-                  <div>
-                    <span className="modal-info-label">PO Number</span>
-                    <span className="modal-info-value">
-                      {selectedPO.poNumber}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="modal-info-label">Consumable</span>
-                    <span className="modal-info-value">
-                      {selectedPO.consumableName}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="modal-info-label">Ordered Quantity</span>
-                    <span className="modal-info-value">
-                      {selectedPO.orderedQty}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="modal-info-label">Received Quantity</span>
-                    <span className="modal-info-value">
-                      {selectedPO.receivedQty}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="modal-info-label">Pending Quantity</span>
-                    <span className="modal-info-value">
-                      {selectedPO.pendingQty}
-                    </span>
-                  </div>
-                </div>
-
-                <form className="modal-form" onSubmit={handleReceiveSubmit}>
-                  <label>
-                    Quantity Received
-                    <input
-                      type="number"
-                      min="1"
-                      max={selectedPO.pendingQty}
-                      value={receiveForm.quantityReceived}
-                      onChange={(e) =>
-                        setReceiveForm((prev) => ({
-                          ...prev,
-                          quantityReceived: e.target.value,
-                        }))
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Received By
-                    <input
-                      type="text"
-                      value={receiveForm.receivedBy}
-                      onChange={(e) =>
-                        setReceiveForm((prev) => ({
-                          ...prev,
-                          receivedBy: e.target.value,
-                        }))
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Remarks
-                    <textarea
-                      value={receiveForm.remarks}
-                      onChange={(e) =>
-                        setReceiveForm((prev) => ({
-                          ...prev,
-                          remarks: e.target.value,
-                        }))
-                      }
-                    />
-                  </label>
-
-                  <div className="modal-actions">
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={closeReceiveModal}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="btn-primary">
-                      Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+          <div className="consumable-grn-form-group">
+            <label>Consumable Name</label>
+            <input
+              type="text"
+              value={directForm.consumableName}
+              onChange={(e) =>
+                handleDirectChange("consumableName", e.target.value)
+              }
+              required
+            />
           </div>
-        )}
 
-        {showDirectModal && (
-          <div className="modal-overlay" onClick={closeDirectModal}>
-            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-              <div className="modal-header">
-                <h3>New Direct GRN</h3>
-                <button className="modal-close" onClick={closeDirectModal}>
-                  <X size={18} />
-                </button>
-              </div>
-
-              <div className="modal-body">
-                <form className="modal-form" onSubmit={handleDirectSubmit}>
-                  <label>
-                    Supplier
-                    <input
-                      type="text"
-                      value={directForm.supplier}
-                      onChange={(e) =>
-                        handleDirectChange("supplier", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Consumable Name
-                    <input
-                      type="text"
-                      value={directForm.consumableName}
-                      onChange={(e) =>
-                        handleDirectChange("consumableName", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Category
-                    <input
-                      type="text"
-                      value={directForm.category}
-                      onChange={(e) =>
-                        handleDirectChange("category", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Unit
-                    <input
-                      type="text"
-                      placeholder="Nos, Kg, Litre..."
-                      value={directForm.unit}
-                      onChange={(e) =>
-                        handleDirectChange("unit", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Quantity
-                    <input
-                      type="number"
-                      min="1"
-                      value={directForm.quantity}
-                      onChange={(e) =>
-                        handleDirectChange("quantity", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Warehouse
-                    <input
-                      type="text"
-                      value={directForm.warehouse}
-                      onChange={(e) =>
-                        handleDirectChange("warehouse", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Received By
-                    <input
-                      type="text"
-                      value={directForm.receivedBy}
-                      onChange={(e) =>
-                        handleDirectChange("receivedBy", e.target.value)
-                      }
-                      required
-                    />
-                  </label>
-
-                  <label>
-                    Remarks
-                    <textarea
-                      value={directForm.remarks}
-                      onChange={(e) =>
-                        handleDirectChange("remarks", e.target.value)
-                      }
-                    />
-                  </label>
-
-                  <div className="modal-actions">
-                    <button
-                      type="button"
-                      className="btn-secondary"
-                      onClick={closeDirectModal}
-                    >
-                      Cancel
-                    </button>
-                    <button type="submit" className="btn-primary">
-                      Save
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+          <div className="consumable-grn-form-group">
+            <label>Category</label>
+            <input
+              type="text"
+              value={directForm.category}
+              onChange={(e) =>
+                handleDirectChange("category", e.target.value)
+              }
+              required
+            />
           </div>
-        )}
+
+          <div className="consumable-grn-form-group">
+            <label>Unit</label>
+            <input
+              type="text"
+              placeholder="Nos, Kg, Litre..."
+              value={directForm.unit}
+              onChange={(e) =>
+                handleDirectChange("unit", e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <div className="consumable-grn-form-group">
+            <label>Quantity</label>
+            <input
+              type="number"
+              min="1"
+              value={directForm.quantity}
+              onChange={(e) =>
+                handleDirectChange("quantity", e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <div className="consumable-grn-form-group">
+            <label>Warehouse</label>
+            <input
+              type="text"
+              value={directForm.warehouse}
+              onChange={(e) =>
+                handleDirectChange("warehouse", e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <div className="consumable-grn-form-group">
+            <label>Received By</label>
+            <input
+              type="text"
+              value={directForm.receivedBy}
+              onChange={(e) =>
+                handleDirectChange("receivedBy", e.target.value)
+              }
+              required
+            />
+          </div>
+
+          <div className="consumable-grn-form-group consumable-grn-form-group-full">
+            <label>Remarks</label>
+            <textarea
+              value={directForm.remarks}
+              onChange={(e) =>
+                handleDirectChange("remarks", e.target.value)
+              }
+            />
+          </div>
+
+          <div className="consumable-grn-form-actions consumable-grn-form-actions-full">
+
+            <button
+              type="button"
+              className="consumable-grn-cancel-btn"
+              onClick={closeDirectModal}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="consumable-grn-save-btn"
+            >
+              Save
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </>
   );

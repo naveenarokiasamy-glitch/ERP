@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   PackageCheck,
   X,
@@ -89,6 +90,17 @@ export default function MaterialGRN() {
     if (!formData.receivedDate) {
       newErrors.receivedDate = "Received Date is required";
     }
+    if (!formData.rackLocation.trim()) {
+      newErrors.rackLocation = "Rack Location is required";
+    }
+
+    if (!formData.batchNumber.trim()) {
+      newErrors.batchNumber = "Batch Number is required";
+    }
+
+    if (!formData.inspectionStatus) {
+      newErrors.inspectionStatus = "Inspection Status is required";
+    }
 
     const qty = Number(formData.receivedQty);
     if (!formData.receivedQty || qty <= 0) {
@@ -169,10 +181,18 @@ export default function MaterialGRN() {
 
       {/* Breadcrumb */}
       <div className="grn-breadcrumb">
-        <span className="grn-breadcrumb-item">Inventory</span>
+        <Link to="/inventory" className="grn-breadcrumb-item">
+          Inventory
+        </Link>
+
         <span className="grn-breadcrumb-sep">/</span>
-        <span className="grn-breadcrumb-item">Material</span>
+
+        <Link to="/inventory/material" className="grn-breadcrumb-item">
+          Material
+        </Link>
+
         <span className="grn-breadcrumb-sep">/</span>
+
         <span className="grn-breadcrumb-item">GRN</span>
       </div>
 
@@ -513,28 +533,36 @@ export default function MaterialGRN() {
                     <span className="grn-error-text">{errors.warehouse}</span>
                   )}
                 </div>
-                <div className="grn-field">
+                <div className="grn-field grn-required">
                   <label>Rack Location</label>
                   <input
-                    type="text"
-                    value={formData.rackLocation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, rackLocation: e.target.value })
-                    }
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="grn-field">
-                  <label>Batch Number</label>
-                  <input
-                    type="text"
-                    value={formData.batchNumber}
-                    onChange={(e) =>
-                      setFormData({ ...formData, batchNumber: e.target.value })
-                    }
-                    disabled={isSubmitting}
-                  />
-                </div>
+                  type="text"
+                  value={formData.rackLocation}
+                   onChange={(e) =>
+                  setFormData({ ...formData, rackLocation: e.target.value })
+                  }
+    className={errors.rackLocation ? "grn-error" : ""}
+    disabled={isSubmitting}
+  />
+  {errors.rackLocation && (
+    <span className="grn-error-text">{errors.rackLocation}</span>
+  )}
+</div>
+                <div className="grn-field grn-required">
+  <label>Batch Number</label>
+  <input
+    type="text"
+    value={formData.batchNumber}
+    onChange={(e) =>
+      setFormData({ ...formData, batchNumber: e.target.value })
+    }
+    className={errors.batchNumber ? "grn-error" : ""}
+    disabled={isSubmitting}
+  />
+  {errors.batchNumber && (
+    <span className="grn-error-text">{errors.batchNumber}</span>
+  )}
+</div>
                 <div className="grn-field grn-required">
                   <label>Received Quantity</label>
                   <input
@@ -588,24 +616,29 @@ export default function MaterialGRN() {
                     </span>
                   )}
                 </div>
-                <div className="grn-field">
-                  <label>Inspection Status</label>
-                  <select
-                    value={formData.inspectionStatus}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        inspectionStatus: e.target.value,
-                      })
-                    }
-                    disabled={isSubmitting}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Passed">Passed</option>
-                    <option value="Failed">Failed</option>
-                    <option value="Partial Pass">Partial Pass</option>
-                  </select>
-                </div>
+                <div className="grn-field grn-required">
+  <label>Inspection Status</label>
+  <select
+    value={formData.inspectionStatus}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        inspectionStatus: e.target.value,
+      })
+    }
+    className={errors.inspectionStatus ? "grn-error" : ""}
+    disabled={isSubmitting}
+  >
+    <option value="Pending">Pending</option>
+    <option value="Passed">Passed</option>
+    <option value="Failed">Failed</option>
+    <option value="Partial Pass">Partial Pass</option>
+  </select>
+
+  {errors.inspectionStatus && (
+    <span className="grn-error-text">{errors.inspectionStatus}</span>
+  )}
+</div>
                 <div className="grn-field grn-full-width">
                   <label>Remarks</label>
                   <textarea

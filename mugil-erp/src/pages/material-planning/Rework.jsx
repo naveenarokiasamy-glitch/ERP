@@ -145,266 +145,684 @@ export default function Rework() {
   }
   const navigate = useNavigate();
   const handleBack = () => navigate("/inventory/material");
-  return (
-    <>
-      <Header />
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Rework</h1>
-        <p className="text-sm text-slate-500">
-          Rejected material sent for repair — entries arrive only from the
-          Rejection page.
-        </p>
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+return (
+  <>
+    <Header />
+
+    <div className="rework-page">
+      <div className="page-container">
+
+      {/* ================= HEADER ================= */}
+
+      <div className="page-header">
+
+        <div className="page-header-left">
+
+          <div className="breadcrumb">
+  <span
+    className="breadcrumb-link"
+    onClick={() => navigate("/inventory")}
+  >
+    Inventory
+  </span>
+
+  <span className="separator">/</span>
+
+  <span
+    className="breadcrumb-link"
+    onClick={() => navigate("/inventory/material")}
+  >
+    Material
+  </span>
+
+  <span className="separator">/</span>
+
+  <span className="active">Rework Materials</span>
+</div>
+
+          <p className="page-description">
+            Manage rejected materials sent for rework, monitor repair progress,
+            complete successful rework, or transfer failed items to scrap.
+          </p>
+
+        </div>
+
+        <div className="page-header-right">
+
+          <button
+            onClick={handleBack}
+            className="back-btn"
           >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+
+            Back to Materials
+          </button>
+
+        </div>
+
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card label="Pending Rework" value={counts.pending} />
-        <Card label="In Progress" value={counts.inProgress} />
-        <Card label="Completed" value={counts.completed} />
-        <Card label="Scrapped" value={counts.scrapped} />
-      </div>
+      {/* ================= KPI ================= */}
 
-      <div className="flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search ID, reject ID, job, piece code…"
-          className={`${inputClass} sm:w-64`}
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className={`${inputClass} sm:w-44`}
-        >
-          <option value="All">All Statuses</option>
-          {statusOptions.rework.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select
-          value={materialFilter}
-          onChange={(e) => setMaterialFilter(e.target.value)}
-          className={`${inputClass} sm:w-44`}
-        >
-          <option value="All">All Materials</option>
-          {materialOptions.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </div>
+      <div className="kpi-grid">
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Rework ID</th>
-              <th className="px-4 py-3">Reject ID</th>
-              <th className="px-4 py-3">Job Number</th>
-              <th className="px-4 py-3">Piece Code</th>
-              <th className="px-4 py-3">Material</th>
-              <th className="px-4 py-3">Grade</th>
-              <th className="px-4 py-3">Qty</th>
-              <th className="px-4 py-3">Reason</th>
-              <th className="px-4 py-3">Assigned To</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filtered.map((r) => {
-              const isPending = r.status === "Pending";
-              const isInProgress = r.status === "In Progress";
-              return (
-                <tr key={r.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-900">
-                    {r.id}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{r.rejectId}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {r.jobNumber || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {r.pieceCode || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600">{r.material}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.grade}</td>
-                  <td className="px-4 py-3 text-slate-900">{r.quantity}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.reason}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {r.assignedTo || "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge
-                      text={r.status}
-                      className={
-                        STATUS_STYLES[r.status] || "bg-slate-100 text-slate-600"
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      {isPending && (
-                        <button
-                          onClick={() => openStart(r)}
-                          className="rounded-md border border-blue-200 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-50"
-                        >
-                          Start Rework
-                        </button>
-                      )}
-                      {isInProgress && (
-                        <>
-                          <button
-                            onClick={() => setCompleteTarget(r)}
-                            className="rounded-md border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
-                          >
-                            Complete Rework
-                          </button>
-                          <button
-                            onClick={() => setScrapTarget(r)}
-                            className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50"
-                          >
-                            Scrap
-                          </button>
-                        </>
-                      )}
-                      {!isPending && !isInProgress && (
-                        <span className="text-xs text-slate-400">
-                          No actions
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-            {filtered.length === 0 && (
-              <tr>
-                <td
-                  colSpan={11}
-                  className="px-4 py-10 text-center text-sm text-slate-400"
-                >
-                  No rework records match the current filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Start Rework modal */}
-      {startTarget && (
-        <Modal title="Start Rework" onClose={() => setStartTarget(null)}>
-          <p className="text-sm text-slate-600">
-            Move{" "}
-            <span className="font-medium text-slate-900">{startTarget.id}</span>{" "}
-            ({startTarget.quantity} {startTarget.material}) into In Progress.
-          </p>
-          <label className="mt-4 block">
-            <span className="mb-1 block text-xs font-medium text-slate-600">
-              Assigned To
+        <div className="kpi-card pending-card">
+          <div className="kpi-content">
+            <span className="kpi-label">
+              Pending Rework
             </span>
-            <input
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-              placeholder="e.g. R. Kumar"
-              className={inputClass}
-            />
-          </label>
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              onClick={() => setStartTarget(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleStart}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Start Rework
-            </button>
-          </div>
-        </Modal>
-      )}
 
-      {/* Complete Rework confirmation */}
-      {completeTarget && (
-        <Modal title="Complete Rework" onClose={() => setCompleteTarget(null)}>
-          <p className="text-sm text-slate-600">
-            Mark{" "}
-            <span className="font-medium text-slate-900">
-              {completeTarget.id}
-            </span>{" "}
-            as Completed and return {completeTarget.quantity}{" "}
-            {completeTarget.material} piece(s) to Finished Pieces inventory?
-          </p>
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              onClick={() => setCompleteTarget(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleComplete}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-            >
-              Complete Rework
-            </button>
+            <span className="kpi-value">
+              {counts.pending}
+            </span>
           </div>
-        </Modal>
-      )}
 
-      {/* Scrap confirmation */}
-      {scrapTarget && (
-        <Modal title="Scrap Failed Rework" onClose={() => setScrapTarget(null)}>
-          <p className="text-sm text-slate-600">
-            Mark{" "}
-            <span className="font-medium text-slate-900">{scrapTarget.id}</span>{" "}
-            as Failed and move {scrapTarget.quantity} {scrapTarget.material}{" "}
-            piece(s) to Scrap Inventory? This cannot be undone.
-          </p>
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              onClick={() => setScrapTarget(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleScrap}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            >
-              Scrap
-            </button>
+          <div className="kpi-icon">
+            ⏳
           </div>
-        </Modal>
-      )}
+        </div>
+
+        <div className="kpi-card progress-card">
+          <div className="kpi-content">
+            <span className="kpi-label">
+              In Progress
+            </span>
+
+            <span className="kpi-value">
+              {counts.inProgress}
+            </span>
+          </div>
+
+          <div className="kpi-icon">
+            🔧
+          </div>
+        </div>
+
+        <div className="kpi-card success-card">
+          <div className="kpi-content">
+            <span className="kpi-label">
+              Completed
+            </span>
+
+            <span className="kpi-value">
+              {counts.completed}
+            </span>
+          </div>
+
+          <div className="kpi-icon">
+            ✅
+          </div>
+        </div>
+
+        <div className="kpi-card scrap-card">
+          <div className="kpi-content">
+            <span className="kpi-label">
+              Scrapped
+            </span>
+
+            <span className="kpi-value">
+              {counts.scrapped}
+            </span>
+          </div>
+
+          <div className="kpi-icon">
+            ♻️
+          </div>
+        </div>
+
+      </div>
+
+      {/* ================= FILTERS ================= */}
+
+<div className="filter-card">
+
+  <div className="filter-header">
+    <div>
+      <h3 className="filter-title">
+        Filter Rework Materials
+      </h3>
+
+      <p className="filter-subtitle">
+        Search and filter rework records by material and status.
+      </p>
     </div>
-    </>
-  );
+  </div>
+
+  <div className="filter-grid">
+
+    <div className="filter-group">
+
+      <label className="filter-label">
+        Search
+      </label>
+
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search Rework ID, Reject ID, Job No, Piece Code..."
+        className={inputClass}
+      />
+
+    </div>
+
+    <div className="filter-group">
+
+      <label className="filter-label">
+        Status
+      </label>
+
+      <select
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+        className={inputClass}
+      >
+        <option value="All">All Statuses</option>
+
+        {statusOptions.rework.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
+
+    </div>
+
+    <div className="filter-group">
+
+      <label className="filter-label">
+        Material
+      </label>
+
+      <select
+        value={materialFilter}
+        onChange={(e) => setMaterialFilter(e.target.value)}
+        className={inputClass}
+      >
+        <option value="All">All Materials</option>
+
+        {materialOptions.map((m) => (
+          <option key={m} value={m}>
+            {m}
+          </option>
+        ))}
+      </select>
+
+    </div>
+
+  </div>
+
+</div>
+
+{/* ================= TABLE ================= */}
+
+
+{/* ================= TABLE ================= */}
+
+<div className="table-card">
+
+      <div className="table-header">
+
+  <div>
+    <h3 className="table-title">
+      Rework Material Records
+    </h3>
+
+    <p className="table-subtitle">
+      Total Records : <strong>{filtered.length}</strong>
+    </p>
+  </div>
+
+</div>
+
+<div className="table-responsive">
+
+  <table className="rework-table">
+
+    <thead>
+
+      <tr>
+        <th>Rework ID</th>
+        <th>Reject ID</th>
+        <th>Job No</th>
+        <th>Piece Code</th>
+        <th>Material</th>
+        <th>Grade</th>
+        <th>Qty</th>
+        <th>Reason</th>
+        <th>Assigned To</th>
+        <th>Status</th>
+        <th className="text-end">Actions</th>
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      {filtered.map((r) => {
+
+        const isPending = r.status === "Pending";
+        const isInProgress = r.status === "In Progress";
+
+        return (
+
+          <tr key={r.id}>
+
+            <td>
+              <span className="primary-id">
+                {r.id}
+              </span>
+            </td>
+
+            <td>{r.rejectId}</td>
+
+            <td>{r.jobNumber || "—"}</td>
+
+            <td>{r.pieceCode || "—"}</td>
+
+            <td>
+              <span className="material-chip">
+                {r.material}
+              </span>
+            </td>
+
+            <td>{r.grade}</td>
+
+            <td>
+              <span className="qty-chip">
+                {r.quantity}
+              </span>
+            </td>
+
+            <td className="reason-column">
+              {r.reason}
+            </td>
+
+            <td>
+
+              {r.assignedTo ? (
+                <span className="user-chip">
+                  {r.assignedTo}
+                </span>
+              ) : (
+                <span className="empty-text">
+                  —
+                </span>
+              )}
+
+            </td>
+
+            <td>
+
+              <Badge
+                text={r.status}
+                className={
+                  STATUS_STYLES[r.status] ||
+                  "bg-slate-100 text-slate-600"
+                }
+              />
+
+            </td>
+
+            <td>
+
+              <div className="table-actions">
+
+                {isPending && (
+
+                  <button
+                    onClick={() => openStart(r)}
+                    className="action-btn start-btn"
+                  >
+                    Start Rework
+                  </button>
+
+                )}
+
+                {isInProgress && (
+
+                  <>
+
+                    <button
+                      onClick={() => setCompleteTarget(r)}
+                      className="action-btn complete-btn"
+                    >
+                      Complete
+                    </button>
+
+                    <button
+                      onClick={() => setScrapTarget(r)}
+                      className="action-btn scrap-btn"
+                    >
+                      Scrap
+                    </button>
+
+                  </>
+
+                )}
+
+                {!isPending && !isInProgress && (
+
+                  <span className="completed-text">
+                    No Actions
+                  </span>
+
+                )}
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        );
+
+      })}
+
+      {filtered.length === 0 && (
+
+        <tr>
+
+          <td
+            colSpan={11}
+            className="table-empty"
+          >
+            <div className="empty-state">
+
+              <div className="empty-icon">
+                📦
+              </div>
+
+              <h4>
+                No Rework Materials Found
+              </h4>
+
+              <p>
+                No rework records match your current search or filter
+                criteria.
+              </p>
+
+            </div>
+          </td>
+
+        </tr>
+
+      )}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+</div>
+
+{/* ================= START REWORK ================= */}
+
+{startTarget && (
+  <Modal
+    title="Start Rework"
+    onClose={() => setStartTarget(null)}
+  >
+
+    <div className="modal-grid">
+
+      <div className="modal-section">
+
+        <h4 className="section-title">
+          Rework Information
+        </h4>
+
+        <div className="details-grid">
+
+          <div>
+            <label>Rework ID</label>
+            <span>{startTarget.id}</span>
+          </div>
+
+          <div>
+            <label>Reject ID</label>
+            <span>{startTarget.rejectId}</span>
+          </div>
+
+          <div>
+            <label>Material</label>
+            <span>{startTarget.material}</span>
+          </div>
+
+          <div>
+            <label>Quantity</label>
+            <span>{startTarget.quantity}</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div className="modal-section">
+
+        <h4 className="section-title">
+          Assignment
+        </h4>
+
+        <div className="form-group">
+
+          <label>
+            Assigned To
+          </label>
+
+          <input
+            value={assignedTo}
+            onChange={(e) => setAssignedTo(e.target.value)}
+            placeholder="Enter employee name"
+            className={inputClass}
+          />
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div className="modal-footer">
+
+      <button
+        onClick={() => setStartTarget(null)}
+        className="secondary-btn"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={handleStart}
+        className="primary-btn"
+      >
+        Start Rework
+      </button>
+
+    </div>
+
+  </Modal>
+)}
+
+{/* ================= COMPLETE ================= */}
+
+{completeTarget && (
+  <Modal
+    title="Complete Rework"
+    onClose={() => setCompleteTarget(null)}
+  >
+
+    <div className="modal-grid">
+
+      <div className="modal-section">
+
+        <h4 className="section-title">
+          Rework Details
+        </h4>
+
+        <div className="details-grid">
+
+          <div>
+            <label>Rework ID</label>
+            <span>{completeTarget.id}</span>
+          </div>
+
+          <div>
+            <label>Material</label>
+            <span>{completeTarget.material}</span>
+          </div>
+
+          <div>
+            <label>Quantity</label>
+            <span>{completeTarget.quantity}</span>
+          </div>
+
+          <div>
+            <label>Status</label>
+            <span>Ready for Completion</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div className="modal-section">
+
+        <div className="success-box">
+
+          <h4>
+            Finished Pieces
+          </h4>
+
+          <p>
+            Completing this rework will transfer the repaired material
+            back to Finished Pieces inventory.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div className="modal-footer">
+
+      <button
+        onClick={() => setCompleteTarget(null)}
+        className="secondary-btn"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={handleComplete}
+        className="success-btn"
+      >
+        Complete Rework
+      </button>
+
+    </div>
+
+  </Modal>
+)}
+
+{/* ================= SCRAP ================= */}
+
+{scrapTarget && (
+  <Modal
+    title="Scrap Failed Rework"
+    onClose={() => setScrapTarget(null)}
+  >
+
+    <div className="modal-grid">
+
+      <div className="modal-section">
+
+        <h4 className="section-title">
+          Failed Rework
+        </h4>
+
+        <div className="details-grid">
+
+          <div>
+            <label>Rework ID</label>
+            <span>{scrapTarget.id}</span>
+          </div>
+
+          <div>
+            <label>Material</label>
+            <span>{scrapTarget.material}</span>
+          </div>
+
+          <div>
+            <label>Quantity</label>
+            <span>{scrapTarget.quantity}</span>
+          </div>
+
+          <div>
+            <label>Destination</label>
+            <span>Scrap Inventory</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div className="modal-section">
+
+        <div className="danger-box">
+
+          <h4>
+            Warning
+          </h4>
+
+          <p>
+            This action will permanently move this material to Scrap
+            Inventory and cannot be undone.
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div className="modal-footer">
+
+      <button
+        onClick={() => setScrapTarget(null)}
+        className="secondary-btn"
+      >
+        Cancel
+      </button>
+
+      <button
+        onClick={handleScrap}
+        className="danger-btn"
+      >
+        Move To Scrap
+      </button>
+
+    </div>
+
+  </Modal>
+)}
+
+    </div>
+  </div>
+</>
+);
 }

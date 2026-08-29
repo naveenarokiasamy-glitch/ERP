@@ -112,23 +112,6 @@ const tabBtn = (active) => ({
   whiteSpace: "nowrap",
 });
 
-const th = {
-  textAlign: "left",
-  padding: "9px 12px",
-  fontSize: 11,
-  textTransform: "uppercase",
-  letterSpacing: 0.3,
-  color: "#475569",
-  borderBottom: "2px solid #e2e8f0",
-  whiteSpace: "nowrap",
-};
-const td = {
-  padding: "9px 12px",
-  fontSize: 13,
-  borderBottom: "1px solid #f1f5f9",
-  color: "#1e293b",
-  whiteSpace: "nowrap",
-};
 
 const exportBtn = {
   padding: "8px 12px",
@@ -311,249 +294,327 @@ export default function Reports() {
   const handleBack = () => navigate("/inventory/material");
   return (
     <>
-      <Header />
-      <div
-        style={{
-          padding: 20,
-          fontFamily: "Inter, system-ui, sans-serif",
-          color: "#0f172a",
-        }}
-      >
-        <h2 style={{ margin: "0 0 4px" }}>Material Reports</h2>
-        <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
+<Header />
+
+<div className="rpt-page">
+
+  <div className="rpt-header">
+
+    <div className="rpt-header-content">
+
+      <div className="rpt-title-section">
+        <h1 className="rpt-title">
+          Material Reports
+        </h1>
+
+        <p className="rpt-subtitle">
           Live dashboard and exportable reports generated from current material
           data.
         </p>
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
+      </div>
+
+      <button
+        onClick={handleBack}
+        className="rpt-back-btn"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+
+        <span>Back</span>
+      </button>
+
+    </div>
+
+  </div>
+
+{/* ================= KPI Summary ================= */}
+
+<div className="rpt-summary-grid">
+
+  <div className="rpt-summary-card rpt-po-card">
+    <div className="rpt-summary-label">
+      Total Purchase Orders
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalPurchaseOrders}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-stock-card">
+    <div className="rpt-summary-label">
+      Total Material Stock
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalMaterialStock}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-finished-card">
+    <div className="rpt-summary-label">
+      Total Finished Pieces
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalFinishedPieces}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-balance-card">
+    <div className="rpt-summary-label">
+      Total Cutting Balance
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalCuttingBalance}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-scrap-card">
+    <div className="rpt-summary-label">
+      Total Scrap Weight
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalScrapWeight.toFixed(1)}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-rejection-card">
+    <div className="rpt-summary-label">
+      Total Rejections
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalRejections}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-rework-card">
+    <div className="rpt-summary-label">
+      Total Rework
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalRework}
+    </div>
+  </div>
+
+  <div className="rpt-summary-card rpt-production-card">
+    <div className="rpt-summary-label">
+      Total Production Issues
+    </div>
+    <div className="rpt-summary-value">
+      {totals.totalProductionIssues}
+    </div>
+  </div>
+
+</div>
+
+{/* ================= Report Views ================= */}
+
+<div className="rpt-tabs">
+
+  {REPORT_VIEWS.map((v) => (
+
+    <button
+      key={v.key}
+      onClick={() => setActiveView(v.key)}
+      className={
+        v.key === activeView
+          ? "rpt-tab rpt-tab-active"
+          : "rpt-tab"
+      }
+    >
+      {v.label}
+    </button>
+
+  ))}
+
+</div>
+
+{/* ================= Filters ================= */}
+
+<div className="rpt-filter-panel">
+
+  <input
+    className="rpt-filter-input rpt-filter-search"
+    placeholder="Search..."
+    value={filters.search}
+    onChange={setFilter("search")}
+  />
+
+  <label className="rpt-filter-date">
+
+    <span>From</span>
+
+    <input
+      type="date"
+      className="rpt-filter-input"
+      value={filters.dateFrom}
+      onChange={setFilter("dateFrom")}
+      disabled={!view.dateField}
+    />
+
+  </label>
+
+  <label className="rpt-filter-date">
+
+    <span>To</span>
+
+    <input
+      type="date"
+      className="rpt-filter-input"
+      value={filters.dateTo}
+      onChange={setFilter("dateTo")}
+      disabled={!view.dateField}
+    />
+
+  </label>
+
+  <select
+    className="rpt-filter-select"
+    value={filters.material}
+    onChange={setFilter("material")}
+  >
+    <option value="">All Materials</option>
+
+    {materialOptions.map((m) => (
+      <option
+        key={m}
+        value={m}
+      >
+        {m}
+      </option>
+    ))}
+
+  </select>
+
+  <input
+    className="rpt-filter-input"
+    placeholder="PO Number"
+    value={filters.poNumber}
+    onChange={setFilter("poNumber")}
+  />
+
+  <select
+    className="rpt-filter-select"
+    value={filters.status}
+    onChange={setFilter("status")}
+  >
+    <option value="">All Statuses</option>
+
+    {statusOptions.map((s) => (
+      <option
+        key={s}
+        value={s}
+      >
+        {s}
+      </option>
+    ))}
+
+  </select>
+
+  <button
+    onClick={resetFilters}
+    className="rpt-filter-clear-btn"
+  >
+    Clear Filters
+  </button>
+
+  <div className="rpt-filter-count">
+    {filteredRows.length} of {rawRows.length} records
+  </div>
+
+</div>
+{/* ================= Export Toolbar ================= */}
+
+<div className="rpt-export-bar">
+
+  <button
+    className="rpt-export-btn"
+    onClick={() => handleExport("pdf")}
+  >
+    Export PDF
+  </button>
+
+  <button
+    className="rpt-export-btn"
+    onClick={() => handleExport("excel")}
+  >
+    Export Excel
+  </button>
+
+  <button
+    className="rpt-export-btn"
+    onClick={() => handleExport("csv")}
+  >
+    Export CSV
+  </button>
+
+  <button
+    className="rpt-export-btn"
+    onClick={() => handleExport("print")}
+  >
+    Print
+  </button>
+
+</div>
+
+{/* ================= Reports Table ================= */}
+
+<div className="rpt-table-wrapper">
+
+  <table className="rpt-table">
+
+    <thead>
+      <tr>
+        {columns.map((c) => (
+          <th key={c}>
+            {c}
+          </th>
+        ))}
+      </tr>
+    </thead>
+
+    <tbody>
+
+      {filteredRows.length === 0 && (
+        <tr>
+          <td
+            className="rpt-empty-cell"
+            colSpan={Math.max(columns.length, 1)}
           >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
+            <div className="rpt-empty-state">
+              No records match the selected filters.
+            </div>
+          </td>
+        </tr>
+      )}
 
-        {/* ---- Dashboard Summary ---- */}
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            flexWrap: "wrap",
-            marginBottom: 22,
-          }}
-        >
-          <div style={card}>
-            <div style={label}>Total Purchase Orders</div>
-            <div style={value}>{totals.totalPurchaseOrders}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Material Stock</div>
-            <div style={value}>{totals.totalMaterialStock}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Finished Pieces</div>
-            <div style={value}>{totals.totalFinishedPieces}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Cutting Balance</div>
-            <div style={value}>{totals.totalCuttingBalance}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Scrap Weight</div>
-            <div style={value}>{totals.totalScrapWeight.toFixed(1)}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Rejections</div>
-            <div style={value}>{totals.totalRejections}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Rework</div>
-            <div style={value}>{totals.totalRework}</div>
-          </div>
-          <div style={card}>
-            <div style={label}>Total Production Issues</div>
-            <div style={value}>{totals.totalProductionIssues}</div>
-          </div>
-        </div>
+      {filteredRows.map((r, i) => (
+        <tr key={r.id ?? i}>
 
-        {/* ---- Report View Tabs ---- */}
-        <div
-          style={{
-            display: "flex",
-            gap: 8,
-            flexWrap: "wrap",
-            marginBottom: 16,
-          }}
-        >
-          {REPORT_VIEWS.map((v) => (
-            <button
-              key={v.key}
-              style={tabBtn(v.key === activeView)}
-              onClick={() => setActiveView(v.key)}
-            >
-              {v.label}
-            </button>
+          {columns.map((c) => (
+            <td key={c}>
+              {formatCell(r[c])}
+            </td>
           ))}
-        </div>
 
-        {/* ---- Filters ---- */}
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            alignItems: "center",
-            marginBottom: 16,
-            background: "#f8fafc",
-            padding: 14,
-            borderRadius: 10,
-            border: "1px solid #e2e8f0",
-          }}
-        >
-          <input
-            style={{ ...inputStyle, minWidth: 220 }}
-            placeholder="Search..."
-            value={filters.search}
-            onChange={setFilter("search")}
-          />
-          <label style={{ fontSize: 12, color: "#64748b" }}>
-            From{" "}
-            <input
-              type="date"
-              style={inputStyle}
-              value={filters.dateFrom}
-              onChange={setFilter("dateFrom")}
-              disabled={!view.dateField}
-            />
-          </label>
-          <label style={{ fontSize: 12, color: "#64748b" }}>
-            To{" "}
-            <input
-              type="date"
-              style={inputStyle}
-              value={filters.dateTo}
-              onChange={setFilter("dateTo")}
-              disabled={!view.dateField}
-            />
-          </label>
-          <select
-            style={inputStyle}
-            value={filters.material}
-            onChange={setFilter("material")}
-          >
-            <option value="">All Materials</option>
-            {materialOptions.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <input
-            style={inputStyle}
-            placeholder="PO Number"
-            value={filters.poNumber}
-            onChange={setFilter("poNumber")}
-          />
-          <select
-            style={inputStyle}
-            value={filters.status}
-            onChange={setFilter("status")}
-          >
-            <option value="">All Statuses</option>
-            {statusOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <button onClick={resetFilters} style={{ ...exportBtn }}>
-            Clear Filters
-          </button>
-          <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b" }}>
-            {filteredRows.length} of {rawRows.length} records
-          </span>
-        </div>
+        </tr>
+      ))}
 
-        {/* ---- Export Bar ---- */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-          <button style={exportBtn} onClick={() => handleExport("pdf")}>
-            Export PDF
-          </button>
-          <button style={exportBtn} onClick={() => handleExport("excel")}>
-            Export Excel
-          </button>
-          <button style={exportBtn} onClick={() => handleExport("csv")}>
-            Export CSV
-          </button>
-          <button style={exportBtn} onClick={() => handleExport("print")}>
-            Print
-          </button>
-        </div>
+    </tbody>
 
-        {/* ---- Table ---- */}
-        <div
-          style={{
-            overflowX: "auto",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              background: "#fff",
-            }}
-          >
-            <thead>
-              <tr>
-                {columns.map((c) => (
-                  <th key={c} style={th}>
-                    {c}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.length === 0 && (
-                <tr>
-                  <td style={td} colSpan={Math.max(columns.length, 1)}>
-                    <div
-                      style={{
-                        padding: "24px 0",
-                        textAlign: "center",
-                        color: "#94a3b8",
-                      }}
-                    >
-                      No records match the selected filters.
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {filteredRows.map((r, i) => (
-                <tr key={r.id ?? i}>
-                  {columns.map((c) => (
-                    <td key={c} style={td}>
-                      {formatCell(r[c])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+  </table>
+
+</div>
       </div>
     </>
   );

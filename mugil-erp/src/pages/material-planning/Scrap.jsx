@@ -79,21 +79,28 @@ function Badge({ text, className }) {
 
 function Modal({ title, onClose, children, wide }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div className="modal-overlay">
       <div
-        className={`w-full ${wide ? "max-w-2xl" : "max-w-md"} rounded-xl bg-white shadow-xl`}
+        className={`modal-content ${wide ? "modal-content-wide" : ""}`}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+        <div className="modal-header">
+
+          <h2>{title}</h2>
+
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="close-button"
             aria-label="Close"
           >
             ✕
           </button>
+
         </div>
-        <div className="max-h-[75vh] overflow-y-auto px-5 py-4">{children}</div>
+
+        <div className="modal-body">
+          {children}
+        </div>
+
       </div>
     </div>
   );
@@ -101,20 +108,25 @@ function Modal({ title, onClose, children, wide }) {
 
 function Field({ label, children }) {
   return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-medium text-slate-600">
+    <label className="form-field">
+
+      <span className="field-label">
         {label}
       </span>
+
       {children}
+
     </label>
   );
 }
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500";
+
 
 export default function Scrap() {
+
   const { scrapMaterials, purchaseOrders } = useMaterialStore();
+
+  /* ---------------- Filters ---------------- */
 
   const [search, setSearch] = useState("");
   const [sourceFilter, setSourceFilter] = useState("All");
@@ -122,480 +134,1001 @@ export default function Scrap() {
   const [materialFilter, setMaterialFilter] = useState("All");
   const [warehouseFilter, setWarehouseFilter] = useState("All");
 
+  /* ---------------- Entry Modal ---------------- */
+
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [entryForm, setEntryForm] = useState(emptyEntryForm);
 
+  /* ---------------- View / Edit ---------------- */
+
   const [viewRecord, setViewRecord] = useState(null);
+
   const [editRecord, setEditRecord] = useState(null);
+
   const [editForm, setEditForm] = useState(null);
+
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // Only POs that have actually received material can be scrapped against.
+  /* ---------------- Navigation ---------------- */
+
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate("/inventory/material");
+  };
+
+  /* ---------------- Purchase Orders ---------------- */
+
   const eligiblePOs = useMemo(
-    () => purchaseOrders.filter((po) => po.receivedQty > 0),
-    [purchaseOrders],
+    () =>
+      purchaseOrders.filter(
+        (po) => po.receivedQty > 0
+      ),
+    [purchaseOrders]
   );
+
   const selectedPO = useMemo(
-    () => eligiblePOs.find((po) => po.poNumber === entryForm.poNumber) || null,
-    [eligiblePOs, entryForm.poNumber],
+    () =>
+      eligiblePOs.find(
+        (po) =>
+          po.poNumber === entryForm.poNumber
+      ) || null,
+    [eligiblePOs, entryForm.poNumber]
   );
+
+  /* ---------------- Dropdown Data ---------------- */
 
   const departmentOptions = useMemo(
     () =>
       Array.from(
-        new Set(scrapMaterials.map((r) => r.department).filter(Boolean)),
+        new Set(
+          scrapMaterials
+            .map((r) => r.department)
+            .filter(Boolean)
+        )
       ).sort(),
-    [scrapMaterials],
+    [scrapMaterials]
   );
+
   const materialOptions = useMemo(
     () =>
       Array.from(
-        new Set(scrapMaterials.map((r) => r.material).filter(Boolean)),
+        new Set(
+          scrapMaterials
+            .map((r) => r.material)
+            .filter(Boolean)
+        )
       ).sort(),
-    [scrapMaterials],
+    [scrapMaterials]
   );
+
   const warehouseOptions = useMemo(
     () =>
       Array.from(
-        new Set(scrapMaterials.map((r) => r.warehouse).filter(Boolean)),
+        new Set(
+          scrapMaterials
+            .map((r) => r.warehouse)
+            .filter(Boolean)
+        )
       ).sort(),
-    [scrapMaterials],
+    [scrapMaterials]
   );
 
+  /* ---------------- Filtering ---------------- */
+
   const filtered = useMemo(() => {
+
     return scrapMaterials.filter((r) => {
-      if (sourceFilter !== "All" && r.source !== sourceFilter) return false;
-      if (departmentFilter !== "All" && r.department !== departmentFilter)
+
+      if (
+        sourceFilter !== "All" &&
+        r.source !== sourceFilter
+      )
         return false;
-      if (materialFilter !== "All" && r.material !== materialFilter)
+
+      if (
+        departmentFilter !== "All" &&
+        r.department !== departmentFilter
+      )
         return false;
-      if (warehouseFilter !== "All" && r.warehouse !== warehouseFilter)
+
+      if (
+        materialFilter !== "All" &&
+        r.material !== materialFilter
+      )
         return false;
+
+      if (
+        warehouseFilter !== "All" &&
+        r.warehouse !== warehouseFilter
+      )
+        return false;
+
       if (search.trim()) {
-        const needle = search.trim().toLowerCase();
+
+        const needle =
+          search.trim().toLowerCase();
+
         const haystack = [
+
           r.id,
+
           r.poNumber,
+
           r.jobNumber,
+
           r.material,
+
           r.grade,
+
           r.plateNumber,
+
         ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
-        if (!haystack.includes(needle)) return false;
+
+        if (!haystack.includes(needle))
+          return false;
       }
+
       return true;
+
     });
+
   }, [
+
     scrapMaterials,
+
     sourceFilter,
+
     departmentFilter,
+
     materialFilter,
+
     warehouseFilter,
+
     search,
+
   ]);
 
+  /* ---------------- KPI ---------------- */
+
   const totals = useMemo(() => {
-    const sumBy = (pred) =>
+
+    const sumBy = (predicate) =>
       scrapMaterials
-        .filter(pred)
-        .reduce((sum, r) => sum + (Number(r.weight) || 0), 0);
+        .filter(predicate)
+        .reduce(
+          (sum, item) =>
+            sum +
+            (Number(item.weight) || 0),
+          0
+        );
+
     return {
+
       total: sumBy(() => true),
-      cutting: sumBy((r) => r.source === "Cutting"),
-      manual: sumBy((r) => r.source === "Manual"),
+
+      cutting: sumBy(
+        (r) => r.source === "Cutting"
+      ),
+
+      manual: sumBy(
+        (r) => r.source === "Manual"
+      ),
+
       count: scrapMaterials.length,
+
     };
+
   }, [scrapMaterials]);
 
+  /* ---------------- Handlers ---------------- */
+
   function openEntryModal() {
+
     setEntryForm(emptyEntryForm);
+
     setShowEntryModal(true);
+
   }
 
   function submitEntry(e) {
+
     e.preventDefault();
-    if (!entryForm.poNumber || !entryForm.weight) return;
+
+    if (
+      !entryForm.poNumber ||
+      !entryForm.weight
+    )
+      return;
+
     createManualScrap({
+
       poNumber: entryForm.poNumber,
+
       weight: entryForm.weight,
+
       department: entryForm.department,
+
       reason: entryForm.reason,
+
       remarks: entryForm.remarks,
+
     });
+
     setShowEntryModal(false);
+
     setEntryForm(emptyEntryForm);
+
   }
 
   function openEdit(record) {
+
     setEditRecord(record);
+
     setEditForm({
+
       weight: record.weight,
+
       department: record.department || "",
+
       reason: record.reason || "",
+
       remarks: record.remarks || "",
-      status: record.status || "Available",
+
+      status:
+        record.status || "Available",
+
     });
+
   }
 
   function submitEdit(e) {
+
     e.preventDefault();
-    updateManualScrap(editRecord.id, editForm);
+
+    updateManualScrap(
+      editRecord.id,
+      editForm
+    );
+
     setEditRecord(null);
+
     setEditForm(null);
+
   }
 
   function confirmDelete() {
+
     deleteManualScrap(deleteTarget.id);
+
     setDeleteTarget(null);
+
   }
-const navigate = useNavigate();
-const handleBack = () => navigate("/inventory/material");
-  return (
-    <>
-      <Header />
-    <div className="space-y-6 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+
+  /* ================================================= */
+
+return (
+  <>
+    <Header />
+
+    <div className="scrap-page">
+
+      {/* ==========================
+          Header
+      ========================== */}
+
+      <div className="page-top">
+
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Scrap</h1>
-          <p className="text-sm text-slate-500">
-            Scrap inventory and manual scrap entry
+
+          <div className="page-breadcrumb">
+
+            <span
+              className="crumb-link"
+              onClick={() => navigate("/inventory")}
+            >
+              Inventory
+            </span>
+
+            <span>/</span>
+
+            <span
+              className="crumb-link"
+              onClick={() => navigate("/inventory/material")}
+            >
+              Material
+            </span>
+
+            <span>/</span>
+
+            <span className="crumb-active">
+              Scrap
+            </span>
+
+          </div>
+
+          <h1>
+            Scrap Inventory
+          </h1>
+
+          <p>
+            Manage all generated scrap and create manual scrap
+            entries for production.
           </p>
-           <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
+
         </div>
-        <button
-          onClick={openEntryModal}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-        >
-          + New Scrap Entry
-        </button>
+
+        <div className="page-actions">
+
+          <button
+            className="back-btn"
+            onClick={handleBack}
+          >
+            ← Back
+          </button>
+
+          <button
+            className="primary-btn"
+            onClick={openEntryModal}
+          >
+            + New Scrap Entry
+          </button>
+
+        </div>
+
       </div>
 
-      {/* Top cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card label="Total Scrap Weight" value={fmtWeight(totals.total)} />
-        <Card
-          label="Cutting Scrap Weight"
-          value={fmtWeight(totals.cutting)}
-          accent="text-slate-700"
-        />
-        <Card
-          label="Manual Scrap Weight"
-          value={fmtWeight(totals.manual)}
-          accent="text-blue-700"
-        />
-        <Card label="Total Scrap Records" value={totals.count} />
+      {/* ==========================
+            KPI
+      ========================== */}
+
+      <div className="kpi-grid">
+
+        <div className="kpi-card blue">
+
+          <div className="kpi-title">
+            Total Scrap
+          </div>
+
+          <div className="kpi-value">
+            {fmtWeight(totals.total)}
+          </div>
+
+        </div>
+
+        <div className="kpi-card green">
+
+          <div className="kpi-title">
+            Cutting Scrap
+          </div>
+
+          <div className="kpi-value">
+            {fmtWeight(totals.cutting)}
+          </div>
+
+        </div>
+
+        <div className="kpi-card purple">
+
+          <div className="kpi-title">
+            Manual Scrap
+          </div>
+
+          <div className="kpi-value">
+            {fmtWeight(totals.manual)}
+          </div>
+
+        </div>
+
+        <div className="kpi-card orange">
+
+          <div className="kpi-title">
+            Scrap Records
+          </div>
+
+          <div className="kpi-value">
+            {totals.count}
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search ID, PO, job, material, plate…"
-          className={`${inputClass} sm:w-64`}
-        />
-        <select
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          className={`${inputClass} sm:w-40`}
-        >
-          <option value="All">All Sources</option>
-          {statusOptions.scrapSource.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select
-          value={departmentFilter}
-          onChange={(e) => setDepartmentFilter(e.target.value)}
-          className={`${inputClass} sm:w-44`}
-        >
-          <option value="All">All Departments</option>
-          {departmentOptions.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-        <select
-          value={materialFilter}
-          onChange={(e) => setMaterialFilter(e.target.value)}
-          className={`${inputClass} sm:w-44`}
-        >
-          <option value="All">All Materials</option>
-          {materialOptions.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-        <select
-          value={warehouseFilter}
-          onChange={(e) => setWarehouseFilter(e.target.value)}
-          className={`${inputClass} sm:w-52`}
-        >
-          <option value="All">All Warehouses</option>
-          {warehouseOptions.map((w) => (
-            <option key={w} value={w}>
-              {w}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* ==========================
+            Filters
+      ========================== */}
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Scrap ID</th>
-              <th className="px-4 py-3">PO Number</th>
-              <th className="px-4 py-3">Job Number</th>
-              <th className="px-4 py-3">Material</th>
-              <th className="px-4 py-3">Grade</th>
-              <th className="px-4 py-3">Plate Number</th>
-              <th className="px-4 py-3">Weight</th>
-              <th className="px-4 py-3">Source</th>
-              <th className="px-4 py-3">Department</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filtered.map((r) => (
-              <tr key={r.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 font-medium text-slate-900">{r.id}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {r.poNumber || "—"}
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {r.jobNumber || r.sourceJob || "—"}
-                </td>
-                <td className="px-4 py-3 text-slate-600">{r.material}</td>
-                <td className="px-4 py-3 text-slate-600">{r.grade}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {r.plateNumber || "—"}
-                </td>
-                <td className="px-4 py-3 text-slate-900">
-                  {fmtWeight(r.weight)}
-                </td>
-                <td className="px-4 py-3">
-                  <Badge
-                    text={r.source}
-                    className={
-                      SOURCE_STYLES[r.source] || "bg-slate-100 text-slate-600"
-                    }
-                  />
-                </td>
-                <td className="px-4 py-3 text-slate-600">
-                  {r.department || "—"}
-                </td>
-                <td className="px-4 py-3">
-                  <Badge
-                    text={r.status}
-                    className={
-                      STATUS_STYLES[r.status] || "bg-slate-100 text-slate-600"
-                    }
-                  />
-                </td>
-                <td className="px-4 py-3 text-slate-500">{r.date || "—"}</td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-end gap-2">
-                    {r.source === "Manual" ? (
-                      <>
-                        <button
-                          onClick={() => openEdit(r)}
-                          className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setDeleteTarget(r)}
-                          className="rounded-md border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => setViewRecord(r)}
-                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                      >
-                        View
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && (
-              <tr>
-                <td
-                  colSpan={12}
-                  className="px-4 py-10 text-center text-sm text-slate-400"
+      <div className="filter-card">
+
+        <div className="filter-header">
+
+          <div>
+
+            <h3>Filter Scrap Records</h3>
+
+            <p>
+              Quickly locate scrap entries using multiple filters.
+            </p>
+
+          </div>
+
+          <div className="record-count">
+
+            {filtered.length} Records
+
+          </div>
+
+        </div>
+
+        <div className="filter-grid">
+
+          <div className="filter-field">
+
+            <label>Search</label>
+
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search ID, PO, Job, Material..."
+            />
+
+          </div>
+
+          <div className="filter-field">
+
+            <label>Source</label>
+
+            <select
+              value={sourceFilter}
+              onChange={(e) =>
+                setSourceFilter(e.target.value)
+              }
+            >
+              <option value="All">
+                All Sources
+              </option>
+
+              {statusOptions.scrapSource.map((s) => (
+
+                <option
+                  key={s}
+                  value={s}
                 >
-                  No scrap records match the current filters.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  {s}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
+          <div className="filter-field">
+
+            <label>Department</label>
+
+            <select
+              value={departmentFilter}
+              onChange={(e) =>
+                setDepartmentFilter(e.target.value)
+              }
+            >
+
+              <option value="All">
+                All Departments
+              </option>
+
+              {departmentOptions.map((d) => (
+
+                <option
+                  key={d}
+                  value={d}
+                >
+                  {d}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
+          <div className="filter-field">
+
+            <label>Material</label>
+
+            <select
+              value={materialFilter}
+              onChange={(e) =>
+                setMaterialFilter(e.target.value)
+              }
+            >
+
+              <option value="All">
+                All Materials
+              </option>
+
+              {materialOptions.map((m) => (
+
+                <option
+                  key={m}
+                  value={m}
+                >
+                  {m}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
+          <div className="filter-field">
+
+            <label>Warehouse</label>
+
+            <select
+              value={warehouseFilter}
+              onChange={(e) =>
+                setWarehouseFilter(e.target.value)
+              }
+            >
+
+              <option value="All">
+                All Warehouses
+              </option>
+
+              {warehouseOptions.map((w) => (
+
+                <option
+                  key={w}
+                  value={w}
+                >
+                  {w}
+                </option>
+
+              ))}
+
+            </select>
+
+          </div>
+
+        </div>
+
       </div>
 
-      {/* New Scrap Entry modal */}
+      {/* ==========================
+            Scrap Table
+      ========================== */}
+
+      <div className="table-card">
+
+        <div className="table-header">
+
+          <div>
+
+            <h3>Scrap Inventory</h3>
+
+            <p>
+              All cutting, manual, rejection and rework scrap records.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="table-wrapper">
+
+          <table className="scrap-table">
+
+            <thead>
+
+              <tr>
+
+                <th>Scrap ID</th>
+                <th>PO Number</th>
+                <th>Job Number</th>
+                <th>Material</th>
+                <th>Grade</th>
+                <th>Plate No.</th>
+                <th>Weight</th>
+                <th>Source</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th className="action-column">
+                  Actions
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {filtered.length > 0 ? (
+
+                filtered.map((r) => (
+
+                  <tr key={r.id}>
+
+                    <td>
+
+                      <span className="id-chip">
+
+                        {r.id}
+
+                      </span>
+
+                    </td>
+
+                    <td>{r.poNumber || "—"}</td>
+
+                    <td>
+                      {r.jobNumber || r.sourceJob || "—"}
+                    </td>
+
+                    <td>{r.material}</td>
+
+                    <td>{r.grade}</td>
+
+                    <td>{r.plateNumber || "—"}</td>
+
+                    <td className="weight-cell">
+
+                      {fmtWeight(r.weight)}
+
+                    </td>
+
+                    <td>
+
+                      <Badge
+                        text={r.source}
+                        className={
+                          SOURCE_STYLES[r.source] ||
+                          "bg-slate-100 text-slate-600"
+                        }
+                      />
+
+                    </td>
+
+                    <td>
+
+                      {r.department || "—"}
+
+                    </td>
+
+                    <td>
+
+                      <Badge
+                        text={r.status}
+                        className={
+                          STATUS_STYLES[r.status] ||
+                          "bg-slate-100 text-slate-600"
+                        }
+                      />
+
+                    </td>
+
+                    <td>
+
+                      {r.date || "—"}
+
+                    </td>
+
+                    <td>
+
+                      <div className="action-buttons">
+
+                        {r.source === "Manual" ? (
+
+                          <>
+
+                            <button
+                              className="edit-btn"
+                              onClick={() => openEdit(r)}
+                            >
+                              Edit
+                            </button>
+
+                            <button
+                              className="delete-btn"
+                              onClick={() =>
+                                setDeleteTarget(r)
+                              }
+                            >
+                              Delete
+                            </button>
+
+                          </>
+
+                        ) : (
+
+                          <button
+                            className="view-btn"
+                            onClick={() =>
+                              setViewRecord(r)
+                            }
+                          >
+                            View
+                          </button>
+
+                        )}
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))
+
+              ) : (
+
+                <tr>
+
+                  <td
+                    colSpan={12}
+                    className="empty-state"
+                  >
+
+                    <div className="empty-icon">
+
+                      ♻️
+
+                    </div>
+
+                    <h4>
+                      No Scrap Records Found
+                    </h4>
+
+                    <p>
+                      No records match your current filters.
+                    </p>
+
+                  </td>
+
+                </tr>
+
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      {/* ==========================
+            New Scrap Entry
+      ========================== */}
+
       {showEntryModal && (
-        <Modal title="New Scrap Entry" onClose={() => setShowEntryModal(false)}>
-          <form className="space-y-4" onSubmit={submitEntry}>
-            <Field label="PO Number">
-              <select
-                required
-                value={entryForm.poNumber}
-                onChange={(e) =>
-                  setEntryForm((f) => ({ ...f, poNumber: e.target.value }))
-                }
-                className={inputClass}
-              >
-                <option value="">Select a PO Number…</option>
-                {eligiblePOs.map((po) => (
-                  <option key={po.poNumber} value={po.poNumber}>
-                    {po.poNumber}
+
+        <Modal
+          title="New Scrap Entry"
+          onClose={() => setShowEntryModal(false)}
+          wide
+        >
+
+          <form
+            className="scrap-form"
+            onSubmit={submitEntry}
+          >
+
+            <div className="form-grid two-column">
+
+              <Field label="PO Number">
+
+                <select
+                  required
+                  value={entryForm.poNumber}
+                  onChange={(e) =>
+                    setEntryForm((f) => ({
+                      ...f,
+                      poNumber: e.target.value,
+                    }))
+                  }
+                  
+                >
+
+                  <option value="">
+                    Select PO Number
                   </option>
-                ))}
-              </select>
-            </Field>
+
+                  {eligiblePOs.map((po) => (
+
+                    <option
+                      key={po.poNumber}
+                      value={po.poNumber}
+                    >
+                      {po.poNumber}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </Field>
+
+              <Field label="Scrap Weight (kg)">
+
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={entryForm.weight}
+                  onChange={(e) =>
+                    setEntryForm((f) => ({
+                      ...f,
+                      weight: e.target.value,
+                    }))
+                  }
+                  
+                />
+
+              </Field>
+
+            </div>
 
             {selectedPO && (
-              <div className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 text-sm">
-                <div>
-                  <span className="text-slate-500">Material: </span>
-                  {selectedPO.material}
+
+              <div className="po-preview">
+
+                <div className="info-card">
+                  <span>Material</span>
+                  <strong>{selectedPO.material}</strong>
                 </div>
-                <div>
-                  <span className="text-slate-500">Grade: </span>
-                  {selectedPO.grade}
+
+                <div className="info-card">
+                  <span>Grade</span>
+                  <strong>{selectedPO.grade}</strong>
                 </div>
-                <div>
-                  <span className="text-slate-500">Plate Number: </span>
-                  {selectedPO.plateNumber}
+
+                <div className="info-card">
+                  <span>Plate No.</span>
+                  <strong>{selectedPO.plateNumber}</strong>
                 </div>
-                <div>
-                  <span className="text-slate-500">Heat Number: </span>
-                  {selectedPO.heatNumber}
+
+                <div className="info-card">
+                  <span>Heat No.</span>
+                  <strong>{selectedPO.heatNumber}</strong>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-slate-500">Warehouse: </span>
-                  {selectedPO.warehouse}
+
+                <div className="info-card full-width">
+                  <span>Warehouse</span>
+                  <strong>{selectedPO.warehouse}</strong>
                 </div>
+
               </div>
+
             )}
 
-            <Field label="Scrap Weight (kg)">
-              <input
-                required
-                type="number"
-                min="0"
-                step="0.1"
-                value={entryForm.weight}
-                onChange={(e) =>
-                  setEntryForm((f) => ({ ...f, weight: e.target.value }))
-                }
-                className={inputClass}
-              />
-            </Field>
+            <div className="form-grid two-column">
 
-            <Field label="Department">
-              <select
-                value={entryForm.department}
-                onChange={(e) =>
-                  setEntryForm((f) => ({ ...f, department: e.target.value }))
-                }
-                className={inputClass}
-              >
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label="Department">
 
-            <Field label="Reason">
-              <input
-                value={entryForm.reason}
-                onChange={(e) =>
-                  setEntryForm((f) => ({ ...f, reason: e.target.value }))
-                }
-                placeholder="e.g. Handling Damage"
-                className={inputClass}
-              />
-            </Field>
+                <select
+                  value={entryForm.department}
+                  onChange={(e) =>
+                    setEntryForm((f) => ({
+                      ...f,
+                      department: e.target.value,
+                    }))
+                  }
+                  
+                >
+
+                  {DEPARTMENTS.map((d) => (
+
+                    <option
+                      key={d}
+                      value={d}
+                    >
+                      {d}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </Field>
+
+              <Field label="Reason">
+
+                <input
+                  value={entryForm.reason}
+                  placeholder="Reason"
+                  onChange={(e) =>
+                    setEntryForm((f) => ({
+                      ...f,
+                      reason: e.target.value,
+                    }))
+                  }
+                  
+                />
+
+              </Field>
+
+            </div>
 
             <Field label="Remarks">
+
               <textarea
-                rows={3}
+                rows={4}
                 value={entryForm.remarks}
                 onChange={(e) =>
-                  setEntryForm((f) => ({ ...f, remarks: e.target.value }))
+                  setEntryForm((f) => ({
+                    ...f,
+                    remarks: e.target.value,
+                  }))
                 }
-                className={inputClass}
+                
               />
+
             </Field>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="modal-footer">
+
               <button
                 type="button"
-                onClick={() => setShowEntryModal(false)}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="cancel-btn"
+                onClick={() =>
+                  setShowEntryModal(false)
+                }
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                disabled={!entryForm.poNumber || !entryForm.weight}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                className="save-btn"
+                disabled={
+                  !entryForm.poNumber ||
+                  !entryForm.weight
+                }
               >
-                Save
+                Save Scrap
               </button>
+
             </div>
+
           </form>
+
         </Modal>
+
       )}
 
-      {/* View modal (Cutting / Rejection / Rework — locked) */}
+      {/* ==========================================================
+          View Scrap Record
+      ========================================================== */}
+
       {viewRecord && (
+
         <Modal
-          title={`Scrap ${viewRecord.id}`}
+          title={`Scrap Record • ${viewRecord.id}`}
           onClose={() => setViewRecord(null)}
+          wide
         >
-          <div className="space-y-3 text-sm">
-            <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 ring-1 ring-amber-200">
-              This record was generated automatically ({viewRecord.source}) and
-              is locked to preserve material traceability. It cannot be edited.
-            </div>
+
+          <div className="locked-banner">
+
+            <strong>Locked Record</strong>
+
+            <span>
+              This scrap was generated automatically from
+              {` ${viewRecord.source}`} and cannot be modified.
+            </span>
+
+          </div>
+
+          <div className="details-grid">
+
             {[
               ["PO Number", viewRecord.poNumber],
               ["Job Number", viewRecord.jobNumber || viewRecord.sourceJob],
@@ -606,174 +1139,297 @@ const handleBack = () => navigate("/inventory/material");
               ["Weight", fmtWeight(viewRecord.weight)],
               ["Source", viewRecord.source],
               ["Department", viewRecord.department],
+              ["Warehouse", viewRecord.warehouse],
               ["Reason", viewRecord.reason],
               ["Remarks", viewRecord.remarks],
-              ["Warehouse", viewRecord.warehouse],
               ["Status", viewRecord.status],
               ["Date", viewRecord.date],
             ].map(([label, value]) => (
+
               <div
                 key={label}
-                className="flex justify-between border-b border-slate-100 py-1.5 last:border-0"
+                className="detail-card"
               >
-                <span className="text-slate-500">{label}</span>
-                <span className="font-medium text-slate-900">
+
+                <span>{label}</span>
+
+                <strong>
                   {value || "—"}
-                </span>
+                </strong>
+
               </div>
+
             ))}
+
           </div>
+
         </Modal>
+
       )}
 
-      {/* Edit modal (Manual only) */}
+      {/* ==========================================================
+          Edit Manual Scrap
+      ========================================================== */}
+
       {editRecord && editForm && (
+
         <Modal
-          title={`Edit Scrap ${editRecord.id}`}
+          title={`Edit Scrap • ${editRecord.id}`}
           onClose={() => {
             setEditRecord(null);
             setEditForm(null);
           }}
+          wide
         >
-          <form className="space-y-4" onSubmit={submitEdit}>
-            <div className="grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3 text-sm">
-              <div>
-                <span className="text-slate-500">PO Number: </span>
-                {editRecord.poNumber}
+
+          <form
+            className="scrap-form"
+            onSubmit={submitEdit}
+          >
+
+            <div className="po-preview">
+
+              <div className="info-card">
+                <span>PO Number</span>
+                <strong>{editRecord.poNumber}</strong>
               </div>
-              <div>
-                <span className="text-slate-500">Material: </span>
-                {editRecord.material}
+
+              <div className="info-card">
+                <span>Material</span>
+                <strong>{editRecord.material}</strong>
               </div>
-              <div>
-                <span className="text-slate-500">Grade: </span>
-                {editRecord.grade}
+
+              <div className="info-card">
+                <span>Grade</span>
+                <strong>{editRecord.grade}</strong>
               </div>
-              <div>
-                <span className="text-slate-500">Plate Number: </span>
-                {editRecord.plateNumber || "—"}
+
+              <div className="info-card">
+                <span>Plate Number</span>
+                <strong>
+                  {editRecord.plateNumber || "—"}
+                </strong>
               </div>
+
             </div>
 
-            <Field label="Scrap Weight (kg)">
-              <input
-                required
-                type="number"
-                min="0"
-                step="0.1"
-                value={editForm.weight}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, weight: e.target.value }))
-                }
-                className={inputClass}
-              />
-            </Field>
+            <div className="form-grid two-column">
 
-            <Field label="Department">
-              <select
-                value={editForm.department}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, department: e.target.value }))
-                }
-                className={inputClass}
-              >
-                {DEPARTMENTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label="Scrap Weight">
 
-            <Field label="Reason">
-              <input
-                value={editForm.reason}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, reason: e.target.value }))
-                }
-                className={inputClass}
-              />
-            </Field>
+                <input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={editForm.weight}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      weight: e.target.value,
+                    }))
+                  }
+                  
+                />
+
+              </Field>
+
+              <Field label="Department">
+
+                <select
+                  value={editForm.department}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      department: e.target.value,
+                    }))
+                  }
+                  
+                >
+
+                  {DEPARTMENTS.map((d) => (
+
+                    <option
+                      key={d}
+                      value={d}
+                    >
+                      {d}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </Field>
+
+              <Field label="Reason">
+
+                <input
+                  value={editForm.reason}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      reason: e.target.value,
+                    }))
+                  }
+                  
+                />
+
+              </Field>
+
+              <Field label="Status">
+
+                <select
+                  value={editForm.status}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      status: e.target.value,
+                    }))
+                  }
+                  
+                >
+
+                  {statusOptions.scrap.map((s) => (
+
+                    <option
+                      key={s}
+                      value={s}
+                    >
+                      {s}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </Field>
+
+            </div>
 
             <Field label="Remarks">
+
               <textarea
-                rows={3}
+                rows={4}
                 value={editForm.remarks}
                 onChange={(e) =>
-                  setEditForm((f) => ({ ...f, remarks: e.target.value }))
+                  setEditForm((f) => ({
+                    ...f,
+                    remarks: e.target.value,
+                  }))
                 }
-                className={inputClass}
+                
               />
+
             </Field>
 
-            <Field label="Status">
-              <select
-                value={editForm.status}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, status: e.target.value }))
-                }
-                className={inputClass}
-              >
-                {statusOptions.scrap.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <div className="modal-footer">
 
-            <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
+                className="cancel-btn"
                 onClick={() => {
                   setEditRecord(null);
                   setEditForm(null);
                 }}
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
+
               <button
                 type="submit"
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                className="save-btn"
               >
                 Save Changes
               </button>
+
             </div>
+
           </form>
+
         </Modal>
+
       )}
 
-      {/* Delete confirmation (Manual only) */}
+      {/* ==========================================================
+          Delete Confirmation
+      ========================================================== */}
+
       {deleteTarget && (
+
         <Modal
           title="Delete Scrap Record"
           onClose={() => setDeleteTarget(null)}
         >
-          <p className="text-sm text-slate-600">
-            Delete manual scrap record{" "}
-            <span className="font-medium text-slate-900">
-              {deleteTarget.id}
-            </span>{" "}
-            ({fmtWeight(deleteTarget.weight)})? This cannot be undone.
-          </p>
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              onClick={() => setDeleteTarget(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={confirmDelete}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            >
-              Delete
-            </button>
+
+          <div className="delete-dialog">
+
+            <div className="delete-icon">
+
+              🗑️
+
+            </div>
+
+            <h3>
+
+              Delete this Scrap Record?
+
+            </h3>
+
+            <p>
+
+              You are about to delete
+
+              <strong> {deleteTarget.id} </strong>
+
+              weighing
+
+              <strong>
+                {" "}
+                {fmtWeight(deleteTarget.weight)}
+              </strong>
+
+              .
+
+            </p>
+
+            <p>
+
+              This action cannot be undone.
+
+            </p>
+
+            <div className="modal-footer">
+
+              <button
+                className="cancel-btn"
+                onClick={() =>
+                  setDeleteTarget(null)
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                className="delete-btn-large"
+                onClick={confirmDelete}
+              >
+                Delete
+
+              </button>
+
+            </div>
+
           </div>
+
         </Modal>
+
       )}
+
     </div>
-    </>
-  );
+
+  </>
+
+);
+
 }

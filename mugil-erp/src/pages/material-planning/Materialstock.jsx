@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useMaterialStore } from "../../data/materialStore";
 import "./MaterialStock.css";
@@ -79,14 +80,21 @@ export default function MaterialStock() {
         <ArrowLeft size={18} /> Back
       </button>
 
-      {/* Breadcrumb */}
-      <div className="ms-breadcrumb">
-        <span className="ms-breadcrumb-item">Inventory</span>
-        <span className="ms-breadcrumb-sep">/</span>
-        <span className="ms-breadcrumb-item">Material</span>
-        <span className="ms-breadcrumb-sep">/</span>
-        <span className="ms-breadcrumb-item">Material Stock</span>
-      </div>
+    <div className="ms-breadcrumb">
+  <Link to="/inventory" className="ms-breadcrumb-item">
+    Inventory
+  </Link>
+
+  <span className="ms-breadcrumb-sep">/</span>
+
+  <Link to="/inventory/material" className="ms-breadcrumb-item">
+    Material
+  </Link>
+
+  <span className="ms-breadcrumb-sep">/</span>
+
+  <span className="ms-breadcrumb-item">Material Stock</span>
+</div>
 
       {/* Header */}
       <div className="ms-header">
@@ -252,47 +260,7 @@ export default function MaterialStock() {
         </div>
       </div>
 
-      {/* Stock Summary */}
-      <div className="ms-stock-summary">
-        <div className="ms-summary-info">
-          <h4>Stock Summary</h4>
-          <div className="ms-summary-grid">
-            <div className="ms-summary-item">
-              <span className="ms-summary-label">Total Lots:</span>
-              <span className="ms-summary-value">{materialStock.length}</span>
-            </div>
-            <div className="ms-summary-item">
-              <span className="ms-summary-label">Total Available:</span>
-              <span className="ms-summary-value">{totalAvailable} units</span>
-            </div>
-            <div className="ms-summary-item">
-              <span className="ms-summary-label">Total Issued to Cutting:</span>
-              <span className="ms-summary-value">
-                {totalIssuedToCutting} units
-              </span>
-            </div>
-            <div className="ms-summary-item">
-              <span className="ms-summary-label">Total Reserved:</span>
-              <span className="ms-summary-value">{totalReserved} units</span>
-            </div>
-            <div className="ms-summary-item">
-              <span className="ms-summary-label">Total Weight:</span>
-              <span className="ms-summary-value">
-                {totalWeight.toFixed(1)} kg
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="ms-summary-note">
-          <small>
-            <strong>Note:</strong>• <strong>In Stock</strong> - Material is
-            fully available for issuance • <strong>Partially Issued</strong> -
-            Some quantity has been issued to cutting •{" "}
-            <strong>Fully Issued</strong> - All quantity has been issued to
-            cutting
-          </small>
-        </div>
-      </div>
+      
     </div>
     </>
   );

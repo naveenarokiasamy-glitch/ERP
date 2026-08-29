@@ -146,59 +146,109 @@ export default function ConsumableReports() {
     [movements, term],
   );
 
-  return (
-    <>
-      <Header />
-      <div className="consumable-stock-page">
-        <Link to="/inventory/consumable" className="consumable-back">
-          <ArrowLeft size={15} />
-          Consumables
-        </Link>
+return (
+  <>
+    <Header />
 
-        <header className="consumable-stock-header">
-          <span className="consumable-eyebrow">Consumables</span>
-          <h1 className="consumable-title">Consumable Reports</h1>
-          <p className="consumable-subtitle">
+    <div className="crpt-page">
+      <Link to="/inventory/consumable" className="crpt-back-link">
+        <ArrowLeft size={15} />
+        <span>Consumables</span>
+      </Link>
+
+      <section className="crpt-header-card">
+        <div className="crpt-header-content">
+          <span className="crpt-eyebrow">Consumables</span>
+
+          <h1 className="crpt-title">Consumable Reports</h1>
+
+          <p className="crpt-subtitle">
             Live reporting across GRN, Stock, Issue, Return, and Movement
-            History. Nothing here is hardcoded - every row reflects the
-            current state of the module.
+            History. Nothing here is hardcoded - every row reflects the current
+            state of the module.
           </p>
-        </header>
+        </div>
+      </section>
 
-        <div className="consumable-stock-stats">
-          <div className="stat-card">
-            <Boxes size={20} />
-            <div>
-              <span className="stat-value">{totalConsumables}</span>
-              <span className="stat-label">Total Consumables</span>
-            </div>
+      <section className="crpt-kpi-grid">
+        <div className="crpt-kpi-card crpt-kpi-blue">
+          <div className="crpt-kpi-pattern"></div>
+
+          <div className="crpt-kpi-icon">
+            <Boxes size={22} />
           </div>
-          <div className="stat-card">
-            <PackageCheck size={20} />
-            <div>
-              <span className="stat-value">{totalAvailableStock}</span>
-              <span className="stat-label">Available Stock</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <Send size={20} />
-            <div>
-              <span className="stat-value">{totalIssued}</span>
-              <span className="stat-label">Total Issued</span>
-            </div>
-          </div>
-          <div className="stat-card">
-            <Undo2 size={20} />
-            <div>
-              <span className="stat-value">{totalReturned}</span>
-              <span className="stat-label">Total Returned</span>
-            </div>
+
+          <div className="crpt-kpi-content">
+            <span className="crpt-kpi-value">
+              {totalConsumables}
+            </span>
+
+            <span className="crpt-kpi-label">
+              Total Consumables
+            </span>
           </div>
         </div>
 
-        <div className="consumable-grn-toolbar">
-          <div className="consumable-search">
-            <Search size={16} />
+        <div className="crpt-kpi-card crpt-kpi-green">
+          <div className="crpt-kpi-pattern"></div>
+
+          <div className="crpt-kpi-icon">
+            <PackageCheck size={22} />
+          </div>
+
+          <div className="crpt-kpi-content">
+            <span className="crpt-kpi-value">
+              {totalAvailableStock}
+            </span>
+
+            <span className="crpt-kpi-label">
+              Available Stock
+            </span>
+          </div>
+        </div>
+
+        <div className="crpt-kpi-card crpt-kpi-orange">
+          <div className="crpt-kpi-pattern"></div>
+
+          <div className="crpt-kpi-icon">
+            <Send size={22} />
+          </div>
+
+          <div className="crpt-kpi-content">
+            <span className="crpt-kpi-value">
+              {totalIssued}
+            </span>
+
+            <span className="crpt-kpi-label">
+              Total Issued
+            </span>
+          </div>
+        </div>
+
+        <div className="crpt-kpi-card crpt-kpi-purple">
+          <div className="crpt-kpi-pattern"></div>
+
+          <div className="crpt-kpi-icon">
+            <Undo2 size={22} />
+          </div>
+
+          <div className="crpt-kpi-content">
+            <span className="crpt-kpi-value">
+              {totalReturned}
+            </span>
+
+            <span className="crpt-kpi-label">
+              Total Returned
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="crpt-toolbar-card">
+        <div className="crpt-toolbar-top">
+          <div className="crpt-search-box">
+            <Search size={18} />
+
             <input
               type="text"
               placeholder="Search consumable, PO, department, employee, warehouse..."
@@ -208,25 +258,29 @@ export default function ConsumableReports() {
           </div>
         </div>
 
-        <div
-          className="consumable-grn-toolbar"
-          style={{ flexWrap: "wrap", gap: "8px" }}
-        >
+        <div className="crpt-tabs">
           {REPORT_TABS.map((tab) => (
             <button
               key={tab.key}
               type="button"
-              className={activeTab === tab.key ? "btn-primary" : "btn-secondary"}
+              className={
+                activeTab === tab.key
+                  ? "crpt-tab crpt-tab-active"
+                  : "crpt-tab"
+              }
               onClick={() => setActiveTab(tab.key)}
             >
               {tab.label}
             </button>
           ))}
         </div>
+      </section>
 
-        <div className="consumable-table-wrapper">
-          {activeTab === "grn" && (
-            <table className="consumable-table">
+      <div className="crpt-table-card">
+
+                {activeTab === "grn" && (
+          <div className="crpt-table-wrapper">
+            <table className="crpt-table">
               <thead>
                 <tr>
                   <th>PO Number</th>
@@ -239,6 +293,7 @@ export default function ConsumableReports() {
                   <th>Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredGrnRows.map((po) => (
                   <tr key={po.id}>
@@ -249,22 +304,32 @@ export default function ConsumableReports() {
                     <td>{po.receivedQty}</td>
                     <td>{po.pendingQty}</td>
                     <td>{po.warehouse}</td>
-                    <td>{po.status}</td>
+                    <td>
+                      <span className="crpt-status-chip">
+                        {po.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
+
                 {filteredGrnRows.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="consumable-empty-row">
+                    <td
+                      colSpan={8}
+                      className="crpt-empty-row"
+                    >
                       No purchase orders found.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          )}
+          </div>
+        )}
 
-          {activeTab === "stock" && (
-            <table className="consumable-table">
+        {activeTab === "stock" && (
+          <div className="crpt-table-wrapper">
+            <table className="crpt-table">
               <thead>
                 <tr>
                   <th>Reference Number</th>
@@ -275,6 +340,7 @@ export default function ConsumableReports() {
                   <th>Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredStockRows.map((item) => (
                   <tr key={item.id}>
@@ -283,22 +349,32 @@ export default function ConsumableReports() {
                     <td>{item.warehouse}</td>
                     <td>{item.availableQty}</td>
                     <td>{item.unit}</td>
-                    <td>{item.status}</td>
+                    <td>
+                      <span className="crpt-status-chip">
+                        {item.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
+
                 {filteredStockRows.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="consumable-empty-row">
+                    <td
+                      colSpan={6}
+                      className="crpt-empty-row"
+                    >
                       No stock records found.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          )}
+          </div>
+        )}
 
-          {activeTab === "issue" && (
-            <table className="consumable-table">
+        {activeTab === "issue" && (
+          <div className="crpt-table-wrapper">
+            <table className="crpt-table">
               <thead>
                 <tr>
                   <th>Issue Number</th>
@@ -311,6 +387,7 @@ export default function ConsumableReports() {
                   <th>Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredIssueRows.map((item) => (
                   <tr key={item.id}>
@@ -321,22 +398,29 @@ export default function ConsumableReports() {
                     <td>{item.issuedQty}</td>
                     <td>{item.balanceQty}</td>
                     <td>{item.warehouse}</td>
-                    <td>{item.status}</td>
+                    <td>
+                      <span className="crpt-status-chip">
+                        {item.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
+
                 {filteredIssueRows.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="consumable-empty-row">
+                    <td colSpan={8} className="crpt-empty-row">
                       No issue records found.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          )}
+          </div>
+        )}
 
-          {activeTab === "return" && (
-            <table className="consumable-table">
+        {activeTab === "return" && (
+          <div className="crpt-table-wrapper">
+            <table className="crpt-table">
               <thead>
                 <tr>
                   <th>Return Number</th>
@@ -349,6 +433,7 @@ export default function ConsumableReports() {
                   <th>Date</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredReturnRows.map((item) => (
                   <tr key={item.id}>
@@ -362,19 +447,22 @@ export default function ConsumableReports() {
                     <td>{item.date}</td>
                   </tr>
                 ))}
+
                 {filteredReturnRows.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="consumable-empty-row">
+                    <td colSpan={8} className="crpt-empty-row">
                       No return records found.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          )}
+          </div>
+        )}
 
-          {activeTab === "movement" && (
-            <table className="consumable-table">
+        {activeTab === "movement" && (
+          <div className="crpt-table-wrapper">
+            <table className="crpt-table">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -389,12 +477,17 @@ export default function ConsumableReports() {
                   <th>Remarks</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredMovementRows.map((item) => (
                   <tr key={item.id}>
                     <td>{item.date}</td>
                     <td>{item.time}</td>
-                    <td>{item.type}</td>
+                    <td>
+                      <span className="crpt-status-chip">
+                        {item.type}
+                      </span>
+                    </td>
                     <td>{item.consumableName}</td>
                     <td>{item.referenceNumber}</td>
                     <td>
@@ -406,18 +499,20 @@ export default function ConsumableReports() {
                     <td>{item.remarks || "-"}</td>
                   </tr>
                 ))}
+
                 {filteredMovementRows.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="consumable-empty-row">
+                    <td colSpan={10} className="crpt-empty-row">
                       No movement history yet.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }

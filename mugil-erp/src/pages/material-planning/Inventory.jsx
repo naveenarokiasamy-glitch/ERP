@@ -49,57 +49,172 @@ const inventoryModules = [
     ],
   },
 ];
+
 export default function Inventory() {
   return (
     <>
       <Header />
 
       <div className="inventory-page">
-        <header className="inventory-header">
-          <span className="inventory-eyebrow">Inventory</span>
-          <h1 className="inventory-title">Inventory Control Center</h1>
-          <p className="inventory-subtitle">
-            Choose a module to manage stock, movements, and records across the plant.
-          </p>
-        </header>
 
-        <div className="inventory-grid">
-          {inventoryModules.map((mod) => {
-            const Icon = mod.icon;
+        <div className="inventory-container">
 
-            return (
-              <Link
-                to={mod.path}
-                key={mod.id}
-                className={`inventory-card inventory-card--${mod.accent}`}
-              >
-                <div className="inventory-card-top">
-                  <div className={`inventory-icon inventory-icon--${mod.accent}`}>
-                    <Icon size={28} strokeWidth={1.8} />
+          {/* ================= HERO ================= */}
+
+          <section className="inventory-hero">
+
+            <div className="inventory-hero-left">
+
+              <span className="inventory-eyebrow">
+                Inventory
+              </span>
+
+              <h1 className="inventory-title">
+                Inventory Control Center
+              </h1>
+
+              <p className="inventory-subtitle">
+                Choose a module to manage stock, movements, and records across
+                the manufacturing plant.
+              </p>
+
+              <div className="inventory-stats">
+
+                <div className="inventory-stat">
+                  <h3>{inventoryModules.length}</h3>
+                  <span>Modules</span>
+                </div>
+
+                <div className="inventory-stat">
+                  <h3>200+</h3>
+                  <span>Items Managed</span>
+                </div>
+
+                <div className="inventory-stat">
+                  <h3>24/7</h3>
+                  <span>Operational</span>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="inventory-hero-right">
+
+              <div className="inventory-illustration">
+
+                <div className="inventory-illustration-box">
+
+                  <Layers size={90} strokeWidth={1.5} />
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          {/* ================= MODULES ================= */}
+
+          <section className="inventory-grid">
+
+            {inventoryModules.map((mod) => {
+
+              const Icon = mod.icon;
+
+              return (
+
+                <Link
+                  to={mod.path}
+                  key={mod.id}
+                  className={`inventory-card inventory-card--${mod.accent}`}
+                >
+
+                  <div className="inventory-card-header">
+
+                    <div className="inventory-card-icon">
+
+                      <div
+                        className={`inventory-icon inventory-icon--${mod.accent}`}
+                      >
+                        <Icon size={34} strokeWidth={1.8} />
+                      </div>
+
+                    </div>
+
+                    <div className="inventory-card-heading">
+
+                      <span className="inventory-code">
+                        {mod.code}
+                      </span>
+
+                      <h2 className="inventory-card-title">
+                        {mod.title}
+                      </h2>
+
+                    </div>
+
                   </div>
 
-                  <span className="inventory-code">{mod.code}</span>
-                </div>
+                  <div className="inventory-card-content">
 
-                <h2 className="inventory-card-title">{mod.title}</h2>
-                <p className="inventory-card-desc">{mod.description}</p>
+                    <p className="inventory-card-desc">
+                      {mod.description}
+                    </p>
 
-                <div className="inventory-tags">
-                  {mod.examples.map((example) => (
-                    <span className="inventory-tag" key={example}>
-                      {example}
-                    </span>
-                  ))}
-                </div>
+                    <div className="inventory-tags">
 
-                <div className="inventory-card-footer">
-                  <span>Open module</span>
-                  <ArrowRight size={18} className="inventory-arrow" />
-                </div>
-              </Link>
-            );
-          })}
+                      {mod.examples.map((example) => (
+
+                        <span
+                          key={example}
+                          className="inventory-tag"
+                        >
+                          {example}
+                        </span>
+
+                      ))}
+
+                    </div>
+
+                  </div>
+
+                  <div className="inventory-card-footer">
+
+                    <div className="inventory-footer-text">
+
+                      <span className="inventory-footer-label">
+                        Open Module
+                      </span>
+
+                      <small>
+                        View inventory records
+                      </small>
+
+                    </div>
+
+                    <div className="inventory-footer-action">
+
+                      <ArrowRight
+                        size={20}
+                        className="inventory-arrow"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </Link>
+
+              );
+
+            })}
+
+          </section>
+
         </div>
+
       </div>
     </>
   );

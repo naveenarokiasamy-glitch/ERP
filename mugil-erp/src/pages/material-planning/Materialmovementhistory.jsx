@@ -7,7 +7,7 @@
 // -----------------------------------------------------------------------------
 
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   useMaterialStore,
   buildPOTimeline,
@@ -194,379 +194,436 @@ export default function MaterialMovementHistory() {
 const navigate = useNavigate();
 const handleBack = () => navigate("/inventory/material");
   return (
-    <>
-          <Header />
-    <div
-      style={{
-        padding: 20,
-        fontFamily: "Inter, system-ui, sans-serif",
-        color: "#0f172a",
-      }}
-    >
-      <h2 style={{ margin: "0 0 4px" }}>Material Movement History</h2>
-      <p style={{ margin: "0 0 20px", color: "#64748b", fontSize: 13 }}>
-        Complete, read-only traceability of every material movement across the
-        module.
-      </p>
-       <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+<>
+  <Header />
+
+  <div className="material-history-page">
+    <div className="material-history-container">
+
+      {/* Page Header */}
+      <div className="page-header">
+        <div className="page-header-left">
+          <div className="breadcrumb">
+  <Link to="/inventory" className="breadcrumb-link">
+    Inventory
+  </Link>
+
+  <span className="breadcrumb-separator">/</span>
+
+  <Link to="/inventory/material" className="breadcrumb-link">
+    Material
+  </Link>
+
+  <span className="breadcrumb-separator">/</span>
+
+  <span className="breadcrumb-current">
+    Material Movement History
+  </span>
+</div>
+
+          <p className="page-subtitle">
+            Complete, read-only traceability of every material movement across the module.
+          </p>
+        </div>
+
+        <div className="page-header-right">
+          <button
+            onClick={handleBack}
+            className="back-button"
           >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
 
-      {/* ---- Stats ---- */}
-      <div
-        style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 22 }}
-      >
-        <div style={card}>
-          <div style={label}>Total Movements</div>
-          <div style={value}>{stats.totalMovements}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Purchase Orders</div>
-          <div style={value}>{stats.totalPurchaseOrders}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Open Jobs</div>
-          <div style={value}>{stats.openJobs}</div>
-        </div>
-        <div style={card}>
-          <div style={label}>Completed Jobs</div>
-          <div style={value}>{stats.completedJobs}</div>
+            Back
+          </button>
         </div>
       </div>
 
-      {/* ---- Filters ---- */}
-      <div
-        style={{
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap",
-          alignItems: "center",
-          marginBottom: 16,
-          background: "#f8fafc",
-          padding: 14,
-          borderRadius: 10,
-          border: "1px solid #e2e8f0",
-        }}
-      >
-        <input
-          style={{ ...inputStyle, minWidth: 220 }}
-          placeholder="Search movements..."
-          value={filters.search}
-          onChange={setFilter("search")}
-        />
-        <input
-          style={inputStyle}
-          placeholder="PO Number"
-          value={filters.poNumber}
-          onChange={setFilter("poNumber")}
-        />
-        <input
-          style={inputStyle}
-          placeholder="Job Number"
-          value={filters.jobNumber}
-          onChange={setFilter("jobNumber")}
-        />
-        <select
-          style={inputStyle}
-          value={filters.material}
-          onChange={setFilter("material")}
-        >
-          <option value="">All Materials</option>
-          {materials.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-        <input
-          style={inputStyle}
-          placeholder="Plate Number"
-          value={filters.plateNumber}
-          onChange={setFilter("plateNumber")}
-        />
-        <input
-          style={inputStyle}
-          placeholder="Heat Number"
-          value={filters.heatNumber}
-          onChange={setFilter("heatNumber")}
-        />
-        <select
-          style={inputStyle}
-          value={filters.movementType}
-          onChange={setFilter("movementType")}
-        >
-          <option value="">All Movement Types</option>
-          {movementTypes.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        <label style={{ fontSize: 12, color: "#64748b" }}>
-          From{" "}
-          <input
-            type="date"
-            style={inputStyle}
-            value={filters.dateFrom}
-            onChange={setFilter("dateFrom")}
-          />
-        </label>
-        <label style={{ fontSize: 12, color: "#64748b" }}>
-          To{" "}
-          <input
-            type="date"
-            style={inputStyle}
-            value={filters.dateTo}
-            onChange={setFilter("dateTo")}
-          />
-        </label>
-        <button
-          onClick={resetFilters}
-          style={{
-            padding: "8px 14px",
-            borderRadius: 6,
-            border: "1px solid #cbd5e1",
-            background: "#fff",
-            cursor: "pointer",
-            fontSize: 13,
-          }}
-        >
-          Clear Filters
-        </button>
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b" }}>
-          {filteredMovements.length} of {store.movementHistory.length} movements
-        </span>
-      </div>
+      {/* KPI Cards */}
+      <div className="kpi-grid">
 
-      {/* ---- Table ---- */}
-      <div
-        style={{
-          overflowX: "auto",
-          border: "1px solid #e2e8f0",
-          borderRadius: 10,
-        }}
-      >
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            background: "#fff",
-          }}
-        >
-          <thead>
-            <tr>
-              <th style={th}>Date</th>
-              <th style={th}>Time</th>
-              <th style={th}>PO Number</th>
-              <th style={th}>Job Number</th>
-              <th style={th}>Plate Number</th>
-              <th style={th}>Piece Code</th>
-              <th style={th}>Material</th>
-              <th style={th}>Movement Type</th>
-              <th style={th}>From</th>
-              <th style={th}>To</th>
-              <th style={th}>Quantity</th>
-              <th style={th}>User</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredMovements.length === 0 && (
-              <tr>
-                <td style={td} colSpan={12}>
-                  <div
-                    style={{
-                      padding: "24px 0",
-                      textAlign: "center",
-                      color: "#94a3b8",
-                    }}
-                  >
-                    No movements match the selected filters.
-                  </div>
-                </td>
-              </tr>
-            )}
-            {filteredMovements.map((m) => (
-              <tr key={m.id}>
-                <td style={td}>{m.date}</td>
-                <td style={td}>{m.time || "—"}</td>
-                <td style={td}>
-                  {m.poNumber ? (
-                    <button
-                      style={poLinkStyle}
-                      onClick={() => openTimeline(m.poNumber)}
-                    >
-                      {m.poNumber}
-                    </button>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td style={td}>{m.jobNumber || "—"}</td>
-                <td style={td}>{m.plateNumber || "—"}</td>
-                <td style={td}>{m.pieceCode || "—"}</td>
-                <td style={td}>{m.material || "—"}</td>
-                <td style={td}>{m.movementType}</td>
-                <td style={td}>{m.from || "—"}</td>
-                <td style={td}>{m.to || "—"}</td>
-                <td style={td}>{m.quantity}</td>
-                <td style={td}>{m.user || "—"}</td>
-              </tr>
+        <div className="kpi-card movements-card">
+          <div className="kpi-label">
+            Total Movements
+          </div>
+
+          <div className="kpi-value">
+            {stats.totalMovements}
+          </div>
+        </div>
+
+        <div className="kpi-card po-card">
+          <div className="kpi-label">
+            Purchase Orders
+          </div>
+
+          <div className="kpi-value">
+            {stats.totalPurchaseOrders}
+          </div>
+        </div>
+
+        <div className="kpi-card open-card">
+          <div className="kpi-label">
+            Open Jobs
+          </div>
+
+          <div className="kpi-value">
+            {stats.openJobs}
+          </div>
+        </div>
+
+        <div className="kpi-card completed-card">
+          <div className="kpi-label">
+            Completed Jobs
+          </div>
+
+          <div className="kpi-value">
+            {stats.completedJobs}
+          </div>
+        </div>
+
+      </div>
+      {/* ================= Filters ================= */}
+
+      <div className="filter-card">
+
+        <div className="filter-card-header">
+          <h3>Filters</h3>
+
+          <div className="filter-count">
+            {filteredMovements.length} of {store.movementHistory.length} movements
+          </div>
+        </div>
+
+        <div className="filter-grid">
+
+          <input
+            className="filter-input filter-search"
+            placeholder="Search movements..."
+            value={filters.search}
+            onChange={setFilter("search")}
+          />
+
+          <input
+            className="filter-input"
+            placeholder="PO Number"
+            value={filters.poNumber}
+            onChange={setFilter("poNumber")}
+          />
+
+          <input
+            className="filter-input"
+            placeholder="Job Number"
+            value={filters.jobNumber}
+            onChange={setFilter("jobNumber")}
+          />
+
+          <select
+            className="filter-select"
+            value={filters.material}
+            onChange={setFilter("material")}
+          >
+            <option value="">All Materials</option>
+
+            {materials.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
-          </tbody>
-        </table>
+          </select>
+
+          <input
+            className="filter-input"
+            placeholder="Plate Number"
+            value={filters.plateNumber}
+            onChange={setFilter("plateNumber")}
+          />
+
+          <input
+            className="filter-input"
+            placeholder="Heat Number"
+            value={filters.heatNumber}
+            onChange={setFilter("heatNumber")}
+          />
+
+          <select
+            className="filter-select"
+            value={filters.movementType}
+            onChange={setFilter("movementType")}
+          >
+            <option value="">All Movement Types</option>
+
+            {movementTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+
+          <label className="date-filter">
+            <span>From</span>
+
+            <input
+              type="date"
+              className="filter-date"
+              value={filters.dateFrom}
+              onChange={setFilter("dateFrom")}
+            />
+          </label>
+
+          <label className="date-filter">
+            <span>To</span>
+
+            <input
+              type="date"
+              className="filter-date"
+              value={filters.dateTo}
+              onChange={setFilter("dateTo")}
+            />
+          </label>
+
+        </div>
+
+        <div className="filter-footer">
+
+          <button
+            onClick={resetFilters}
+            className="clear-filter-btn"
+          >
+            Clear Filters
+          </button>
+
+        </div>
+
       </div>
 
-      {/* ---- Timeline Modal ---- */}
+      {/* ================= End Filters ================= */}
+       {/* ================= Table ================= */}
+
+      <div className="table-card">
+
+        <div className="table-header">
+
+          <div>
+            <h3 className="table-title">
+              Material Movement Records
+            </h3>
+
+            <p className="table-subtitle">
+              Complete chronological movement history across the material lifecycle.
+            </p>
+          </div>
+
+          <div className="table-record-count">
+            {filteredMovements.length} Records
+          </div>
+
+        </div>
+
+        <div className="table-wrapper">
+
+          <table className="movement-table">
+
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>PO Number</th>
+                <th>Job Number</th>
+                <th>Plate Number</th>
+                <th>Piece Code</th>
+                <th>Material</th>
+                <th>Movement Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Quantity</th>
+                <th>User</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {filteredMovements.length === 0 && (
+                <tr>
+                  <td colSpan={12}>
+                    <div className="empty-state">
+                      No movements match the selected filters.
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {filteredMovements.map((m) => (
+                <tr key={m.id}>
+
+                  <td>{m.date}</td>
+
+                  <td>{m.time || "—"}</td>
+
+                  <td>
+                    {m.poNumber ? (
+                      <button
+                        className="po-link-button"
+                        onClick={() => openTimeline(m.poNumber)}
+                      >
+                        {m.poNumber}
+                      </button>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+
+                  <td>{m.jobNumber || "—"}</td>
+
+                  <td>{m.plateNumber || "—"}</td>
+
+                  <td>{m.pieceCode || "—"}</td>
+
+                  <td>
+                    <span className="material-chip">
+                      {m.material || "—"}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span className="movement-badge">
+                      {m.movementType}
+                    </span>
+                  </td>
+
+                  <td>{m.from || "—"}</td>
+
+                  <td>{m.to || "—"}</td>
+
+                  <td className="quantity-cell">
+                    {m.quantity}
+                  </td>
+
+                  <td>{m.user || "—"}</td>
+
+                </tr>
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      {/* ================= End Table ================= */}
+      {/* ================= Timeline Modal ================= */}
+
       {timelinePO && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15,23,42,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
+          className="timeline-overlay"
           onClick={() => setTimelinePO(null)}
         >
           <div
-            style={{
-              background: "#fff",
-              borderRadius: 12,
-              width: "min(680px, 92vw)",
-              maxHeight: "85vh",
-              overflowY: "auto",
-              padding: 24,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-            }}
+            className="timeline-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: 4,
-              }}
-            >
-              <h3 style={{ margin: 0 }}>PO Lifecycle — {timelinePO}</h3>
+            <div className="timeline-header">
+
+              <div>
+                <h3 className="timeline-title">
+                  PO Lifecycle — {timelinePO}
+                </h3>
+
+                <p className="timeline-subtitle">
+                  Complete chronological trail generated dynamically from movement history.
+                </p>
+              </div>
+
               <button
+                className="timeline-close-button"
                 onClick={() => setTimelinePO(null)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: 20,
-                  cursor: "pointer",
-                  color: "#64748b",
-                  lineHeight: 1,
-                }}
                 aria-label="Close"
               >
                 ×
               </button>
+
             </div>
-            <p style={{ margin: "0 0 18px", fontSize: 12, color: "#64748b" }}>
-              Complete chronological trail generated dynamically from movement
-              history.
-            </p>
 
             {timelineEvents.length === 0 && (
-              <div style={{ color: "#94a3b8", fontSize: 13 }}>
+              <div className="timeline-empty">
                 No movement records found for this PO.
               </div>
             )}
 
-            <div style={{ position: "relative", paddingLeft: 22 }}>
-              <div
-                style={{
-                  position: "absolute",
-                  left: 6,
-                  top: 4,
-                  bottom: 4,
-                  width: 2,
-                  background: "#e2e8f0",
-                }}
-              />
-              {timelineEvents.map((ev, idx) => (
-                <div
-                  key={ev.id ?? idx}
-                  style={{ position: "relative", paddingBottom: 20 }}
-                >
+            {timelineEvents.length > 0 && (
+              <div className="timeline-container">
+
+                <div className="timeline-line"></div>
+
+                {timelineEvents.map((ev, idx) => (
                   <div
-                    style={{
-                      position: "absolute",
-                      left: -22,
-                      top: 3,
-                      width: 12,
-                      height: 12,
-                      borderRadius: "50%",
-                      background: "#2563eb",
-                      border: "3px solid #dbeafe",
-                    }}
-                  />
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      flexWrap: "wrap",
-                      gap: 8,
-                    }}
+                    key={ev.id ?? idx}
+                    className="timeline-event"
                   >
-                    <strong style={{ fontSize: 14 }}>
-                      {ev.stageLabel || ev.movementType}
-                    </strong>
-                    <span style={{ fontSize: 12, color: "#64748b" }}>
-                      {ev.date} {ev.time ? `• ${ev.time}` : ""}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: 12, color: "#334155", marginTop: 2 }}>
-                    {ev.from && ev.to ? `${ev.from} → ${ev.to}` : null}
-                    {ev.quantity !== undefined
-                      ? `  •  Qty: ${ev.quantity}`
-                      : ""}
-                  </div>
-                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
-                    User: {ev.user || "—"}
-                    {ev.status ? `  •  Status: ${ev.status}` : ""}
-                  </div>
-                  {ev.remarks ? (
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "#475569",
-                        marginTop: 2,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      “{ev.remarks}”
+                    <div className="timeline-event-dot"></div>
+
+                    <div className="timeline-event-content">
+
+                      <div className="timeline-event-header">
+
+                        <div className="timeline-event-title">
+                          {ev.stageLabel || ev.movementType}
+                        </div>
+
+                        <div className="timeline-event-time">
+                          {ev.date}
+                          {ev.time ? ` • ${ev.time}` : ""}
+                        </div>
+
+                      </div>
+
+                      <div className="timeline-event-details">
+                        {ev.from && ev.to
+                          ? `${ev.from} → ${ev.to}`
+                          : ""}
+                        {ev.quantity !== undefined
+                          ? ` • Qty: ${ev.quantity}`
+                          : ""}
+                      </div>
+
+                      <div className="timeline-event-user">
+                        User: {ev.user || "—"}
+                        {ev.status ? ` • Status: ${ev.status}` : ""}
+                      </div>
+
+                      {ev.remarks && (
+                        <div className="timeline-event-remarks">
+                          "{ev.remarks}"
+                        </div>
+                      )}
+
                     </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+
+              </div>
+            )}
+
           </div>
         </div>
       )}
+
     </div>
-    </>
+  </div>
+</>
   );
 }

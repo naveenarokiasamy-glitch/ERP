@@ -1,693 +1,687 @@
-/* Base styles and resets */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ==========================================================
+   CUTTING BALANCE STOCK
+   PART 1
+   Page Layout + Header + KPI Cards
+========================================================== */
 
-body {
-  margin: 0;
+.cutting-balance-page {
+  padding: 24px;
   background: #f8fafc;
-  color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-/* Smooth transitions */
-* {
-  transition: background-color 0.2s ease,
-              color 0.2s ease,
-              border-color 0.2s ease,
-              box-shadow 0.2s ease,
-              transform 0.2s ease;
-}
-
-/* Table styles */
-table {
-  border-collapse: collapse;
+.cutting-balance-page .cutting-balance-container {
   width: 100%;
 }
 
-th,
-td {
-  padding: 12px 16px;
-  vertical-align: middle;
+/* ===========================
+   Header
+=========================== */
+
+.cutting-balance-page .cbs-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 30px;
 }
 
-/* Typography */
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
+.cutting-balance-page .cbs-page-header-left {
+  flex: 1;
 }
 
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
+.cutting-balance-page .cbs-page-header-right {
+  display: flex;
+  align-items: flex-start;
 }
 
-.text-sm {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+.cutting-balance-page .cbs-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
-.text-xs {
-  font-size: 0.75rem;
-  line-height: 1rem;
+.cutting-balance-page .cbs-breadcrumb-link {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
 }
 
-.font-semibold {
+.cutting-balance-page .cbs-breadcrumb-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.cutting-balance-page .cbs-breadcrumb-current {
+  color: #64748b;
+  font-size: 13px;
   font-weight: 600;
 }
 
-.font-medium {
-  font-weight: 500;
+.cutting-balance-page .cbs-breadcrumb-separator {
+  color: #cbd5e1;
 }
 
-.text-slate-800 {
-  color: #1e293b;
+.cutting-balance-page .cbs-page-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
 }
 
-.text-slate-700 {
-  color: #334155;
-}
-
-.text-slate-600 {
-  color: #475569;
-}
-
-.text-slate-500 {
+.cutting-balance-page .cbs-page-subtitle {
+  margin-top: 10px;
   color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 700px;
 }
 
-.text-slate-400 {
-  color: #94a3b8;
-}
+/* ===========================
+   Back Button
+=========================== */
 
-.text-emerald-700 {
-  color: #047857;
-}
+.cutting-balance-page .cbs-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-.text-blue-700 {
-  color: #1d4ed8;
-}
+  padding: 12px 22px;
 
-.text-amber-700 {
-  color: #b45309;
-}
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
 
-.text-white {
-  color: #ffffff;
-}
+  background: #ffffff;
 
-.text-red-600 {
-  color: #dc2626;
-}
+  color: #334155;
 
-/* Spacing utilities */
-.p-6 {
-  padding: 1.5rem;
-}
+  font-size: 14px;
+  font-weight: 600;
 
-.p-4 {
-  padding: 1rem;
-}
+  cursor: pointer;
 
-.p-3 {
-  padding: 0.75rem;
-}
-
-.px-4 {
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-.py-3 {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-}
-
-.py-10 {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
-}
-
-.px-3 {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.px-2\.5 {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
-}
-
-.py-1 {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-}
-
-.mt-1 {
-  margin-top: 0.25rem;
-}
-
-.mt-0\.5 {
-  margin-top: 0.125rem;
-}
-
-.mb-1 {
-  margin-bottom: 0.25rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
-}
-
-.mb-3 {
-  margin-bottom: 0.75rem;
-}
-
-/* Card component */
-.card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  padding: 16px;
-  animation: fadeInUp 0.3s ease;
   transition: all 0.25s ease;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-}
-
-/* Badge styles */
-.badge {
-  display: inline-block;
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.025em;
-}
-
-.badge-amber {
-  background-color: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fde68a;
-}
-
-.badge-emerald {
-  background-color: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
-}
-
-.badge-blue {
-  background-color: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.badge-slate {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-}
-
-/* Input and select styles */
-input,
-select,
-textarea {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 8px 12px;
-  background: white;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  color: #0f172a;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
+.cutting-balance-page .cbs-back-button:hover {
+  background: #f8fafc;
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  color: #2563eb;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
 }
 
-select {
-  appearance: auto;
-  padding-right: 2.5rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364758b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5rem 1.5rem;
+.cutting-balance-page .cbs-back-button svg {
+  flex-shrink: 0;
 }
 
-select:focus {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-}
+/* ===========================
+   KPI Grid
+=========================== */
 
-textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-/* Button styles */
-button {
-  cursor: pointer;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  background: transparent;
-  color: inherit;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-button:active {
-  transform: scale(0.98);
-}
-
-.btn-primary {
-  background: #2563eb;
-  color: white;
-  padding: 10px 18px;
-}
-
-.btn-primary:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-}
-
-.btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 10px 18px;
-}
-
-.btn-secondary:hover {
-  background: #e2e8f0;
-}
-
-.btn-danger {
-  color: #dc2626;
-  padding: 4px 8px;
-  font-size: 0.875rem;
-}
-
-.btn-danger:hover {
-  color: #b91c1c;
-  background: #fef2f2;
-}
-
-/* Grid layouts */
-.grid {
+.cutting-balance-page .cbs-kpi-grid {
   display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 22px;
+  margin-bottom: 30px;
 }
 
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+/* ===========================
+   KPI Cards
+=========================== */
+
+.cutting-balance-page .cbs-kpi-card {
+  position: relative;
+  overflow: hidden;
+
+  padding: 26px;
+
+  border-radius: 22px;
+
+  color: #ffffff;
+
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
+
+  transition: all 0.25s ease;
 }
 
-.gap-4 {
-  gap: 1rem;
+.cutting-balance-page .cbs-kpi-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
 }
 
-.gap-3 {
-  gap: 0.75rem;
+.cutting-balance-page .cbs-kpi-card::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18),
+    transparent 55%
+  );
+
+  pointer-events: none;
 }
 
-.gap-2 {
-  gap: 0.5rem;
+/* Card Colors */
+
+.cutting-balance-page .cbs-total-card {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
-/* Flex utilities */
-.flex {
+.cutting-balance-page .cbs-weight-card {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+}
+
+.cutting-balance-page .cbs-available-card {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.cutting-balance-page .cbs-issued-card {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+/* KPI Text */
+
+.cutting-balance-page .cbs-kpi-label {
+  margin-bottom: 14px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cutting-balance-page .cbs-kpi-value {
+  color: #ffffff;
+
+  font-size: 38px;
+  font-weight: 700;
+
+  line-height: 1.1;
+}
+
+/* ==========================================================
+   PART 2
+   Premium Filter Card
+========================================================== */
+
+.cutting-balance-page .cbs-filter-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* ===========================
+   Header
+=========================== */
+
+.cutting-balance-page .cbs-filter-card-header {
   display: flex;
-}
-
-.flex-wrap {
-  flex-wrap: wrap;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.items-end {
-  align-items: flex-end;
-}
-
-.justify-between {
   justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+
+  border-bottom: 1px solid #eef2f7;
 }
 
-.justify-end {
-  justify-content: flex-end;
+.cutting-balance-page .cbs-filter-card-header h3 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: #0f172a;
 }
 
-.flex-1 {
-  flex: 1 1 0%;
+.cutting-balance-page .cbs-filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 16px;
+
+  border-radius: 999px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 13px;
+  font-weight: 700;
 }
 
-.min-w-\[220px\] {
-  min-width: 220px;
+/* ===========================
+   Grid
+=========================== */
+
+.cutting-balance-page .cbs-filter-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
 }
 
-/* Table and container styles */
-.w-full {
+/* ===========================
+   Groups
+=========================== */
+
+.cutting-balance-page .cbs-filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.cutting-balance-page .cbs-filter-group label {
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: #475569;
+}
+
+/* ===========================
+   Inputs
+=========================== */
+
+.cutting-balance-page .cbs-filter-input,
+.cutting-balance-page .cbs-filter-select {
+  width: 100%;
+  height: 48px;
+
+  padding: 0 16px;
+
+  border: 1px solid #dbe3ef;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  color: #0f172a;
+  font-size: 14px;
+
+  transition: all 0.25s ease;
+}
+
+.cutting-balance-page .cbs-filter-input::placeholder {
+  color: #94a3b8;
+}
+
+.cutting-balance-page .cbs-filter-input:hover,
+.cutting-balance-page .cbs-filter-select:hover {
+  border-color: #94a3b8;
+}
+
+.cutting-balance-page .cbs-filter-input:focus,
+.cutting-balance-page .cbs-filter-select:focus {
+  outline: none;
+
+  border-color: #2563eb;
+
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* ===========================
+   Select
+=========================== */
+
+.cutting-balance-page .cbs-filter-select {
+  cursor: pointer;
+}
+
+/* ===========================
+   Search
+=========================== */
+
+.cutting-balance-page .cbs-filter-search {
   width: 100%;
 }
 
-.overflow-hidden {
+/* ==========================================================
+   PART 3
+   Premium Table
+========================================================== */
+
+.cutting-balance-page .cbs-table-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
   overflow: hidden;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
 }
 
-.overflow-y-auto {
-  overflow-y: auto;
+/* ==========================
+   Table Header
+========================== */
+
+.cutting-balance-page .cbs-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  padding: 24px 28px;
+
+  border-bottom: 1px solid #eef2f7;
 }
 
-.overflow-x-auto {
+.cutting-balance-page .cbs-table-title {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.cutting-balance-page .cbs-table-subtitle {
+  margin-top: 6px;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+.cutting-balance-page .cbs-table-record-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 18px;
+
+  border-radius: 999px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ==========================
+   Table Wrapper
+========================== */
+
+.cutting-balance-page .cbs-table-wrapper {
   overflow-x: auto;
 }
 
-/* Text alignment */
-.text-left {
-  text-align: left;
-}
+/* Scrollbar */
 
-.text-right {
-  text-align: right;
-}
-
-.text-center {
-  text-align: center;
-}
-
-/* Background colors */
-.bg-white {
-  background-color: #ffffff;
-}
-
-.bg-slate-50 {
-  background-color: #f8fafc;
-}
-
-.bg-slate-100 {
-  background-color: #f1f5f9;
-}
-
-.bg-red-50 {
-  background-color: #fef2f2;
-}
-
-/* Border and divider utilities */
-.border-b {
-  border-bottom-width: 1px;
-}
-
-.border-t {
-  border-top-width: 1px;
-}
-
-.border-slate-100 {
-  border-color: #f1f5f9;
-}
-
-.divide-y > * + * {
-  border-top-width: 1px;
-  border-color: #f1f5f9;
-}
-
-/* Shadow utilities */
-.shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.shadow-xl {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* Position utilities */
-.fixed {
-  position: fixed;
-}
-
-.inset-0 {
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-}
-
-.sticky {
-  position: sticky;
-}
-
-.top-0 {
-  top: 0;
-}
-
-.bottom-0 {
-  bottom: 0;
-}
-
-.z-50 {
-  z-index: 50;
-}
-
-.z-10 {
-  z-index: 10;
-}
-
-/* Hover effects */
-.hover\:bg-slate-50\/60:hover {
-  background-color: rgba(248, 250, 252, 0.6);
-}
-
-.hover\:bg-slate-100:hover {
-  background-color: #f1f5f9;
-}
-
-.hover\:text-red-600:hover {
-  color: #dc2626;
-}
-
-.hover\:text-blue-700:hover {
-  color: #1d4ed8;
-}
-
-/* Disabled states */
-.disabled\:opacity-30:disabled {
-  opacity: 0.3;
-}
-
-.disabled\:cursor-not-allowed:disabled {
-  cursor: not-allowed;
-}
-
-/* Modal styles */
-.max-w-3xl {
-  max-width: 48rem;
-}
-
-.max-h-\[90vh\] {
-  max-height: 90vh;
-}
-
-/* Radio buttons */
-input[type="radio"] {
-  width: 1rem;
-  height: 1rem;
-  padding: 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-input[type="radio"]:checked {
-  border-color: #2563eb;
-  background-color: #2563eb;
-}
-
-.accent-blue-600 {
-  accent-color: #2563eb;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
+.cutting-balance-page .cbs-table-wrapper::-webkit-scrollbar {
   height: 8px;
 }
 
-::-webkit-scrollbar-track {
+.cutting-balance-page .cbs-table-wrapper::-webkit-scrollbar-track {
   background: #f1f5f9;
-  border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb {
+.cutting-balance-page .cbs-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.cutting-balance-page .cbs-table-wrapper::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
-  border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+/* ==========================
+   Table
+========================== */
+
+.cutting-balance-page .cbs-balance-table {
+  width: 100%;
+  min-width: 1250px;
+  border-collapse: collapse;
 }
 
-/* Animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Header */
+
+.cutting-balance-page .cbs-balance-table thead {
+  background: #f8fafc;
 }
 
-/* Space between elements */
-.space-y-6 > * + * {
-  margin-top: 1.5rem;
+.cutting-balance-page .cbs-balance-table th {
+  padding: 16px 18px;
+
+  text-align: left;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+
+  color: #475569;
+
+  white-space: nowrap;
+
+  border-bottom: 1px solid #e2e8f0;
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
-  .grid-cols-4 {
+/* Cells */
+
+.cutting-balance-page .cbs-balance-table td {
+  padding: 16px 18px;
+
+  font-size: 14px;
+
+  color: #334155;
+
+  border-bottom: 1px solid #f1f5f9;
+
+  white-space: nowrap;
+
+  vertical-align: middle;
+
+  transition: background 0.25s ease;
+}
+
+.cutting-balance-page .cbs-balance-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.cutting-balance-page .cbs-balance-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ==========================
+   Special Cells
+========================== */
+
+.cutting-balance-page .cbs-job-number {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cutting-balance-page .cbs-weight-cell {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ==========================
+   Material Chip
+========================== */
+
+.cutting-balance-page .cbs-material-chip {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background: #ecfeff;
+
+  color: #0f766e;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ==========================
+   Status Badge Base
+========================== */
+
+.cutting-balance-page .cbs-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 7px 14px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+/* ==========================================================
+   PART 4
+   Status Badges + Empty State + Responsive
+========================================================== */
+
+/* ==========================
+   Status Colors
+========================== */
+
+.cutting-balance-page .cbs-status-available {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.cutting-balance-page .cbs-status-issued {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+
+.cutting-balance-page .cbs-status-consumed,
+.cutting-balance-page .cbs-status-default {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+/* ==========================
+   Empty State
+========================== */
+
+.cutting-balance-page .cbs-empty-state {
+  padding: 70px 20px !important;
+
+  text-align: center;
+
+  color: #94a3b8;
+
+  font-size: 15px;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 1200px) {
+
+  .cutting-balance-page .cbs-kpi-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .cutting-balance-page .cbs-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
 }
 
 @media (max-width: 768px) {
-  .p-6 {
-    padding: 1rem;
+
+  .cutting-balance-page {
+    padding: 18px;
   }
-  
-  .flex-wrap {
+
+  .cutting-balance-page .cbs-page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 18px;
   }
-  
-  .min-w-\[220px\] {
-    min-width: 100%;
-  }
-  
-  table {
-    min-width: 800px;
-  }
-}
 
-@media (max-width: 640px) {
-  .grid-cols-4 {
+  .cutting-balance-page .cbs-page-header-right {
+    justify-content: flex-start;
+  }
+
+  .cutting-balance-page .cbs-page-title {
+    font-size: 28px;
+  }
+
+  .cutting-balance-page .cbs-kpi-grid {
     grid-template-columns: 1fr;
   }
-  
-  .text-2xl {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
+
+  .cutting-balance-page .cbs-filter-card,
+  .cutting-balance-page .cbs-table-card {
+    padding: 18px;
   }
-  
-  .p-4 {
-    padding: 0.75rem;
+
+  .cutting-balance-page .cbs-table-header,
+  .cutting-balance-page .cbs-filter-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
-  
-  .max-w-3xl {
-    max-width: 100%;
+
+  .cutting-balance-page .cbs-table-record-count,
+  .cutting-balance-page .cbs-filter-count {
+    align-self: flex-start;
   }
-  
-  .grid-cols-3 {
-    grid-template-columns: 1fr;
+
+}
+
+@media (max-width: 480px) {
+
+  .cutting-balance-page {
+    padding: 14px;
   }
-  
-  .grid-cols-2 {
-    grid-template-columns: 1fr;
+
+  .cutting-balance-page .cbs-page-title {
+    font-size: 24px;
   }
-  
-  .col-span-3,
-  .col-span-2,
-  .col-span-1,
-  .col-span-12 {
-    grid-column: span 1 / span 1;
+
+  .cutting-balance-page .cbs-page-subtitle {
+    font-size: 14px;
   }
-}
 
-/* Additional grid columns for other components */
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.grid-cols-12 {
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-}
-
-.col-span-3 {
-  grid-column: span 3 / span 3;
-}
-
-.col-span-2 {
-  grid-column: span 2 / span 2;
-}
-
-.col-span-1 {
-  grid-column: span 1 / span 1;
-}
-
-.col-span-12 {
-  grid-column: span 12 / span 12;
-}
-
-/* Special styles for specific components */
-.bg-slate-900\/50 {
-  background-color: rgba(15, 23, 42, 0.5);
-}
-
-.bg-blue-600 {
-  background-color: #2563eb;
-}
-
-.bg-blue-600:hover {
-  background-color: #1d4ed8;
-}
-
-/* Form field labels */
-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #64748b;
-  margin-bottom: 0.25rem;
-}
-
-/* Empty state */
-.text-slate-400.py-10 {
-  font-style: italic;
-}
-
-/* Utility for hidden elements on small screens */
-@media (max-width: 640px) {
-  .hidden-mobile {
-    display: none !important;
+  .cutting-balance-page .cbs-kpi-card {
+    padding: 20px;
   }
+
+  .cutting-balance-page .cbs-kpi-value {
+    font-size: 30px;
+  }
+
+  .cutting-balance-page .cbs-back-button {
+    width: 100%;
+    justify-content: center;
+  }
+
 }

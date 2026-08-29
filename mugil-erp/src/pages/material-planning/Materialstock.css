@@ -2,11 +2,17 @@
 
 /* Container */
 .ms-page {
-  max-width: 100%;
-  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+
   padding: 24px 28px 64px;
+
   color: #1c2a35;
+
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+
   background: #f4f6f8;
 }
 
@@ -24,6 +30,16 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+.ms-breadcrumb a.ms-breadcrumb-item {
+  color: #64768a;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.ms-breadcrumb a.ms-breadcrumb-item:hover {
+  color: #2e5c8a;
 }
 
 .ms-breadcrumb-sep {
@@ -123,6 +139,31 @@
   border-radius: 8px;
   padding: 14px 16px;
   box-shadow: 0 1px 2px rgba(15, 41, 66, 0.06);
+}
+
+/* Stock Lots */
+.ms-stat-card:nth-child(1) {
+  background: #dceaf7;
+}
+
+/* Available Qty */
+.ms-stat-card:nth-child(2) {
+  background: #dfeee4;
+}
+
+/* Issued to Cutting */
+.ms-stat-card:nth-child(3) {
+  background: #f2e6cc;
+}
+
+/* Reserved Qty */
+.ms-stat-card:nth-child(4) {
+  background: #e8e0f0;
+}
+
+/* Total Weight */
+.ms-stat-card:nth-child(5) {
+  background: #dfe8f3;
 }
 
 .ms-stat-value {
@@ -277,55 +318,7 @@
   font-weight: 700;
 }
 
-/* Stock Summary */
-.ms-stock-summary {
-  margin-top: 20px;
-  background: #ffffff;
-  border: 1px solid #dde3e9;
-  border-radius: 8px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 2px rgba(15, 41, 66, 0.06);
-}
 
-.ms-summary-info h4 {
-  margin: 0 0 12px 0;
-  font-size: 14px;
-  color: #0f2942;
-}
-
-.ms-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-}
-
-.ms-summary-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid #dde3e9;
-}
-
-.ms-summary-label {
-  color: #64768a;
-  font-size: 13px;
-}
-
-.ms-summary-value {
-  font-weight: 600;
-  color: #0f2942;
-}
-
-.ms-summary-note {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #dde3e9;
-}
-
-.ms-summary-note small {
-  color: #64768a;
-  font-size: 12px;
-}
 
 /* Responsive */
 @media (max-width: 1200px) {

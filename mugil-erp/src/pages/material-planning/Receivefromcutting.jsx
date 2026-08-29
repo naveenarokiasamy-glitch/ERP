@@ -1,16 +1,18 @@
 import { useState, useMemo } from "react";
 import { useMaterialStore, receiveFromCutting } from "../../data/materialStore";
 import "./Receivefromcutting.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 const badgeClass = (status) => {
   switch (status) {
     case "Open":
-      return "bg-amber-50 text-amber-700 ring-1 ring-amber-200";
+      return "rfc-status-open";
+
     case "Received":
-      return "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200";
+      return "rfc-status-received";
+
     default:
-      return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+      return "rfc-status-default";
   }
 };
 
@@ -266,599 +268,1000 @@ const navigate = useNavigate();
 const handleBack = () => navigate("/inventory/material");
 
   return (
-    <>
-          <Header />
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-800">
-            Receive From Cutting
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Close open cutting jobs and record finished pieces, leftover
-            balance, scrap and rejection — plate by plate.
-          </p>
-        </div>
-        <button
-          onClick={handleBack}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          Back
-        </button>
+<>
+  <Header />
+
+  <div className="receive-cutting-page">
+
+    {/* =====================================
+        PAGE HEADER
+    ====================================== */}
+
+    <div className="rfc-page-header">
+
+      <div className="rfc-header-left">
+
+        <div className="rfc-breadcrumb">
+
+  <Link to="/inventory" className="rfc-breadcrumb-link">
+    Inventory
+  </Link>
+
+  <span>/</span>
+
+  <Link to="/inventory/material" className="rfc-breadcrumb-link">
+    Material
+  </Link>
+
+  <span>/</span>
+
+  <span className="rfc-current">
+    Receive From Cutting
+  </span>
+
+</div>
+
+        <h1 className="rfc-page-title">
+          Receive From Cutting
+        </h1>
+
+        <p className="rfc-page-subtitle">
+          Close open cutting jobs and record finished pieces,
+          leftover balance, scrap and rejection plate by plate.
+        </p>
+
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <button
+        type="button"
+        onClick={handleBack}
+        className="rfc-back-btn"
+      >
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+
+        Back
+
+      </button>
+
+    </div>
+
+    {/* =====================================
+        JOB LIST
+    ====================================== */}
+
+    <div className="rfc-table-card">
+
+      <div className="rfc-table-header">
+
+        <div>
+
+          <h3 className="rfc-section-title">
+            Open Cutting Jobs
+          </h3>
+
+          <p className="rfc-section-subtitle">
+            {openJobs.length} Open Job{openJobs.length !== 1 ? "s" : ""}
+          </p>
+
+        </div>
+
+      </div>
+
+      <div className="rfc-table-responsive">
+
+        <table className="rfc-table">
+
           <thead>
-            <tr className="bg-slate-50 text-slate-600 text-left">
-              <th className="px-4 py-3 font-medium">Source</th>
-              <th className="px-4 py-3 font-medium">Job Number</th>
-              <th className="px-4 py-3 font-medium">PO Number</th>
-              <th className="px-4 py-3 font-medium">Plate Number</th>
-              <th className="px-4 py-3 font-medium">Heat Number</th>
-              <th className="px-4 py-3 font-medium">Material</th>
-              <th className="px-4 py-3 font-medium">Grade</th>
-              <th className="px-4 py-3 font-medium">Original Plate Size</th>
-              <th className="px-4 py-3 font-medium">Issued Plate Qty</th>
-              <th className="px-4 py-3 font-medium">Issue Date</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium text-right">Action</th>
+
+            <tr>
+
+              <th>Job Number</th>
+              <th>PO Number</th>
+              <th>Plate Number</th>
+              <th>Heat Number</th>
+              <th>Material</th>
+              <th>Grade</th>
+              <th>Original Plate Size</th>
+              <th>Issued Qty</th>
+              <th>Issue Date</th>
+              <th>Status</th>
+              <th className="rfc-text-center">
+                Action
+              </th>
+
             </tr>
+
           </thead>
-          <tbody className="divide-y divide-slate-100">
+
+          <tbody>
+
             {openJobs.length === 0 && (
+
               <tr>
+
                 <td
-                  colSpan={12}
-                  className="px-4 py-10 text-center text-slate-400"
+                  colSpan={11}
+                  className="rfc-empty-table"
                 >
-                  No open jobs. Every job has been received.
+
+                  <div className="rfc-empty-state">
+
+                    <div className="rfc-empty-icon">
+                      📋
+                    </div>
+
+                    <h4>
+                      No Open Cutting Jobs
+                    </h4>
+
+                    <p>
+                      Every cutting job has already been received.
+                    </p>
+
+                  </div>
+
                 </td>
+
               </tr>
+
             )}
+
             {openJobs.map((job) => (
-              <tr key={job.jobNumber} className="hover:bg-slate-50/60">
-                <td className="px-4 py-3">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${sourceBadgeClass(job.source)}`}
-                  >
-                    {job.source}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-medium text-slate-800">
+
+              <tr key={job.jobNumber}>
+
+                <td className="rfc-job-number">
                   {job.jobNumber}
                 </td>
-                <td className="px-4 py-3 text-slate-600">{job.poNumber}</td>
-                <td className="px-4 py-3 text-slate-600">{job.plateNumber}</td>
-                <td className="px-4 py-3 text-slate-600">{job.heatNumber}</td>
-                <td className="px-4 py-3 text-slate-600">{job.material}</td>
-                <td className="px-4 py-3 text-slate-600">{job.grade}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {job.originalLength || "-"} x {job.originalWidth || "-"}
+
+                <td>{job.poNumber}</td>
+
+                <td>{job.plateNumber}</td>
+
+                <td>{job.heatNumber}</td>
+
+                <td>
+
+                  <span className="rfc-material-chip">
+                    {job.material}
+                  </span>
+
                 </td>
-                <td className="px-4 py-3 text-slate-600">{job.issuedQty}</td>
-                <td className="px-4 py-3 text-slate-600">{job.issueDate}</td>
-                <td className="px-4 py-3">
+
+                <td>{job.grade}</td>
+
+                <td>
+                  {job.originalLength || "-"} × {job.originalWidth || "-"}
+                </td>
+
+                <td className="rfc-issued-cell">
+                  {job.issuedQty}
+                </td>
+
+                <td>{job.issueDate}</td>
+
+                <td>
+
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${badgeClass(job.status)}`}
+                    className={`rfc-status ${badgeClass(job.status)}`}
                   >
                     {job.status}
                   </span>
+
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => openModal(job)}
-                    className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    Receive
-                  </button>
+
+                <td>
+
+                  <div className="rfc-action">
+
+                    <button
+                      type="button"
+                      onClick={() => openModal(job)}
+                      className="rfc-btn rfc-btn-primary"
+                    >
+                      Receive
+                    </button>
+
+                  </div>
+
                 </td>
+
               </tr>
+
             ))}
+
           </tbody>
+
         </table>
+
       </div>
 
-      {activeJob && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
-            {/* Fixed header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-              <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                Receive From Cutting — {activeJob.jobNumber}
-                <span
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium ${sourceBadgeClass(activeJob.source)}`}
-                >
-                  {activeJob.source}
-                </span>
-              </h2>
-              <button
-                onClick={closeModal}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                ✕
-              </button>
+    </div>
+
+ {activeJob && (
+  <div className="rfc-overlay">
+    <div className="rfc-modal">
+
+      {/* Modal Header */}
+
+      <div className="rfc-modal-header">
+
+        <div>
+
+          <h2 className="rfc-modal-title">
+            Receive From Cutting
+          </h2>
+
+          <p className="rfc-modal-subtitle">
+            Job Number : <strong>{activeJob.jobNumber}</strong>
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={closeModal}
+          className="rfc-close-btn"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      {/* Modal Content */}
+
+      <div className="rfc-modal-content">
+
+        <div className="rfc-modal-container">
+
+          {/* ===========================
+              Job Information
+          =========================== */}
+
+          <div className="rfc-readonly-card">
+
+            <div className="rfc-section-header">
+
+              <div>
+
+                <h3 className="rfc-section-title">
+                  Job Information
+                </h3>
+
+                <p className="rfc-section-subtitle">
+                  Issued plate details from the cutting department.
+                </p>
+
+              </div>
+
             </div>
 
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Readonly job details */}
-              <div className="grid grid-cols-3 gap-4 bg-slate-50 rounded-lg p-4">
-                <ReadonlyField label="Job Number" value={activeJob.jobNumber} />
-                <ReadonlyField label="PO Number" value={activeJob.poNumber} />
-                <ReadonlyField
-                  label="Plate Number"
-                  value={activeJob.plateNumber}
-                />
-                <ReadonlyField label="Material" value={activeJob.material} />
-                <ReadonlyField label="Grade" value={activeJob.grade} />
-                <ReadonlyField
-                  label="Thickness"
-                  value={
-                    activeJob.thickness ? `${activeJob.thickness} mm` : "-"
-                  }
-                />
-                <ReadonlyField
-                  label="Original Length"
-                  value={activeJob.originalLength || "-"}
-                />
-                <ReadonlyField
-                  label="Original Width"
-                  value={activeJob.originalWidth || "-"}
-                />
-                <ReadonlyField
-                  label="Issued Plate Quantity"
-                  value={activeJob.issuedQty}
-                />
-              </div>
+            <div className="rfc-readonly-grid">
 
-              {/* Summary strip */}
-              <div className="grid grid-cols-3 gap-4">
-                <SummaryCard label="Total Issued Plates" value={issuedQty} tone="slate" />
-                <SummaryCard
-                  label="Fully Consumed Plates"
-                  value={fullyConsumedCount}
-                  tone="emerald"
-                />
-                <SummaryCard
-                  label="Remaining Plates"
-                  value={remainingCount}
-                  tone="amber"
-                />
-              </div>
+              <ReadonlyField
+                label="Job Number"
+                value={activeJob.jobNumber}
+              />
 
-              {/* Step 1: completely consumed plates */}
-              <div className="bg-white ring-1 ring-slate-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-1">
+              <ReadonlyField
+                label="PO Number"
+                value={activeJob.poNumber}
+              />
+
+              <ReadonlyField
+                label="Plate Number"
+                value={activeJob.plateNumber}
+              />
+
+              <ReadonlyField
+                label="Material"
+                value={activeJob.material}
+              />
+
+              <ReadonlyField
+                label="Grade"
+                value={activeJob.grade}
+              />
+
+              <ReadonlyField
+                label="Thickness"
+                value={
+                  activeJob.thickness
+                    ? `${activeJob.thickness} mm`
+                    : "-"
+                }
+              />
+
+              <ReadonlyField
+                label="Original Length"
+                value={activeJob.originalLength || "-"}
+              />
+
+              <ReadonlyField
+                label="Original Width"
+                value={activeJob.originalWidth || "-"}
+              />
+
+              <ReadonlyField
+                label="Issued Plate Quantity"
+                value={activeJob.issuedQty}
+              />
+
+            </div>
+
+          </div>
+
+          {/* ===========================
+              Summary Cards
+          =========================== */}
+
+          <div className="rfc-summary-grid">
+
+            <SummaryCard
+              label="Total Issued Plates"
+              value={issuedQty}
+              tone="slate"
+            />
+
+            <SummaryCard
+              label="Fully Consumed Plates"
+              value={fullyConsumedCount}
+              tone="emerald"
+            />
+
+            <SummaryCard
+              label="Remaining Plates"
+              value={remainingCount}
+              tone="amber"
+            />
+
+          </div>
+
+          {/* ===========================
+              Step 1
+          =========================== */}
+
+          <div className="rfc-step-card">
+
+            <div className="rfc-section-header">
+
+              <div>
+
+                <h3 className="rfc-section-title">
                   Step 1 — Completely Consumed Plates
                 </h3>
-                <p className="text-xs text-slate-500 mb-3">
-                  Out of the {issuedQty} issued plates, how many were
-                  completely consumed (100% used)?
+
+                <p className="rfc-section-subtitle">
+                  Out of the <strong>{issuedQty}</strong> issued plates,
+                  how many were completely consumed?
                 </p>
-                <div className="max-w-xs">
-                  <FormField
-                    label="Completely Consumed Plates"
-                    type="number"
-                    value={form.fullyConsumedCount}
-                    onChange={handleFullyConsumedChange}
-                  />
-                </div>
+
               </div>
 
-              {/* Fully consumed plates — aggregated output */}
-              {fullyConsumedCount > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-700">
-                        Finished Piece Output — Fully Consumed Plates
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        Total output from the {fullyConsumedCount} fully
-                        consumed plate(s). No plate-wise detail needed.
-                      </p>
-                    </div>
-                    <button
-                      onClick={addFullyConsumedPiece}
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      + Add Piece
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    {form.fullyConsumedPieces.map((piece, idx) => (
-                      <div
-                        key={piece.rowId}
-                        className="grid grid-cols-12 gap-2 items-end bg-white ring-1 ring-slate-200 rounded-lg p-3"
-                      >
-                        <div className="col-span-12 text-xs font-medium text-slate-500">
-                          Piece {idx + 1}
-                        </div>
-                        <FormField
-                          className="col-span-4"
-                          label="Piece Code"
-                          value={piece.pieceCode}
-                          onChange={(v) =>
-                            updateFullyConsumedPiece(piece.rowId, "pieceCode", v)
-                          }
-                        />
-                        <FormField
-                          className="col-span-3"
-                          label="Drawing No"
-                          value={piece.drawingNumber}
-                          onChange={(v) =>
-                            updateFullyConsumedPiece(
-                              piece.rowId,
-                              "drawingNumber",
-                              v,
-                            )
-                          }
-                        />
-                        <FormField
-                          className="col-span-2"
-                          label="Total Quantity"
-                          type="number"
-                          value={piece.quantity}
-                          onChange={(v) =>
-                            updateFullyConsumedPiece(piece.rowId, "quantity", v)
-                          }
-                        />
-                        <FormField
-                          className="col-span-2"
-                          label="Weight (kg)"
-                          type="number"
-                          value={piece.weight}
-                          onChange={(v) =>
-                            updateFullyConsumedPiece(piece.rowId, "weight", v)
-                          }
-                        />
-                        <div className="col-span-1 flex justify-end">
-                          <button
-                            onClick={() => removeFullyConsumedPiece(piece.rowId)}
-                            disabled={form.fullyConsumedPieces.length === 1}
-                            className="text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                            title="Remove piece"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Remaining plates — full detail, dynamically generated */}
-              {remainingCount > 0 && (
-                <div className="space-y-5">
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-700">
-                      Remaining Plates — Detailed Entry ({remainingCount})
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      These plates still hold balance material. Enter details
-                      for each one individually.
-                    </p>
-                  </div>
-
-                  {form.remainingPlates.map((plate, plateIdx) => (
-                    <div
-                      key={plate.id}
-                      className="bg-slate-50/60 ring-1 ring-slate-200 rounded-xl p-4 space-y-4"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                          Remaining Plate {plateIdx + 1}
-                        </span>
-                      </div>
-
-                      <div className="max-w-xs">
-                        <FormField
-                          label="Plate Number"
-                          value={plate.plateNumber}
-                          onChange={(v) =>
-                            updateRemainingPlateField(plate.id, "plateNumber", v)
-                          }
-                        />
-                      </div>
-
-                      {/* Finished pieces for this plate */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xs font-semibold text-slate-600">
-                            Finished Pieces
-                          </h4>
-                          <button
-                            onClick={() => addRemainingPiece(plate.id)}
-                            className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                          >
-                            + Add Piece
-                          </button>
-                        </div>
-                        <div className="space-y-2">
-                          {plate.pieces.map((piece, idx) => (
-                            <div
-                              key={piece.rowId}
-                              className="grid grid-cols-12 gap-2 items-end bg-white ring-1 ring-slate-200 rounded-lg p-3"
-                            >
-                              <div className="col-span-12 text-xs font-medium text-slate-500">
-                                Piece {idx + 1}
-                              </div>
-                              <FormField
-                                className="col-span-3"
-                                label="Piece Code"
-                                value={piece.pieceCode}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "pieceCode",
-                                    v,
-                                  )
-                                }
-                              />
-                              <FormField
-                                className="col-span-3"
-                                label="Drawing Number"
-                                value={piece.drawingNumber}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "drawingNumber",
-                                    v,
-                                  )
-                                }
-                              />
-                              <FormField
-                                className="col-span-1"
-                                label="Length"
-                                type="number"
-                                value={piece.length}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "length",
-                                    v,
-                                  )
-                                }
-                              />
-                              <FormField
-                                className="col-span-1"
-                                label="Width"
-                                type="number"
-                                value={piece.width}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "width",
-                                    v,
-                                  )
-                                }
-                              />
-                              <FormField
-                                className="col-span-1"
-                                label="Qty"
-                                type="number"
-                                value={piece.quantity}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "quantity",
-                                    v,
-                                  )
-                                }
-                              />
-                              <FormField
-                                className="col-span-2"
-                                label="Weight (kg)"
-                                type="number"
-                                value={piece.weight}
-                                onChange={(v) =>
-                                  updateRemainingPiece(
-                                    plate.id,
-                                    piece.rowId,
-                                    "weight",
-                                    v,
-                                  )
-                                }
-                              />
-                              <div className="col-span-1 flex justify-end">
-                                <button
-                                  onClick={() =>
-                                    removeRemainingPiece(plate.id, piece.rowId)
-                                  }
-                                  disabled={plate.pieces.length === 1}
-                                  className="text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed text-sm"
-                                  title="Remove piece"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Balance plate for this plate */}
-                      <div>
-                        <h4 className="text-xs font-semibold text-slate-600 mb-2">
-                          Balance Plate
-                        </h4>
-                        <div className="grid grid-cols-3 gap-3">
-                          <FormField
-                            label="Length"
-                            type="number"
-                            value={plate.remainingLength}
-                            onChange={(v) =>
-                              updateRemainingPlateField(
-                                plate.id,
-                                "remainingLength",
-                                v,
-                              )
-                            }
-                          />
-                          <FormField
-                            label="Width"
-                            type="number"
-                            value={plate.remainingWidth}
-                            onChange={(v) =>
-                              updateRemainingPlateField(
-                                plate.id,
-                                "remainingWidth",
-                                v,
-                              )
-                            }
-                          />
-                          <FormField
-                            label="Weight (kg)"
-                            type="number"
-                            value={plate.remainingWeight}
-                            onChange={(v) =>
-                              updateRemainingPlateField(
-                                plate.id,
-                                "remainingWeight",
-                                v,
-                              )
-                            }
-                          />
-                        </div>
-                      </div>
-
-                      {/* Scrap / rejection / remarks for this plate */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <FormField
-                          label="Scrap Weight (kg)"
-                          type="number"
-                          value={plate.scrapWeight}
-                          onChange={(v) =>
-                            updateRemainingPlateField(plate.id, "scrapWeight", v)
-                          }
-                        />
-                        <FormField
-                          label="Rejected Quantity"
-                          type="number"
-                          value={plate.rejectedQty}
-                          onChange={(v) =>
-                            updateRemainingPlateField(plate.id, "rejectedQty", v)
-                          }
-                        />
-                        <div className="col-span-2">
-                          <label className="text-xs font-medium text-slate-500 mb-1 block">
-                            Remarks
-                          </label>
-                          <textarea
-                            value={plate.remarks}
-                            onChange={(e) =>
-                              updateRemainingPlateField(
-                                plate.id,
-                                "remarks",
-                                e.target.value,
-                              )
-                            }
-                            rows={2}
-                            className="w-full rounded-lg ring-1 ring-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Received By */}
-              <div className="grid grid-cols-2 gap-3">
-                <FormField
-                  className="col-span-2"
-                  label="Received By"
-                  value={form.receivedBy}
-                  onChange={(v) => setForm((f) => ({ ...f, receivedBy: v }))}
-                />
-              </div>
-
-              {error && (
-                <div className="text-sm text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-3 py-2">
-                  {error}
-                </div>
-              )}
             </div>
 
-            {/* Fixed footer */}
-            <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 flex-shrink-0 bg-white rounded-b-xl">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700"
-              >
-                Save
-              </button>
+            <div className="rfc-step-input">
+
+              <FormField
+                label="Completely Consumed Plates"
+                type="number"
+                value={form.fullyConsumedCount}
+                onChange={handleFullyConsumedChange}
+              />
+
             </div>
+
           </div>
-        </div>
-      )}
+
+          {/* ===========================
+              Fully Consumed Output
+          =========================== */}
+
+          {fullyConsumedCount > 0 && (
+
+            <div className="rfc-piece-section">
+
+              <div className="rfc-section-header">
+
+                <div>
+
+                  <h3 className="rfc-section-title">
+                    Finished Piece Output
+                  </h3>
+
+                  <p className="rfc-section-subtitle">
+                    Total output from the{" "}
+                    <strong>
+                      {fullyConsumedCount}
+                    </strong>{" "}
+                    fully consumed plate(s).
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addFullyConsumedPiece}
+                  className="rfc-btn-link"
+                >
+                  + Add Piece
+                </button>
+
+              </div>
+
+              <div className="rfc-piece-list">
+
+                {form.fullyConsumedPieces.map((piece, idx) => (
+
+                  <div
+                    key={piece.rowId}
+                    className="rfc-piece-card"
+                  >
+
+                    <div className="rfc-piece-title">
+                      Piece {idx + 1}
+                    </div>
+
+                    <div className="rfc-piece-grid">
+
+                      <FormField
+                        className="rfc-col-4"
+                        label="Piece Code"
+                        value={piece.pieceCode}
+                        onChange={(v) =>
+                          updateFullyConsumedPiece(
+                            piece.rowId,
+                            "pieceCode",
+                            v
+                          )
+                        }
+                      />
+
+                      <FormField
+                        className="rfc-col-3"
+                        label="Drawing No"
+                        value={piece.drawingNumber}
+                        onChange={(v) =>
+                          updateFullyConsumedPiece(
+                            piece.rowId,
+                            "drawingNumber",
+                            v
+                          )
+                        }
+                      />
+
+                      <FormField
+                        className="rfc-col-2"
+                        label="Total Quantity"
+                        type="number"
+                        value={piece.quantity}
+                        onChange={(v) =>
+                          updateFullyConsumedPiece(
+                            piece.rowId,
+                            "quantity",
+                            v
+                          )
+                        }
+                      />
+
+                      <FormField
+                        className="rfc-col-2"
+                        label="Weight (kg)"
+                        type="number"
+                        value={piece.weight}
+                        onChange={(v) =>
+                          updateFullyConsumedPiece(
+                            piece.rowId,
+                            "weight",
+                            v
+                          )
+                        }
+                      />
+
+                      <div className="rfc-piece-action">
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeFullyConsumedPiece(piece.rowId)
+                          }
+                          disabled={
+                            form.fullyConsumedPieces.length === 1
+                          }
+                          className="rfc-remove-btn"
+                        >
+                          ✕
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          )}
+
+{/* ===========================================
+    Remaining Plates
+=========================================== */}
+
+{remainingCount > 0 && (
+
+  <div className="rfc-remaining-section">
+
+    <div className="rfc-section-header">
+
+      <div>
+
+        <h3 className="rfc-section-title">
+          Remaining Plates — Detailed Entry ({remainingCount})
+        </h3>
+
+        <p className="rfc-section-subtitle">
+          Enter complete details for every remaining plate individually.
+        </p>
+
+      </div>
+
     </div>
-    </>
+
+    {form.remainingPlates.map((plate, plateIdx) => (
+
+      <div
+        key={plate.id}
+        className="rfc-remaining-card"
+      >
+
+        <div className="rfc-remaining-header">
+
+          <span className="rfc-remaining-title">
+            Remaining Plate {plateIdx + 1}
+          </span>
+
+        </div>
+
+        <div className="rfc-plate-input">
+
+          <FormField
+            label="Plate Number"
+            value={plate.plateNumber}
+            onChange={(v) =>
+              updateRemainingPlateField(
+                plate.id,
+                "plateNumber",
+                v
+              )
+            }
+          />
+
+        </div>
+
+        {/* Finished Pieces */}
+
+        <div className="rfc-piece-section">
+
+          <div className="rfc-section-header">
+
+            <h4 className="rfc-subsection-title">
+              Finished Pieces
+            </h4>
+
+            <button
+              type="button"
+              onClick={() => addRemainingPiece(plate.id)}
+              className="rfc-btn-link"
+            >
+              + Add Piece
+            </button>
+
+          </div>
+
+          <div className="rfc-piece-list">
+
+            {plate.pieces.map((piece, idx) => (
+
+              <div
+                key={piece.rowId}
+                className="rfc-piece-card"
+              >
+
+                <div className="rfc-piece-title">
+                  Piece {idx + 1}
+                </div>
+
+                <div className="rfc-piece-grid">
+
+                  <FormField
+                    className="rfc-col-3"
+                    label="Piece Code"
+                    value={piece.pieceCode}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "pieceCode",
+                        v
+                      )
+                    }
+                  />
+
+                  <FormField
+                    className="rfc-col-3"
+                    label="Drawing Number"
+                    value={piece.drawingNumber}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "drawingNumber",
+                        v
+                      )
+                    }
+                  />
+
+                  <FormField
+                    className="rfc-col-1"
+                    label="Length"
+                    type="number"
+                    value={piece.length}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "length",
+                        v
+                      )
+                    }
+                  />
+
+                  <FormField
+                    className="rfc-col-1"
+                    label="Width"
+                    type="number"
+                    value={piece.width}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "width",
+                        v
+                      )
+                    }
+                  />
+
+                  <FormField
+                    className="rfc-col-1"
+                    label="Qty"
+                    type="number"
+                    value={piece.quantity}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "quantity",
+                        v
+                      )
+                    }
+                  />
+
+                  <FormField
+                    className="rfc-col-2"
+                    label="Weight (kg)"
+                    type="number"
+                    value={piece.weight}
+                    onChange={(v) =>
+                      updateRemainingPiece(
+                        plate.id,
+                        piece.rowId,
+                        "weight",
+                        v
+                      )
+                    }
+                  />
+
+                  <div className="rfc-piece-action">
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeRemainingPiece(
+                          plate.id,
+                          piece.rowId
+                        )
+                      }
+                      disabled={plate.pieces.length === 1}
+                      className="rfc-remove-btn"
+                      title="Remove Piece"
+                    >
+                      ✕
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+                  {/* ===========================================
+                      Balance Plate
+                  =========================================== */}
+
+                  <div className="rfc-balance-section">
+
+                    <h4 className="rfc-subsection-title">
+                      Balance Plate
+                    </h4>
+
+                    <div className="rfc-balance-grid">
+
+                      <FormField
+                        label="Length"
+                        type="number"
+                        value={plate.remainingLength}
+                        onChange={(v) =>
+                          updateRemainingPlateField(
+                            plate.id,
+                            "remainingLength",
+                            v
+                          )
+                        }
+                      />
+
+                      <FormField
+                        label="Width"
+                        type="number"
+                        value={plate.remainingWidth}
+                        onChange={(v) =>
+                          updateRemainingPlateField(
+                            plate.id,
+                            "remainingWidth",
+                            v
+                          )
+                        }
+                      />
+
+                      <FormField
+                        label="Weight (kg)"
+                        type="number"
+                        value={plate.remainingWeight}
+                        onChange={(v) =>
+                          updateRemainingPlateField(
+                            plate.id,
+                            "remainingWeight",
+                            v
+                          )
+                        }
+                      />
+
+                    </div>
+
+                  </div>
+
+                  {/* ===========================================
+                      Scrap / Rejection
+                  =========================================== */}
+
+                  <div className="rfc-scrap-grid">
+
+                    <FormField
+                      className="rfc-col-4"
+                      label="Scrap Weight (kg)"
+                      type="number"
+                      value={plate.scrapWeight}
+                      onChange={(v) =>
+                        updateRemainingPlateField(
+                          plate.id,
+                          "scrapWeight",
+                          v
+                        )
+                      }
+                    />
+
+                    <FormField
+                      className="rfc-col-4"
+                      label="Rejected Quantity"
+                      type="number"
+                      value={plate.rejectedQty}
+                      onChange={(v) =>
+                        updateRemainingPlateField(
+                          plate.id,
+                          "rejectedQty",
+                          v
+                        )
+                      }
+                    />
+
+                    <div className="rfc-col-12">
+
+                      <label className="rfc-label">
+                        Remarks
+                      </label>
+
+                      <textarea
+                        rows={3}
+                        value={plate.remarks}
+                        onChange={(e) =>
+                          updateRemainingPlateField(
+                            plate.id,
+                            "remarks",
+                            e.target.value
+                          )
+                        }
+                        className="rfc-textarea"
+                      />
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          )}
+
+          {/* ===========================================
+              Received By
+          =========================================== */}
+
+          <div className="rfc-received-section">
+
+            <FormField
+              className="rfc-received-input"
+              label="Received By"
+              value={form.receivedBy}
+              onChange={(v) =>
+                setForm((f) => ({
+                  ...f,
+                  receivedBy: v,
+                }))
+              }
+            />
+
+          </div>
+
+          {/* ===========================================
+              Error
+          =========================================== */}
+
+          {error && (
+
+            <div className="rfc-error-box">
+
+              {error}
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+      {/* ===========================================
+          Footer
+      =========================================== */}
+
+      <div className="rfc-modal-footer">
+
+        <button
+          type="button"
+          onClick={closeModal}
+          className="rfc-btn rfc-btn-secondary"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSave}
+          className="rfc-btn rfc-btn-primary"
+        >
+          Save
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
+
+  </div>
+
+</>
   );
 }
 
 function ReadonlyField({ label, value }) {
   return (
-    <div>
-      <div className="text-xs font-medium text-slate-500">{label}</div>
-      <div className="text-sm text-slate-800 mt-0.5">{value}</div>
+    <div className="rfc-readonly-field">
+
+      <label className="rfc-readonly-label">
+        {label}
+      </label>
+
+      <div className="rfc-readonly-value">
+        {value}
+      </div>
+
     </div>
   );
 }
 
 function SummaryCard({ label, value, tone }) {
+
   const toneClass = {
-    slate: "bg-slate-50 ring-slate-200 text-slate-700",
-    emerald: "bg-emerald-50 ring-emerald-200 text-emerald-700",
-    amber: "bg-amber-50 ring-amber-200 text-amber-700",
+    slate: "rfc-summary-slate",
+    emerald: "rfc-summary-emerald",
+    amber: "rfc-summary-amber",
   }[tone];
+
   return (
-    <div className={`rounded-xl ring-1 p-4 ${toneClass}`}>
-      <div className="text-xs font-medium opacity-80">{label}</div>
-      <div className="text-2xl font-semibold mt-1">{value}</div>
+    <div className={`rfc-summary-card ${toneClass}`}>
+
+      <div className="rfc-summary-label">
+        {label}
+      </div>
+
+      <div className="rfc-summary-value">
+        {value}
+      </div>
+
     </div>
   );
 }
 
-function FormField({ label, value, onChange, type = "text", className = "" }) {
+function FormField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  className = "",
+}) {
   return (
-    <div className={className}>
-      <label className="text-xs font-medium text-slate-500 mb-1 block">
+    <div className={`rfc-form-group ${className}`}>
+
+      <label className="rfc-label">
         {label}
       </label>
+
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg ring-1 ring-slate-200 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="rfc-input"
       />
+
     </div>
   );
 }

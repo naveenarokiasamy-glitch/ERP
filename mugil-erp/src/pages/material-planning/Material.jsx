@@ -105,46 +105,151 @@ const materialActions = [
 export default function Material() {
   const navigate = useNavigate();
 
-  return (
-    <>
-      <Header />
-      <div className="material-page">
-        <Link to="/inventory" className="material-back">
-          <ArrowLeft size={15} />
-          Inventory
-        </Link>
+return (
+  <>
+    <Header />
 
-        <header className="material-header">
-          <span className="material-eyebrow">Materials</span>
-          <h1 className="material-title">Material Inventory</h1>
-          <p className="material-subtitle">
-            Manage all raw materials used in production.
-          </p>
-        </header>
+    <div className="material-page">
+      <div className="material-layout">
 
-        <div className="material-grid">
-          {materialActions.map((action) => {
-            const Icon = action.icon;
+        {/* ================= SIDEBAR ================= */}
 
-            if (action.isStock) {
+        <aside className="material-sidebar">
+
+          <div className="material-sidebar-brand">
+            <div className="material-sidebar-brand-icon">
+              <Layers size={21} strokeWidth={1.8} />
+            </div>
+
+            <div>
+              <span className="material-sidebar-label">
+                Inventory Module
+              </span>
+
+              <h2 className="material-sidebar-title">
+                Materials
+              </h2>
+            </div>
+          </div>
+
+
+          <nav className="material-sidebar-nav">
+
+            {materialActions.map((action) => {
+              const Icon = action.icon;
+
               return (
-                <div
-                  className="material-card material-card-wide"
+                <button
+                  type="button"
+                  key={action.title}
+                  className={`material-sidebar-item ${
+                    action.isStock ? "material-sidebar-item-active" : ""
+                  }`}
+                  onClick={() => navigate(action.path)}
+                >
+                  <span className="material-sidebar-item-icon">
+                    <Icon size={18} strokeWidth={1.8} />
+                  </span>
+
+                  <span className="material-sidebar-item-content">
+                    <span className="material-sidebar-item-code">
+                      {action.code}
+                    </span>
+
+                    <span className="material-sidebar-item-title">
+                      {action.title}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+
+          </nav>
+
+
+          <div className="material-sidebar-footer">
+            <div className="material-sidebar-footer-icon">
+              <Factory size={19} strokeWidth={1.8} />
+            </div>
+
+            <div>
+              <strong>Material Operations</strong>
+              <span>All workflows in one place.</span>
+            </div>
+          </div>
+
+        </aside>
+
+
+        {/* ================= MAIN CONTENT ================= */}
+
+        <main className="material-main">
+
+          <Link to="/inventory" className="material-back">
+            <ArrowLeft size={15} />
+            Inventory
+          </Link>
+
+
+          <header className="material-header">
+
+            <span className="material-eyebrow">
+              Materials
+            </span>
+
+            <h1 className="material-title">
+              Material Inventory
+            </h1>
+
+            <p className="material-subtitle">
+              Manage all raw materials used in production.
+            </p>
+
+          </header>
+
+
+          {/* ================= FEATURED STOCK ================= */}
+
+          {materialActions
+            .filter((action) => action.isStock)
+            .map((action) => {
+              const Icon = action.icon;
+
+              return (
+                <section
+                  className="material-featured"
                   key={action.title}
                   onClick={() => navigate(action.path)}
                 >
-                  <div className="material-card-top">
-                    <div className="material-icon">
-                      <Icon size={22} strokeWidth={1.8} />
+
+                  <div className="material-featured-header">
+
+                    <div className="material-featured-icon">
+                      <Icon size={26} strokeWidth={1.8} />
                     </div>
-                    <span className="material-code">{action.code}</span>
+
+                    <div className="material-featured-heading">
+                      <span className="material-code">
+                        {action.code}
+                      </span>
+
+                      <h2 className="material-featured-title">
+                        {action.title}
+                      </h2>
+
+                      <p className="material-featured-desc">
+                        {action.description}
+                      </p>
+                    </div>
+
                   </div>
-                  <h3 className="material-card-title">{action.title}</h3>
-                  <p className="material-card-desc">{action.description}</p>
+
 
                   <div className="material-subgrid">
+
                     {action.subSections.map((sub) => {
                       const SubIcon = sub.icon;
+
                       return (
                         <div
                           className="material-subcard"
@@ -154,44 +259,78 @@ export default function Material() {
                             navigate(sub.path);
                           }}
                         >
+
                           <div className="material-subcard-icon">
-                            <SubIcon size={17} strokeWidth={1.8} />
+                            <SubIcon size={19} strokeWidth={1.8} />
                           </div>
+
                           <div>
                             <h4 className="material-subcard-title">
                               {sub.label}
                             </h4>
+
                             <p className="material-subcard-desc">
                               {sub.description}
                             </p>
                           </div>
+
                         </div>
                       );
                     })}
-                  </div>
-                </div>
-              );
-            }
 
-            return (
-              <div
-                className="material-card"
-                key={action.title}
-                onClick={() => navigate(action.path)}
-              >
-                <div className="material-card-top">
-                  <div className="material-icon">
-                    <Icon size={22} strokeWidth={1.8} />
                   </div>
-                  <span className="material-code">{action.code}</span>
-                </div>
-                <h3 className="material-card-title">{action.title}</h3>
-                <p className="material-card-desc">{action.description}</p>
-              </div>
-            );
-          })}
-        </div>
+
+                </section>
+              );
+            })}
+
+
+          {/* ================= ACTION CARDS ================= */}
+
+          <div className="material-grid">
+
+            {materialActions
+              .filter((action) => !action.isStock)
+              .map((action) => {
+                const Icon = action.icon;
+
+                return (
+                  <div
+                    className="material-card"
+                    key={action.title}
+                    onClick={() => navigate(action.path)}
+                  >
+
+                    <div className="material-card-top">
+
+                      <div className="material-icon">
+                        <Icon size={22} strokeWidth={1.8} />
+                      </div>
+
+                      <span className="material-code">
+                        {action.code}
+                      </span>
+
+                    </div>
+
+                    <h3 className="material-card-title">
+                      {action.title}
+                    </h3>
+
+                    <p className="material-card-desc">
+                      {action.description}
+                    </p>
+
+                  </div>
+                );
+              })}
+
+          </div>
+
+        </main>
+
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }
