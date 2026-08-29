@@ -299,21 +299,7 @@ export default function Reports() {
 <div className="rpt-page">
 
   <div className="rpt-header">
-
-    <div className="rpt-header-content">
-
-      <div className="rpt-title-section">
-        <h1 className="rpt-title">
-          Material Reports
-        </h1>
-
-        <p className="rpt-subtitle">
-          Live dashboard and exportable reports generated from current material
-          data.
-        </p>
-      </div>
-
-      <button
+    <button
         onClick={handleBack}
         className="rpt-back-btn"
       >
@@ -334,6 +320,21 @@ export default function Reports() {
 
         <span>Back</span>
       </button>
+
+    <div className="rpt-header-content">
+
+      <div className="rpt-title-section">
+        <h1 className="rpt-title">
+          Material Reports
+        </h1>
+
+        <p className="rpt-subtitle">
+          Live dashboard and exportable reports generated from current material
+          data.
+        </p>
+      </div>
+
+      
 
     </div>
 

@@ -253,10 +253,7 @@ export default function IssueMaterialToCutting() {
     <>
       <Header />
     <div className="imtc-page">
-      {/* Back Button */}
-      <button className="imtc-back-btn" onClick={goBack}>
-        <ArrowLeft size={18} /> Back
-      </button>
+      
 
       {/* Breadcrumb */}
       <div className="imtc-breadcrumb">
@@ -273,7 +270,13 @@ export default function IssueMaterialToCutting() {
         <span className="imtc-breadcrumb-sep">/</span>
 
         <span className="imtc-breadcrumb-item">Issue to Cutting</span>
+        
       </div>
+      {/* Back Button */}
+      <button className="imtc-back-btn" onClick={goBack}>
+        <ArrowLeft size={18} /> Back
+      </button>
+      
 
       {/* Header */}
       <div className="imtc-header">

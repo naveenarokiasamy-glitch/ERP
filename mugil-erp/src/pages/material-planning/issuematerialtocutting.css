@@ -1167,8 +1167,8 @@ background-color: var(--surface);
 =========================== */
 
 .imtc-back-btn {
-  width: max-content;
-
+    width: fit-content;
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
 

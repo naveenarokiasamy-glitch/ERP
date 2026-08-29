@@ -143,7 +143,12 @@ export default function IssueToProduction() {
               <span className="crumb-active">
                 Issue Material To Production
               </span>
-
+            <button
+            className="back-btn"
+            onClick={handleBack}
+          >
+            ← Back
+          </button>
             </div>
 
             <h1>
@@ -156,12 +161,7 @@ export default function IssueToProduction() {
 
           </div>
 
-          <button
-            className="back-btn"
-            onClick={handleBack}
-          >
-            ← Back
-          </button>
+          
 
         </div>
 

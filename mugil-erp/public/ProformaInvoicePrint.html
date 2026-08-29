@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Proforma Invoice - Print</title>
+<link rel="stylesheet" href="./ProformaInvoicePrint.css" />
+</head>
+<body>
+
+  <!-- PRINT CONTROLS ============================================== -->
+  <div class="print-controls">
+    <button type="button" id="btnBack" class="pc-btn pc-btn--back">&larr; Back</button>
+    <button type="button" id="btnPrint" class="pc-btn pc-btn--print">Print</button>
+  </div>
+
+  <!-- Shown only if no invoice data could be found -->
+  <div class="empty-state" id="emptyState" style="display:none">
+    <p><strong>No invoice data found.</strong></p>
+    <p>Open this page from the Proforma Invoice form (after using "Save Draft"),
+       or send the current form data to this window using
+       <code>postMessage({ type: 'PROFORMA_INVOICE_DATA', data }, ...)</code>.</p>
+  </div>
+
+  <div class="page-wrap" id="pageWrap">
+    <div class="page" id="invoicePage">
+      <div class="outer-border">
+<!-- INVOICE HEADER ========================================= -->
+<div class="title-row">
+  PROFORMA INVOICE
+</div>
+
+<!-- SUPPLIER / INVOICE DETAILS ============================= -->
+<div class="header-row">
+
+  <!-- LEFT: SUPPLIER -->
+  <div class="header-left">
+
+    <div class="supplier-name" id="f-supplier-name"></div>
+
+    <div class="supplier-line" id="f-supplier-address"></div>
+
+    <div class="supplier-line" id="f-supplier-city"></div>
+
+    <div class="supplier-line" id="f-supplier-msme"></div>
+
+    <div class="supplier-line" id="f-supplier-gstin"></div>
+
+    <div class="supplier-line" id="f-supplier-statecode"></div>
+
+    <div class="supplier-line" id="f-supplier-email"></div>
+
+  </div>
+
+  <!-- RIGHT: INVOICE DETAILS -->
+  <div class="header-right">
+
+    <table class="details-grid">
+
+      <colgroup>
+        <col style="width:22%">
+        <col style="width:28%">
+        <col style="width:20%">
+        <col style="width:30%">
+      </colgroup>
+
+      <tbody>
+
+        <!-- Invoice No / Dated -->
+        <tr>
+          <td class="dg-label">Invoice No.</td>
+          <td class="dg-value" id="f-invoiceNumber"></td>
+
+          <td class="dg-label">Dated</td>
+          <td class="dg-value" id="f-date"></td>
+        </tr>
+
+        <!-- Delivery Note / Payment -->
+        <tr>
+          <td class="dg-label">Delivery Note</td>
+          <td class="dg-value" id="f-deliveryNote"></td>
+
+          <td class="dg-label">
+    Mode/Terms of<br>
+    Payment
+</td>
+          <td class="dg-value" id="f-modeOfPayment"></td>
+        </tr>
+
+        <!-- Reference -->
+        <tr>
+          <td class="dg-label">
+    Reference No. &amp;<br>
+    Date.
+</td>
+          <td class="dg-value" id="f-referenceNoDate"></td>
+
+          <td class="dg-label">Other References</td>
+          <td class="dg-value" id="f-otherReferences"></td>
+        </tr>
+
+        <!-- Buyer Order -->
+        <tr>
+          <td class="dg-label">Buyer's Order No.</td>
+          <td class="dg-value" id="f-buyerOrderNumber"></td>
+
+          <td class="dg-label">Dated</td>
+          <td class="dg-value" id="f-buyerOrderDate"></td>
+        </tr>
+
+        <!-- Dispatch -->
+        <tr>
+          <td class="dg-label">Dispatch Doc No.</td>
+          <td class="dg-value" id="f-dispatchDocNumber"></td>
+
+          <td class="dg-label">
+    Delivery Note<br>
+    Date
+</td>
+          <td class="dg-value" id="f-deliveryNoteDate"></td>
+        </tr>
+
+        <!-- Dispatch Through -->
+        <tr>
+          <td class="dg-label">
+    Dispatched<br>
+    through
+</td>
+          <td class="dg-value" id="f-dispatchedThrough"></td>
+
+          <td class="dg-label">Destination</td>
+          <td class="dg-value" id="f-destination"></td>
+        </tr>
+
+        <!-- Terms -->
+        <tr>
+          <td class="dg-label">Terms of Delivery</td>
+          <td class="dg-value" colspan="3" id="f-termsOfDelivery"></td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+        <!-- CONSIGNEE / BUYER ======================================= -->
+        <div class="party-row">
+          <div class="party-box">
+            <div class="party-title">Consignee (Ship to)</div>
+            <div class="party-name" id="f-consignee-name"></div>
+            <div class="party-line" id="f-consignee-address"></div>
+            <div class="party-line" id="f-consignee-statecode"></div>
+          </div>
+          <div class="party-box">
+            <div class="party-title">Buyer (Bill to)</div>
+            <div class="party-name" id="f-buyer-name"></div>
+            <div class="party-line" id="f-buyer-address"></div>
+            <div class="party-line" id="f-buyer-statecode"></div>
+          </div>
+        </div>
+
+        <!-- ITEM TABLE ============================================== -->
+        <table class="item-table" id="itemTable">
+          <colgroup>
+            <col style="width:5%" />
+            <col style="width:34%" />
+            <col style="width:11%" />
+            <col style="width:12%" />
+            <col style="width:10%" />
+            <col style="width:7%" />
+            <col style="width:7%" />
+            <col style="width:14%" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Sl<br />No.</th>
+              <th>Description of Goods</th>
+              <th>HSN/SAC</th>
+              <th>Quantity</th>
+              <th>Rate</th>
+              <th>per</th>
+              <th>Disc.&nbsp;%</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody id="itemRows"><!-- item rows injected by JS --></tbody>
+          <tbody id="itemFooterRows"><!-- spacer / subtotal / GST / R.O / total injected by JS --></tbody>
+        </table>
+
+        <!-- AMOUNT IN WORDS ========================================= -->
+        <div class="words-row">
+          <span class="words-label">Amount Chargeable (in words)</span>
+          <span class="words-eoe">E. &amp; O.E</span>
+        </div>
+        <div class="words-value" id="f-amountInWords"></div>
+
+        <!-- HSN/SAC TAX SUMMARY ===================================== -->
+        <div class="hsn-section">
+          <table class="hsn-table" id="hsnTable">
+            <colgroup>
+              <col style="width:50%" />
+              <col style="width:50%" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>HSN/SAC</th>
+                <th>Taxable Value</th>
+              </tr>
+            </thead>
+            <tbody id="hsnRows"><!-- HSN rows injected by JS --></tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td class="num" id="f-hsnTotal"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- TAX AMOUNT IN WORDS ===================================== -->
+        <div class="tax-words-row">
+          Tax Amount (in words) : <span id="f-taxAmountInWords"></span>
+        </div>
+
+        <!-- DECLARATION / BANK DETAILS ============================= -->
+        <div class="bottom-grid">
+          <div class="bottom-left">
+            <div class="section-title">Declaration</div>
+            <div class="declaration-text" id="f-declaration"></div>
+          </div>
+          <div class="bottom-right">
+            <div class="section-title">Company's Bank Details</div>
+            <div class="bank-line"><span class="bank-label">A/c Holder's Name</span><span class="bank-colon">:</span><span id="f-bankHolder"></span></div>
+            <div class="bank-line"><span class="bank-label">Bank Name</span><span class="bank-colon">:</span><span id="f-bankName"></span></div>
+            <div class="bank-line"><span class="bank-label">A/c No.</span><span class="bank-colon">:</span><span id="f-bankAccount"></span></div>
+            <div class="bank-line"><span class="bank-label">Branch &amp; IFS Code</span><span class="bank-colon">:</span><span id="f-bankBranchIfsc"></span></div>
+            <div class="signatory-for" id="f-forCompany"></div>
+            <div class="signatory-space"></div>
+            <div class="signatory-label">Authorised Signatory</div>
+          </div>
+        </div>
+
+        <!-- FOOTER =================================================== -->
+        <div class="footer-row">This is a Computer Generated Invoice</div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden 1mm probe used by the JS to convert mm to px accurately -->
+  <div id="mmProbe" style="width:1mm; height:1mm; position:absolute; visibility:hidden; top:-100px;"></div>
+
+  <script src="./ProformaInvoicePrint.js"></script>
+</body>
+</html>

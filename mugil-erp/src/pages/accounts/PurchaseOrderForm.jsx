@@ -5,13 +5,13 @@ import OrderItemsTable, {
 } from "../../components/OrderItemsTable";
 import AmountSummary from "../../components/AmountSummary";
 import TermsEditor from "../../components/TermsEditor";
-import PurchaseOrderPreview from "./PurchaseOrderPreview";
 import { initialPOData } from "../../utils/initialData";
 import { summarizePOItems } from "../../utils/calculations";
 import "./PurchaseOrder.css";
 import "../../styles/form.css";
 import "../../styles/print.css";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header";
 
 const DRAFT_KEY = "mei-erp-po-draft";
 const DRAFT_VERSION = 2;
@@ -41,11 +41,83 @@ const makeUniqueColumnId = (label, existingColumns) => {
   return `${base}${n}`;
 };
 
+let purchaseOrderPrintEnginePromise = null;
+
+function loadPurchaseOrderPrintEngine() {
+  if (
+    typeof window.generatePurchaseOrderPrint ===
+    "function"
+  ) {
+    return Promise.resolve();
+  }
+
+  if (purchaseOrderPrintEnginePromise) {
+    return purchaseOrderPrintEnginePromise;
+  }
+
+  purchaseOrderPrintEnginePromise =
+    new Promise((resolve, reject) => {
+      const existing =
+        document.querySelector(
+          'script[data-purchase-order-print-engine="true"]',
+        );
+
+      if (existing) {
+        existing.addEventListener(
+          "load",
+          () => resolve(),
+          { once: true },
+        );
+
+        existing.addEventListener(
+          "error",
+          () =>
+            reject(
+              new Error(
+                "PurchaseOrderPrint.js failed to load",
+              ),
+            ),
+          { once: true },
+        );
+
+        return;
+      }
+
+      const script =
+        document.createElement("script");
+
+      script.src =
+        "/PurchaseOrderPrint.js";
+
+      script.async = true;
+
+      script.dataset.purchaseOrderPrintEngine =
+        "true";
+
+      script.onload = () => resolve();
+
+      script.onerror = () => {
+        purchaseOrderPrintEnginePromise = null;
+
+        reject(
+          new Error(
+            "PurchaseOrderPrint.js failed to load",
+          ),
+        );
+      };
+
+      document.head.appendChild(script);
+    });
+
+  return purchaseOrderPrintEnginePromise;
+}
+
 export default function PurchaseOrderForm() {
-  const [view, setView] = useState("form");
-  const [data, setData] = useState(initialPOData);
-  const [errors, setErrors] = useState({});
-  const [savedAt, setSavedAt] = useState(null);
+  
+const [data, setData] = useState(initialPOData);
+const [errors, setErrors] = useState({});
+const [savedAt, setSavedAt] = useState(null);
+const [includeAmountDetails, setIncludeAmountDetails] = useState(true);
 
   const [columns, setColumns] = useState(() => createDefaultColumns("po"));
   const [showColumnModal, setShowColumnModal] = useState(false);
@@ -75,20 +147,47 @@ export default function PurchaseOrderForm() {
     }
   }, []);
 
+  useEffect(() => {
+loadPurchaseOrderPrintEngine().catch((error) => {
+console.error(
+"Purchase Order print engine preload failed:",
+error
+);
+});
+}, []);
+
+
   const set = (key, value) => setData((d) => ({ ...d, [key]: value }));
   const setNested = (group, key, value) =>
     setData((d) => ({ ...d, [group]: { ...d[group], [key]: value } }));
 
   // Simple summary that just aggregates what user entered - no calculations
-  const summary = {
-    subtotal: data.items.reduce((sum, item) => {
-      const amount = parseFloat(item.amount) || 0;
-      return sum + amount;
-    }, 0),
-    totalGst: data.gstAmount ? parseFloat(data.gstAmount) || 0 : 0,
-    grandTotal: data.grandTotal ? parseFloat(data.grandTotal) || 0 : 0,
-    interState: data.interState,
-  };
+// ============================================================
+// PURCHASE ORDER AMOUNT CALCULATIONS
+// ============================================================
+
+// Total excluding GST = sum of all item amounts
+const subtotal = data.items.reduce((sum, item) => {
+  const amount = Number(item.amount) || 0;
+  return sum + amount;
+}, 0);
+
+// GST percentage is entered by the user
+const gstPercent = Number(data.gstPercent) || 0;
+
+// GST amount = subtotal × GST %
+const gstAmount = (subtotal * gstPercent) / 100;
+
+// Final total = subtotal + GST amount
+const grandTotal = subtotal + gstAmount;
+
+const summary = {
+  subtotal,
+  totalGst: gstAmount,
+  grandTotal,
+  gstPercent,
+  interState: data.interState,
+};
 
   const validate = () => {
     const next = {};
@@ -122,12 +221,31 @@ export default function PurchaseOrderForm() {
     setErrors({});
     setSavedAt(null);
   };
+const goToPreview = () => {
+if (!validate()) return;
 
-  const goToPreview = () => {
-    if (!validate()) return;
-    saveDraft();
-    setView("preview");
-  };
+saveDraft();
+
+if (
+typeof window.generatePurchaseOrderPrint !==
+"function"
+) {
+alert(
+"Purchase Order print system is still loading. Please wait a moment and try Preview again."
+);
+return;
+}
+
+window.generatePurchaseOrderPrint(
+{
+...data,
+includeAmountDetails,
+},
+summary,
+columns
+);
+};
+
 
   const handleAddColumn = () => {
     const label = newColLabel.trim();
@@ -224,28 +342,19 @@ export default function PurchaseOrderForm() {
     );
   };
 
-  if (view === "preview") {
-    return (
-      <PurchaseOrderPreview
-        data={data}
-        summary={summary}
-        onBack={() => setView("form")}
-        columns={columns}
-      />
-    );
-  }
+
 
   const handleBack = () => {
     navigate("/accounts");
   };
-  return (
-    <div className="form-page">
-      
-      <div className="form-page__header">
-         <button
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-          >
+return (
+  <>
+  <Header />
+  <div className="po-page">
+    <div className="po-container">
+      <section className="po-hero">
+        <div className="po-hero__top">
+          <button type="button" className="po-back-btn" onClick={handleBack}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -260,92 +369,166 @@ export default function PurchaseOrderForm() {
               <path d="M19 12H5" />
               <path d="M12 19l-7-7 7-7" />
             </svg>
-            Back
+            <span>Back</span>
           </button>
-        <div className="form-page__heading">
 
-          <h1>Purchase Order</h1>
-          <p>Fill in the details below, then preview the official document.</p>
+          <div className="po-hero__actions">
+            <button
+              type="button"
+              className="po-btn po-btn--ghost"
+              onClick={clearForm}
+            >
+              Clear
+            </button>
+
+            <button
+              type="button"
+              className="po-btn po-btn--secondary"
+              onClick={saveDraft}
+            >
+              Save Draft
+            </button>
+
+            <button
+              type="button"
+              className="po-btn po-btn--primary"
+              onClick={goToPreview}
+            >
+              Preview →
+            </button>
+          </div>
         </div>
-        <div className="form-page__actions">
-          <button className="btn btn-ghost" onClick={clearForm}>
-            Clear
-          </button>
-          <button className="btn btn-secondary" onClick={saveDraft}>
-            Save Draft
-          </button>
-          <button className="btn btn-primary" onClick={goToPreview}>
-            Preview →
-          </button>
+
+        <div className="po-hero__content">
+          <div className="po-hero__heading">
+            <h1>Purchase Order</h1>
+            <p>
+              Fill in the details below, then preview the official document.
+            </p>
+          </div>
+
+          <div className="po-status">
+            <div className="po-status__card">
+              <span className="po-status__label">Draft Status</span>
+              <strong>
+                {savedAt ? "Saved" : "Not Saved"}
+              </strong>
+            </div>
+
+            <div className="po-status__card">
+              <span className="po-status__label">Last Saved</span>
+              <strong>
+                {savedAt
+                  ? savedAt.toLocaleTimeString()
+                  : "--"}
+              </strong>
+            </div>
+
+            <div className="po-status__card">
+              <span className="po-status__label">Items</span>
+              <strong>{data.items.length}</strong>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {Object.keys(errors).length > 0 && (
-        <div className="validation-banner">
-          Please fix the highlighted fields before previewing:{" "}
-          {Object.values(errors).join(" · ")}
+        <div className="po-validation">
+          <div className="po-validation__title">
+            Validation Required
+          </div>
+
+          <div className="po-validation__text">
+            Please fix the highlighted fields before previewing:{" "}
+            {Object.values(errors).join(" · ")}
+          </div>
         </div>
       )}
 
-      {/* 1. Purchase Details */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">1</span> Purchase Details
-        </h3>
-        <div className="field-grid">
-          <label className="field">
-            <span className="field__label">
-              PO Number<span className="field__required">*</span>
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">01</div>
+
+          <div className="po-card__heading">
+            <h3>Purchase Details</h3>
+          </div>
+        </div>
+
+        <div className="po-grid">
+          <label className="po-field">
+            <span className="po-field__label">
+              PO Number
+              <span className="po-required">*</span>
             </span>
+
             <input
-              className={`field__input ${errors.poNumber ? "has-error" : ""}`}
+              className={`po-input ${errors.poNumber ? "po-input--error" : ""}`}
               value={data.poNumber}
               onChange={(e) => set("poNumber", e.target.value)}
               placeholder="e.g. PO/2026/0142"
             />
           </label>
-          <label className="field">
-            <span className="field__label">
-              PO Date<span className="field__required">*</span>
+
+          <label className="po-field">
+            <span className="po-field__label">
+              PO Date
+              <span className="po-required">*</span>
             </span>
+
             <input
               type="date"
-              className={`field__input ${errors.poDate ? "has-error" : ""}`}
+              className={`po-input ${errors.poDate ? "po-input--error" : ""}`}
               value={data.poDate}
               onChange={(e) => set("poDate", e.target.value)}
             />
           </label>
-          <label className="field">
-            <span className="field__label">Reference Quotation Number</span>
+
+          <label className="po-field">
+            <span className="po-field__label">
+              Reference Quotation Number
+            </span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.refQuoteNumber}
               onChange={(e) => set("refQuoteNumber", e.target.value)}
               placeholder="e.g. CS-QT/1544 R4/25-26"
             />
           </label>
-          <label className="field">
-            <span className="field__label">Reference Date</span>
+
+          <label className="po-field">
+            <span className="po-field__label">
+              Reference Date
+            </span>
+
             <input
               type="date"
-              className="field__input"
+              className="po-input"
               value={data.refDate}
               onChange={(e) => set("refDate", e.target.value)}
             />
           </label>
-          <label className="field field--wide">
-            <span className="field__label">Subject</span>
+
+          <label className="po-field po-field--wide">
+            <span className="po-field__label">
+              Subject
+            </span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.subject}
               onChange={(e) => set("subject", e.target.value)}
               placeholder="e.g. Purchase Order for 5 Ton Single Girder EOT Crane"
             />
           </label>
-          <label className="field">
-            <span className="field__label">Prepared By</span>
+
+          <label className="po-field">
+            <span className="po-field__label">
+              Prepared By
+            </span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.preparedBy}
               onChange={(e) => set("preparedBy", e.target.value)}
               placeholder="Employee name"
@@ -354,136 +537,206 @@ export default function PurchaseOrderForm() {
         </div>
       </section>
 
-      {/* 2. Vendor Details */}
-      <VendorDetails
-        mode="form"
-        vendor={data.vendor}
-        onChange={(v) => set("vendor", v)}
-      />
-
-      {/* 3. Intro Paragraph */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">3</span> Intro Paragraph
-        </h3>
-        <label className="field">
-          <textarea
-            className="field__textarea"
-            value={data.introText}
-            onChange={(e) => set("introText", e.target.value)}
-          />
-        </label>
-      </section>
-
-      {/* 4. Order Items */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">4</span> Order Items
-          <span className="form-card__hint">
-            Enter item details with Amount (₹)
-          </span>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm manage-columns-btn"
-            onClick={() => setShowColumnModal(true)}
-          >
-            ⚙ Manage Columns
-          </button>
-        </h3>
-        <OrderItemsTable
-          variant="po"
+      <div className="po-section">
+        <VendorDetails
           mode="form"
-          items={data.items}
-          onChange={(items) => set("items", items)}
-          columns={columns}
+          vendor={data.vendor}
+          onChange={(v) => set("vendor", v)}
         />
-      </section>
+      </div>
 
-      {/* 5. Amount Summary - User editable */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">5</span> Amount Summary
-        </h3>
-        <div className="field-grid">
-          <label className="field">
-            <span className="field__label">Total Amount (₹)</span>
-            <input
-              type="number"
-              className="field__input"
-              value={data.grandTotal || ""}
-              onChange={(e) => set("grandTotal", e.target.value)}
-              placeholder="Enter total amount"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">GST %</span>
-            <input
-              type="number"
-              className="field__input"
-              value={data.gstPercent || ""}
-              onChange={(e) => set("gstPercent", e.target.value)}
-              placeholder="e.g. 18"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">GST Amount (₹)</span>
-            <input
-              type="number"
-              className="field__input"
-              value={data.gstAmount || ""}
-              onChange={(e) => set("gstAmount", e.target.value)}
-              placeholder="Enter GST amount"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Final Total (₹)</span>
-            <input
-              type="number"
-              className="field__input"
-              value={data.finalTotal || ""}
-              onChange={(e) => set("finalTotal", e.target.value)}
-              placeholder="Enter final total"
+       <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">03</div>
+
+          <div className="po-card__heading">
+            <h3>Intro Paragraph</h3>
+          </div>
+        </div>
+
+        <div className="po-card__body">
+          <label className="po-field">
+            <textarea
+              className="po-textarea"
+              value={data.introText}
+              onChange={(e) => set("introText", e.target.value)}
             />
           </label>
         </div>
       </section>
 
-      {/* 6. Delivery Details */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">6</span> Delivery Details
-        </h3>
-        <div className="field-grid">
-          <label className="field field--wide">
-            <span className="field__label">Delivery Address</span>
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">04</div>
+
+          <div className="po-card__heading">
+  <h3>Order Items</h3>
+
+  <label className="po-amount-toggle">
+    <input
+      type="checkbox"
+      checked={includeAmountDetails}
+      onChange={(e) => setIncludeAmountDetails(e.target.checked)}
+    />
+    <span>Include amount details</span>
+  </label>
+</div>
+          <button
+            type="button"
+            className="po-btn po-btn--secondary po-btn--sm"
+            onClick={() => setShowColumnModal(true)}
+          >
+            ⚙ Manage Columns
+          </button>
+        </div>
+
+        <div className="po-card__body po-card__body--table">
+          <OrderItemsTable
+            variant="po"
+            mode="form"
+            items={data.items}
+            onChange={(items) => set("items", items)}
+            columns={columns}
+          />
+        </div>
+      </section>
+
+      <section className="po-card">
+  <div className="po-card__header">
+    <div className="po-card__step">05</div>
+
+    <div className="po-card__heading">
+      <h3>Amount Summary</h3>
+    </div>
+  </div>
+
+  <div className="po-grid">
+
+    {/* =========================================================
+        TOTAL AMOUNT — AUTOMATIC
+        Sum of all Order Item Amount values
+       ========================================================= */}
+    <label className="po-field">
+      <span className="po-field__label">
+        Total Amount (₹)
+      </span>
+
+      <input
+        type="number"
+        className="po-input"
+        value={subtotal}
+        readOnly
+      />
+    </label>
+
+
+    {/* =========================================================
+        GST % — USER INPUT
+       ========================================================= */}
+    <label className="po-field">
+      <span className="po-field__label">
+        GST %
+      </span>
+
+      <input
+        type="number"
+        className="po-input"
+        value={data.gstPercent || ""}
+        onChange={(e) =>
+          set("gstPercent", e.target.value)
+        }
+        placeholder="e.g. 18"
+        min="0"
+      />
+    </label>
+
+
+    {/* =========================================================
+        GST AMOUNT — AUTOMATIC
+       ========================================================= */}
+    <label className="po-field">
+      <span className="po-field__label">
+        GST Amount (₹)
+      </span>
+
+      <input
+        type="number"
+        className="po-input"
+        value={gstAmount}
+        readOnly
+      />
+    </label>
+
+
+    {/* =========================================================
+        FINAL TOTAL — AUTOMATIC
+       ========================================================= */}
+    <label className="po-field">
+      <span className="po-field__label">
+        Final Total (₹)
+      </span>
+
+      <input
+        type="number"
+        className="po-input"
+        value={grandTotal}
+        readOnly
+      />
+    </label>
+
+  </div>
+</section>
+
+
+        <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">06</div>
+
+          <div className="po-card__heading">
+            <h3>Delivery Details</h3>
+          </div>
+        </div>
+
+        <div className="po-grid">
+          <label className="po-field po-field--wide">
+            <span className="po-field__label">Delivery Address</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.delivery.address}
-              onChange={(e) => setNested("delivery", "address", e.target.value)}
+              onChange={(e) =>
+                setNested("delivery", "address", e.target.value)
+              }
             />
           </label>
-          <label className="field">
-            <span className="field__label">Delivery Date</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Delivery Date</span>
+
             <input
               type="date"
-              className="field__input"
+              className="po-input"
               value={data.delivery.date}
               onChange={(e) => setNested("delivery", "date", e.target.value)}
             />
           </label>
-          <label className="field">
-            <span className="field__label">Mode of Transport</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Mode of Transport</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.delivery.mode}
               onChange={(e) => setNested("delivery", "mode", e.target.value)}
               placeholder="e.g. By Road / Courier"
             />
           </label>
-          <label className="field">
-            <span className="field__label">Expected Delivery</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Expected Delivery</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.delivery.expectedDelivery}
               onChange={(e) =>
                 setNested("delivery", "expectedDelivery", e.target.value)
@@ -494,47 +747,60 @@ export default function PurchaseOrderForm() {
         </div>
       </section>
 
-      {/* 7. Payment Details */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">7</span> Payment Details
-        </h3>
-        <div className="field-grid">
-          <label className="field">
-            <span className="field__label">Payment Terms</span>
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">07</div>
+
+          <div className="po-card__heading">
+            <h3>Payment Details</h3>
+          </div>
+        </div>
+
+        <div className="po-grid">
+          <label className="po-field">
+            <span className="po-field__label">Payment Terms</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.payment.terms}
-              onChange={(e) => setNested("payment", "terms", e.target.value)}
+              onChange={(e) =>
+                setNested("payment", "terms", e.target.value)
+              }
               placeholder="e.g. 80% advance, 20% before dispatch"
             />
           </label>
-          <label className="field">
-            <span className="field__label">Advance %</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Advance %</span>
+
             <input
               type="number"
-              className="field__input"
+              className="po-input"
               value={data.payment.advancePercent}
               onChange={(e) =>
                 setNested("payment", "advancePercent", e.target.value)
               }
             />
           </label>
-          <label className="field">
-            <span className="field__label">Credit Days</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Credit Days</span>
+
             <input
               type="number"
-              className="field__input"
+              className="po-input"
               value={data.payment.creditDays}
               onChange={(e) =>
                 setNested("payment", "creditDays", e.target.value)
               }
             />
           </label>
-          <label className="field field--wide">
-            <span className="field__label">Bank Details</span>
+
+          <label className="po-field po-field--wide">
+            <span className="po-field__label">Bank Details</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.payment.bankDetails}
               onChange={(e) =>
                 setNested("payment", "bankDetails", e.target.value)
@@ -545,61 +811,82 @@ export default function PurchaseOrderForm() {
         </div>
       </section>
 
-      {/* 8. Terms & Conditions */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">8</span> Terms &amp; Conditions
-        </h3>
-        <TermsEditor
-          mode="form"
-          terms={data.terms}
-          onChange={(t) => set("terms", t)}
-        />
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">08</div>
+
+          <div className="po-card__heading">
+            <h3>Terms &amp; Conditions</h3>
+          </div>
+        </div>
+
+        <div className="po-card__body">
+          <TermsEditor
+            mode="form"
+            terms={data.terms}
+            onChange={(t) => set("terms", t)}
+          />
+        </div>
       </section>
 
-      {/* 9. Notes */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">9</span> Notes
-        </h3>
-        <textarea
-          className="field__textarea field__textarea--lg"
-          value={data.notes}
-          onChange={(e) => set("notes", e.target.value)}
-          placeholder="Any additional notes for this order..."
-        />
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">09</div>
+
+          <div className="po-card__heading">
+            <h3>Notes</h3>
+          </div>
+        </div>
+
+        <div className="po-card__body">
+          <textarea
+            className="po-textarea po-textarea--large"
+            value={data.notes}
+            onChange={(e) => set("notes", e.target.value)}
+            placeholder="Any additional notes for this order..."
+          />
+        </div>
       </section>
 
-      {/* 10. Signature */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">10</span> Signature
-        </h3>
-        <div className="field-grid field-grid--tight">
-          <label className="field">
-            <span className="field__label">Prepared By</span>
+      <section className="po-card">
+        <div className="po-card__header">
+          <div className="po-card__step">10</div>
+
+          <div className="po-card__heading">
+            <h3>Signature</h3>
+          </div>
+        </div>
+
+        <div className="po-grid po-grid--compact">
+          <label className="po-field">
+            <span className="po-field__label">Prepared By</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.signatures.preparedBy}
               onChange={(e) =>
                 setNested("signatures", "preparedBy", e.target.value)
               }
             />
           </label>
-          <label className="field">
-            <span className="field__label">Checked By</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Checked By</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.signatures.checkedBy}
               onChange={(e) =>
                 setNested("signatures", "checkedBy", e.target.value)
               }
             />
           </label>
-          <label className="field">
-            <span className="field__label">Approved By</span>
+
+          <label className="po-field">
+            <span className="po-field__label">Approved By</span>
+
             <input
-              className="field__input"
+              className="po-input"
               value={data.signatures.approvedBy}
               onChange={(e) =>
                 setNested("signatures", "approvedBy", e.target.value)
@@ -609,37 +896,57 @@ export default function PurchaseOrderForm() {
         </div>
       </section>
 
-      <div className="sticky-actionbar">
-        <span className="sticky-actionbar__status">
+      <div className="po-footerbar">
+        <div className="po-footerbar__status">
           {savedAt
             ? `Draft saved at ${savedAt.toLocaleTimeString()}`
             : "Not saved yet"}
-        </span>
-        <button className="btn btn-ghost" onClick={clearForm}>
-          Clear
-        </button>
-        <button className="btn btn-secondary" onClick={saveDraft}>
-          Save Draft
-        </button>
-        <button className="btn btn-primary" onClick={goToPreview}>
-          Preview →
-        </button>
+        </div>
+
+        <div className="po-footerbar__actions">
+          <button
+            type="button"
+            className="po-btn po-btn--ghost"
+            onClick={clearForm}
+          >
+            Clear
+          </button>
+
+          <button
+            type="button"
+            className="po-btn po-btn--secondary"
+            onClick={saveDraft}
+          >
+            Save Draft
+          </button>
+
+          <button
+            type="button"
+            className="po-btn po-btn--primary"
+            onClick={goToPreview}
+          >
+            Preview →
+          </button>
+        </div>
       </div>
 
-      {/* Manage Columns modal */}
       {showColumnModal && (
         <div
-          className="mc-overlay"
+          className="po-modal"
           role="dialog"
           aria-modal="true"
           onClick={() => setShowColumnModal(false)}
         >
-          <div className="mc-panel" onClick={(e) => e.stopPropagation()}>
-            <div className="mc-panel__header">
+          <div
+            className="po-modal__panel"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="po-modal__header">
               <h3>Manage Columns</h3>
+
               <button
                 type="button"
-                className="icon-btn"
+                className="po-icon-btn"
                 title="Close"
                 onClick={() => setShowColumnModal(false)}
               >
@@ -647,73 +954,98 @@ export default function PurchaseOrderForm() {
               </button>
             </div>
 
-            <div className="mc-panel__body">
-              <ul className="mc-list">
+            <div className="po-modal__body">
+              <ul className="po-column-list">
                 {columns.map((c, idx) => (
                   <li
                     key={c.id}
-                    className={`mc-list__row${c.visible === false ? " mc-list__row--hidden" : ""}`}
+                    className={`po-column-row${
+                      c.visible === false
+                        ? " po-column-row--hidden"
+                        : ""
+                    }`}
                   >
-                    <span className="mc-list__name">
-                      {c.label}
+                    <div className="po-column-row__left">
+                      <span>{c.label}</span>
+
                       {c.custom && (
-                        <span className="mc-list__badge">custom</span>
+                        <span className="po-column-badge">
+                          custom
+                        </span>
                       )}
-                    </span>
-                    <div className="mc-list__actions">
+                    </div>
+
+                    <div className="po-column-row__actions">
                       <button
                         type="button"
-                        className="icon-btn"
+                        className="po-icon-btn"
+                        disabled={
+                          c.movable === false || idx === 0
+                        }
                         title="Move up"
-                        disabled={c.movable === false || idx === 0}
-                        onClick={() => handleMoveColumn(c, "up")}
+                        onClick={() =>
+                          handleMoveColumn(c, "up")
+                        }
                       >
                         ↑
                       </button>
+
                       <button
                         type="button"
-                        className="icon-btn"
-                        title="Move down"
+                        className="po-icon-btn"
                         disabled={
-                          c.movable === false || idx === columns.length - 1
+                          c.movable === false ||
+                          idx === columns.length - 1
                         }
-                        onClick={() => handleMoveColumn(c, "down")}
+                        title="Move down"
+                        onClick={() =>
+                          handleMoveColumn(c, "down")
+                        }
                       >
                         ↓
                       </button>
+
                       <button
                         type="button"
-                        className="icon-btn"
+                        className="po-icon-btn"
                         title="Rename column"
-                        onClick={() => handleRenameColumn(c)}
+                        onClick={() =>
+                          handleRenameColumn(c)
+                        }
                       >
                         ✎
                       </button>
+
                       <button
                         type="button"
-                        className="icon-btn"
+                        className="po-icon-btn"
+                        disabled={c.hideable === false}
                         title={
                           c.hideable === false
                             ? "Always visible (required for calculations)"
                             : c.visible === false
-                              ? "Show column"
-                              : "Hide column"
+                            ? "Show column"
+                            : "Hide column"
                         }
-                        disabled={c.hideable === false}
-                        onClick={() => handleToggleColumnVisibility(c)}
+                        onClick={() =>
+                          handleToggleColumnVisibility(c)
+                        }
                       >
                         {c.visible === false ? "🙈" : "👁"}
                       </button>
+
                       <button
                         type="button"
-                        className="icon-btn icon-btn--danger"
+                        className="po-icon-btn po-icon-btn--danger"
+                        disabled={c.removable === false}
                         title={
                           c.removable === false
                             ? "Required for calculations"
                             : "Delete column"
                         }
-                        disabled={c.removable === false}
-                        onClick={() => handleDeleteColumn(c)}
+                        onClick={() =>
+                          handleDeleteColumn(c)
+                        }
                       >
                         ✕
                       </button>
@@ -722,48 +1054,67 @@ export default function PurchaseOrderForm() {
                 ))}
               </ul>
 
-              <div className="mc-add">
+              <div className="po-column-add">
                 <h4>Add New Column</h4>
-                <div className="field-grid">
-                  <label className="field">
-                    <span className="field__label">Column Name</span>
+
+                <div className="po-grid">
+                  <label className="po-field">
+                    <span className="po-field__label">
+                      Column Name
+                    </span>
+
                     <input
-                      className="field__input"
+                      className="po-input"
                       value={newColLabel}
-                      onChange={(e) => setNewColLabel(e.target.value)}
+                      onChange={(e) =>
+                        setNewColLabel(e.target.value)
+                      }
                       placeholder="e.g. Heat Number"
                     />
                   </label>
-                  <label className="field">
-                    <span className="field__label">Data Type</span>
+
+                  <label className="po-field">
+                    <span className="po-field__label">
+                      Data Type
+                    </span>
+
                     <select
-                      className="field__input"
+                      className="po-input"
                       value={newColType}
-                      onChange={(e) => setNewColType(e.target.value)}
+                      onChange={(e) =>
+                        setNewColType(e.target.value)
+                      }
                     >
                       <option value="text">Text</option>
                       <option value="number">Number</option>
                       <option value="date">Date</option>
-                      <option value="dropdown">Dropdown</option>
+                      <option value="dropdown">
+                        Dropdown
+                      </option>
                     </select>
                   </label>
+
                   {newColType === "dropdown" && (
-                    <label className="field field--wide">
-                      <span className="field__label">
+                    <label className="po-field po-field--wide">
+                      <span className="po-field__label">
                         Dropdown Options (comma separated)
                       </span>
+
                       <input
-                        className="field__input"
+                        className="po-input"
                         value={newColOptions}
-                        onChange={(e) => setNewColOptions(e.target.value)}
+                        onChange={(e) =>
+                          setNewColOptions(e.target.value)
+                        }
                         placeholder="e.g. A36, A572, SS400"
                       />
                     </label>
                   )}
                 </div>
+
                 <button
                   type="button"
-                  className="btn btn-primary btn-sm"
+                  className="po-btn po-btn--primary po-btn--sm"
                   disabled={!newColLabel.trim()}
                   onClick={handleAddColumn}
                 >
@@ -774,64 +1125,8 @@ export default function PurchaseOrderForm() {
           </div>
         </div>
       )}
-
-      <style>{`
-        .manage-columns-btn { margin-left: 12px; }
-
-        .mc-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(15, 23, 42, 0.55);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-          padding: 20px;
-        }
-        .mc-panel {
-          background: #fff;
-          border-radius: 10px;
-          width: 100%;
-          max-width: 560px;
-          max-height: 85vh;
-          overflow-y: auto;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-        }
-        .mc-panel__header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 16px 20px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .mc-panel__header h3 { margin: 0; font-size: 16px; }
-        .mc-panel__body { padding: 16px 20px 20px; }
-        .mc-list { list-style: none; margin: 0 0 20px; padding: 0; }
-        .mc-list__row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-          padding: 8px 10px;
-          border-radius: 6px;
-          border: 1px solid #e5e7eb;
-          margin-bottom: 6px;
-        }
-        .mc-list__row--hidden { opacity: 0.5; }
-        .mc-list__name { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
-        .mc-list__badge {
-          font-size: 10.5px;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          background: #eef2ff;
-          color: #4338ca;
-          border-radius: 999px;
-          padding: 2px 7px;
-        }
-        .mc-list__actions { display: flex; align-items: center; gap: 4px; }
-        .mc-add { border-top: 1px solid #e5e7eb; padding-top: 16px; }
-        .mc-add h4 { margin: 0 0 10px; font-size: 13.5px; }
-      `}</style>
     </div>
-  );
-}
+  </div>
+  </>
+);
+    }

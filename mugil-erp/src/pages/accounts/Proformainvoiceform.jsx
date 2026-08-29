@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ProformaInvoicePreview from "./ProformaInvoicePreview";
 import { useNavigate } from "react-router-dom";
+import "./Proformainvoiceform.css";
+import Header from "../../components/Header";
 
 const STORAGE_KEY = "mei_proforma_invoice_draft";
+
+// Standalone, PDF-accurate print renderer (ProformaInvoicePrint.html/.js/.css).
+// This assumes the three print files are placed together in the app's
+// `public/` folder so they're served from the site root. Adjust the path
+// here if you host them somewhere else.
+const PRINT_URL = "/ProformaInvoicePrint.html";
 
 const UNIT_OPTIONS = ["Nos", "Kgs", "Mtr", "Set", "Box", "Ltr", "Pcs"];
 
@@ -66,7 +73,6 @@ const getInitialState = () => ({
    ------------------------------------------------------------------ */
 
 export default function ProformaInvoiceForm() {
-  const [view, setView] = useState("form"); // "form" | "preview"
   const [supplier, setSupplier] = useState(emptySupplier());
   const [invoiceDetails, setInvoiceDetails] = useState(emptyInvoiceDetails());
   const [items, setItems] = useState([emptyItem()]);
@@ -176,31 +182,45 @@ export default function ProformaInvoiceForm() {
     }
   };
 
-  const handlePreview = () => setView("preview");
-  const handleBack = () => setView("form");
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const payload = {
+      supplier,
+      invoiceDetails,
+      items,
+      taxSummary,
+      declaration,
+    };
 
-  /* ---------------- preview view ---------------- */
+    // Stage the data the same way "Save Draft" does, so the print page's
+    // localStorage fallback can find it even if the postMessage below
+    // doesn't arrive in time (slow-loading tab, popup blocker, etc.).
+    // This does not touch the form's own draft-loading behavior.
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (err) {
+      console.warn("Could not stage invoice data for printing:", err);
+    }
 
-  if (view === "preview") {
-    return (
-      <ProformaInvoicePreview
-        supplier={supplier}
-        invoiceDetails={invoiceDetails}
-        items={items}
-        taxSummary={taxSummary}
-        declaration={declaration}
-        onBack={handleBack}
-        onPrint={handlePrint}
-      />
-    );
-  }
+    const printWindow = window.open(PRINT_URL, "_blank");
+    if (printWindow) {
+      // Also hand the live, possibly-unsaved data straight to the new
+      // tab once it has had a moment to attach its message listener.
+      setTimeout(() => {
+        printWindow.postMessage(
+          { type: "PROFORMA_INVOICE_DATA", data: payload },
+          "*",
+        );
+      }, 300);
+    }
+  };
 
   /* ---------------- form view ---------------- */
   const backhandler = () => {
     navigate("/accounts");
   };
   return (
+    <>
+          <Header />
     <div className="form-page">
       {/* ================= SECTION 1 : Supplier Details ================= */}
       <div className="form-card">
@@ -669,12 +689,13 @@ export default function ProformaInvoiceForm() {
           <button
             type="button"
             className="btn btn--primary"
-            onClick={handlePreview}
+            onClick={handlePrint}
           >
             Preview
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 }

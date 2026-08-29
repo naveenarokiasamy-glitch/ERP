@@ -220,14 +220,7 @@ const handleBack = () => navigate("/inventory/material");
     Material Movement History
   </span>
 </div>
-
-          <p className="page-subtitle">
-            Complete, read-only traceability of every material movement across the module.
-          </p>
-        </div>
-
-        <div className="page-header-right">
-          <button
+<button
             onClick={handleBack}
             className="back-button"
           >
@@ -248,6 +241,13 @@ const handleBack = () => navigate("/inventory/material");
 
             Back
           </button>
+          <p className="page-subtitle">
+            Complete, read-only traceability of every material movement across the module.
+          </p>
+        </div>
+
+        <div className="page-header-right">
+          
         </div>
       </div>
 

@@ -67,6 +67,7 @@
     display: inline-flex;
     align-items: center;
     gap: 10px;
+    width: fit-content;
 
     padding: 11px 18px;
 
@@ -821,10 +822,15 @@
         padding:18px;
     }
 
-    .rfc-page-header{
-        flex-direction:column;
-        align-items:flex-start;
-    }
+    .rfc-page-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
 
     .rfc-table-header{
         padding:18px;

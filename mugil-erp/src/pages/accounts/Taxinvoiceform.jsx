@@ -1,7 +1,47 @@
 import React, { useState, useEffect, useMemo } from "react";
 import TaxInvoicePreview from "./TaxInvoicePreview";
-import "../../styles/form.css";
+import "./TaxInvoice.css";
 import { useNavigate } from "react-router-dom";
+import Header from "../../components/Header";
+
+// ---------------------------------------------------------------------------
+// Lazy-loads the standalone print engine (TaxInvoicePrint.js) into the page
+// on first use, so no manual <script> tag needs to be added to index.html.
+// Mirrors the same pattern QuotationForm.jsx uses for QuotationPrint.js.
+// Safe to call repeatedly.
+// ---------------------------------------------------------------------------
+let taxInvoicePrintEnginePromise = null;
+function loadTaxInvoicePrintEngine() {
+  if (typeof window.generateTaxInvoicePrint === "function") {
+    return Promise.resolve();
+  }
+  if (taxInvoicePrintEnginePromise) return taxInvoicePrintEnginePromise;
+
+  taxInvoicePrintEnginePromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector(
+      'script[data-tax-invoice-print-engine="true"]',
+    );
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () =>
+        reject(new Error("TaxInvoicePrint.js failed to load")),
+      );
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "/TaxInvoicePrint.js";
+    script.async = true;
+    script.dataset.taxInvoicePrintEngine = "true";
+    script.onload = () => resolve();
+    script.onerror = () => {
+      taxInvoicePrintEnginePromise = null; // allow retrying on a later click
+      reject(new Error("TaxInvoicePrint.js failed to load"));
+    };
+    document.head.appendChild(script);
+  });
+
+  return taxInvoicePrintEnginePromise;
+}
 
 const COMPANY = {
   name: "MUGIL ENGINEERING INDUSTRY",
@@ -13,6 +53,21 @@ const COMPANY = {
   cell2: "89039-52887",
   pan: "AHDPR8644K",
 };
+
+const COMPANY_ADDRESSES = [
+  {
+    id: "unit1",
+    label: "Unit 1",
+    address:
+      "4/211, S.F. No.105, Thanjavur Main Road, Devarayanery, Assor (P.O.), Trichy - 620 015",
+  },
+  {
+    id: "unit2",
+    label: "Unit 2",
+    address:
+      "S.F. No: 436 / 5A, Near B K Bharath Township, Thanjavur Main Road, Valavanthankottai, Trichy - 620015",
+  },
+];
 
 const customers = [
   {
@@ -113,6 +168,7 @@ const defaultFormData = {
   stateNameCode: "",
   receiverGst: "",
   consigneeGst: "",
+  companyAddressId: "unit1",
 
   cgstPct: 9,
   sgstPct: 9,
@@ -182,6 +238,7 @@ function numberToWordsIndian(num) {
     if (n < 20) return ones[n];
     return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
   };
+
   const threeDigits = (n) => {
     if (n < 100) return twoDigits(n);
     return (
@@ -243,9 +300,18 @@ export default function TaxInvoiceForm() {
     () => customers.find((c) => c.gst === formData.receiverGst) || null,
     [formData.receiverGst],
   );
+
   const consignee = useMemo(
     () => customers.find((c) => c.gst === formData.consigneeGst) || null,
     [formData.consigneeGst],
+  );
+
+  const selectedCompanyAddress = useMemo(
+    () =>
+      COMPANY_ADDRESSES.find(
+        (address) => address.id === formData.companyAddressId,
+      ) || COMPANY_ADDRESSES[0],
+    [formData.companyAddressId],
   );
 
   /* Place of supply is derived entirely from the consignee */
@@ -270,7 +336,9 @@ export default function TaxInvoiceForm() {
       prev.map((it) => (it.id === id ? { ...it, [field]: value } : it)),
     );
   };
+
   const addRow = () => setItems((prev) => [...prev, emptyItem()]);
+
   const duplicateRow = (id) => {
     setItems((prev) => {
       const idx = prev.findIndex((it) => it.id === id);
@@ -281,6 +349,7 @@ export default function TaxInvoiceForm() {
       return next;
     });
   };
+
   const deleteRow = (id) => {
     setItems((prev) =>
       prev.length > 1 ? prev.filter((it) => it.id !== id) : prev,
@@ -292,6 +361,7 @@ export default function TaxInvoiceForm() {
     ...it,
     amount: (parseFloat(it.quantity) || 0) * (parseFloat(it.rate) || 0),
   }));
+
   const subtotal = itemsWithAmount.reduce((sum, it) => sum + it.amount, 0);
 
   const cgstAmount = (subtotal * (parseFloat(formData.cgstPct) || 0)) / 100;
@@ -299,13 +369,21 @@ export default function TaxInvoiceForm() {
   const igstAmount = (subtotal * (parseFloat(formData.igstPct) || 0)) / 100;
 
   const beforeRounding = subtotal + cgstAmount + sgstAmount + igstAmount;
-  const grandTotalRaw = beforeRounding + (parseFloat(formData.roundedOff) || 0);
+  const grandTotalRaw =
+    beforeRounding + (parseFloat(formData.roundedOff) || 0);
   const grandTotal = Math.round(grandTotalRaw);
   const roundedOffAuto = grandTotal - beforeRounding;
+
   const navigate = useNavigate();
+
   const amountInWords = numberToWordsIndian(grandTotal) + " Rupees Only";
+
   const previewData = {
-    company: COMPANY,
+    company: {
+      ...COMPANY,
+      worksLine1: `Works : ${selectedCompanyAddress.address}`,
+      worksLine2: "",
+    },
     formData,
     items: itemsWithAmount,
     receiver,
@@ -327,425 +405,766 @@ export default function TaxInvoiceForm() {
     },
   };
 
+  // Opens the new standalone print system (TaxInvoicePrint.html/css/js) in
+  // its own tab, handing it the exact same `previewData` this form already
+  // computes -- mirrors QuotationForm.jsx's goToPreview(). The existing
+  // in-app "preview" view/TaxInvoicePreview component above is left intact
+  // and untouched; this simply gives the Preview button a second, primary
+  // action (print/PDF) without removing any existing functionality.
+  const goToPrint = async () => {
+    try {
+      await loadTaxInvoicePrintEngine();
+      window.generateTaxInvoicePrint(previewData);
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Print preview isn't available: couldn't load /TaxInvoicePrint.js. " +
+          "Make sure TaxInvoicePrint.html, TaxInvoicePrint.css, and TaxInvoicePrint.js " +
+          "are deployed as static files reachable at the site root (e.g. copied into " +
+          "your app's public/ folder), and that public/left.png and public/right.png exist.",
+      );
+    }
+  };
+
   if (view === "preview") {
     return (
       <TaxInvoicePreview data={previewData} onBack={() => setView("form")} />
     );
   }
+
   const handleBack = () => {
     navigate("/accounts");
   };
+
   return (
-    <div className="form-page">
-      <button
-        onClick={handleBack}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-        Back
-      </button>
-      <h1 style={{ margin: 0 }}>Tax Invoice</h1>
-
-      {/* 1. Invoice Details */}
-      <section className="form-section">
-        <h2>Invoice Details</h2>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Invoice Number</label>
-            <input
-              value={formData.invoiceNumber}
-              onChange={(e) => updateField("invoiceNumber", e.target.value)}
-              placeholder="e.g. 01"
-            />
-          </div>
-          <div className="form-field">
-            <label>Invoice Date</label>
-            <input
-              type="date"
-              value={formData.invoiceDate}
-              onChange={(e) => updateField("invoiceDate", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>Date of Supply</label>
-            <input
-              type="date"
-              value={formData.dateOfSupply}
-              onChange={(e) => updateField("dateOfSupply", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>Reverse Charge (Y/N)</label>
-            <select
-              value={formData.reverseCharge}
-              onChange={(e) => updateField("reverseCharge", e.target.value)}
+     <>
+                  <Header />
+    <div className="ti-form-page">
+      <div className="ti-form-header">
+        <div className="ti-form-header-left">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="ti-form-back-btn"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <option value="NO">NO</option>
-              <option value="YES">YES</option>
-            </select>
-          </div>
-          <div className="form-field">
-            <label>Vehicle Number</label>
-            <input
-              value={formData.vehicleNumber}
-              onChange={(e) => updateField("vehicleNumber", e.target.value)}
-              placeholder="e.g. TN23AV9019"
-            />
-          </div>
-          <div className="form-field">
-            <label>Mode of Transport</label>
-            <input
-              value={formData.modeOfTransport}
-              onChange={(e) => updateField("modeOfTransport", e.target.value)}
-              placeholder="e.g. VAN"
-            />
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+
+          <div className="ti-form-title-block">
+            <h1 className="ti-form-title">Tax Invoice</h1>
+            <p className="ti-form-subtitle">
+              Create and manage tax invoice details
+            </p>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* 2. Receiver */}
-      <section className="form-section">
-        <h2>Details of Receiver (Billed To)</h2>
-        <div className="form-field">
-          <label>Select GST</label>
-          <select
-            value={formData.receiverGst}
-            onChange={(e) => updateField("receiverGst", e.target.value)}
-          >
-            <option value="">-- Select GST --</option>
-            {customers.map((c) => (
-              <option key={c.gst} value={c.gst}>
-                {c.gst} — {c.companyName}
-              </option>
-            ))}
-          </select>
+      <div className="ti-form-content">
+
+        {/* 1. Invoice Details */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">01</span>
+            <h2 className="ti-form-section-title">Invoice Details</h2>
+          </div>
+
+          <div className="ti-form-section-body">
+            <div className="ti-form-grid">
+              <div className="ti-form-field">
+                <label className="ti-form-label">Invoice Number</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.invoiceNumber}
+                  onChange={(e) =>
+                    updateField("invoiceNumber", e.target.value)
+                  }
+                  placeholder="e.g. 01"
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Invoice Date</label>
+                <input
+                  className="ti-form-input"
+                  type="date"
+                  value={formData.invoiceDate}
+                  onChange={(e) =>
+                    updateField("invoiceDate", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Date of Supply</label>
+                <input
+                  className="ti-form-input"
+                  type="date"
+                  value={formData.dateOfSupply}
+                  onChange={(e) =>
+                    updateField("dateOfSupply", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Reverse Charge (Y/N)</label>
+                <select
+                  className="ti-form-select"
+                  value={formData.reverseCharge}
+                  onChange={(e) =>
+                    updateField("reverseCharge", e.target.value)
+                  }
+                >
+                  <option value="NO">NO</option>
+                  <option value="YES">YES</option>
+                </select>
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Vehicle Number</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.vehicleNumber}
+                  onChange={(e) =>
+                    updateField("vehicleNumber", e.target.value)
+                  }
+                  placeholder="e.g. TN23AV9019"
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Mode of Transport</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.modeOfTransport}
+                  onChange={(e) =>
+                    updateField("modeOfTransport", e.target.value)
+                  }
+                  placeholder="e.g. VAN"
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Address</label>
+                <select
+                  className="ti-form-select"
+                  value={selectedCompanyAddress.id}
+                  onChange={(e) =>
+                    updateField("companyAddressId", e.target.value)
+                  }
+                >
+                  {COMPANY_ADDRESSES.map((address) => (
+                    <option key={address.id} value={address.id}>
+                      {address.label}: {address.address}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 2. Receiver / 3. Consignee */}
+        <div className="ti-form-party-grid">
+          <section className="ti-form-party-card">
+            <div className="ti-form-party-card-header">
+              <h2 className="ti-form-party-card-title">
+                02 &nbsp; Details of Receiver (Billed To)
+              </h2>
+            </div>
+
+            <div className="ti-form-party-card-body">
+              <div className="ti-form-field ti-form-customer-select">
+                <label className="ti-form-label">Select GST</label>
+                <select
+                  className="ti-form-select"
+                  value={formData.receiverGst}
+                  onChange={(e) =>
+                    updateField("receiverGst", e.target.value)
+                  }
+                >
+                  <option value="">-- Select GST --</option>
+                  {customers.map((c) => (
+                    <option key={c.gst} value={c.gst}>
+                      {c.gst} — {c.companyName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {receiver && (
+                <div className="ti-form-grid ti-form-grid--two ti-form-readonly-grid">
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">Company Name</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.companyName}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">GST Number</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.gst}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field ti-form-field--span-2">
+                    <label className="ti-form-label">Address</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.address}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">State</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.state}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">State Code</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.stateCode}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">Phone Number</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.phone}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">Email</label>
+                    <input
+                      className="ti-form-input"
+                      value={receiver.email}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="ti-form-party-card">
+            <div className="ti-form-party-card-header">
+              <h2 className="ti-form-party-card-title">
+                03 &nbsp; Details of Consignee (Shipped To)
+              </h2>
+            </div>
+
+            <div className="ti-form-party-card-body">
+              <div className="ti-form-field ti-form-customer-select">
+                <label className="ti-form-label">Select GST</label>
+                <select
+                  className="ti-form-select"
+                  value={formData.consigneeGst}
+                  onChange={(e) =>
+                    updateField("consigneeGst", e.target.value)
+                  }
+                >
+                  <option value="">-- Select GST --</option>
+                  {customers.map((c) => (
+                    <option key={c.gst} value={c.gst}>
+                      {c.gst} — {c.companyName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {consignee && (
+                <div className="ti-form-grid ti-form-grid--two ti-form-readonly-grid">
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">Company Name</label>
+                    <input
+                      className="ti-form-input"
+                      value={consignee.companyName}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">GST</label>
+                    <input
+                      className="ti-form-input"
+                      value={consignee.gst}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field ti-form-field--span-2">
+                    <label className="ti-form-label">Address</label>
+                    <input
+                      className="ti-form-input"
+                      value={consignee.address}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">State</label>
+                    <input
+                      className="ti-form-input"
+                      value={consignee.state}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="ti-form-field">
+                    <label className="ti-form-label">State Code</label>
+                    <input
+                      className="ti-form-input"
+                      value={consignee.stateCode}
+                      readOnly
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
-        {receiver && (
-          <div className="form-grid readonly-grid">
-            <div className="form-field">
-              <label>Company Name</label>
-              <input value={receiver.companyName} readOnly />
-            </div>
-            <div className="form-field">
-              <label>GST Number</label>
-              <input value={receiver.gst} readOnly />
-            </div>
-            <div className="form-field span-2">
-              <label>Address</label>
-              <input value={receiver.address} readOnly />
-            </div>
-            <div className="form-field">
-              <label>State</label>
-              <input value={receiver.state} readOnly />
-            </div>
-            <div className="form-field">
-              <label>State Code</label>
-              <input value={receiver.stateCode} readOnly />
-            </div>
-            <div className="form-field">
-              <label>Phone Number</label>
-              <input value={receiver.phone} readOnly />
-            </div>
-            <div className="form-field">
-              <label>Email</label>
-              <input value={receiver.email} readOnly />
-            </div>
+                {/* 4. Place of Supply */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">04</span>
+            <h2 className="ti-form-section-title">Place of Supply</h2>
           </div>
-        )}
-      </section>
 
-      {/* 3. Consignee */}
-      <section className="form-section">
-        <h2>Details of Consignee (Shipped To)</h2>
-        <div className="form-field">
-          <label>Select GST</label>
-          <select
-            value={formData.consigneeGst}
-            onChange={(e) => updateField("consigneeGst", e.target.value)}
-          >
-            <option value="">-- Select GST --</option>
-            {customers.map((c) => (
-              <option key={c.gst} value={c.gst}>
-                {c.gst} — {c.companyName}
-              </option>
-            ))}
-          </select>
-        </div>
-        {consignee && (
-          <div className="form-grid readonly-grid">
-            <div className="form-field">
-              <label>Company Name</label>
-              <input value={consignee.companyName} readOnly />
-            </div>
-            <div className="form-field">
-              <label>GST</label>
-              <input value={consignee.gst} readOnly />
-            </div>
-            <div className="form-field span-2">
-              <label>Address</label>
-              <input value={consignee.address} readOnly />
-            </div>
-            <div className="form-field">
-              <label>State</label>
-              <input value={consignee.state} readOnly />
-            </div>
-            <div className="form-field">
-              <label>State Code</label>
-              <input value={consignee.stateCode} readOnly />
-            </div>
-          </div>
-        )}
-      </section>
+          <div className="ti-form-section-body">
+            <div className="ti-form-grid ti-form-grid--two">
+              <div className="ti-form-field">
+                <label className="ti-form-label">
+                  Place of Supply (Auto from Consignee)
+                </label>
+                <input
+                  className="ti-form-input"
+                  value={placeOfSupply.state}
+                  readOnly
+                  placeholder="Auto from Consignee"
+                />
+              </div>
 
-      <section className="form-section">
-        <h2>Place of Supply</h2>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Place of Supply (Auto from Consignee)</label>
-            <input
-              value={placeOfSupply.state}
-              readOnly
-              placeholder="Auto from Consignee"
-            />
+              <div className="ti-form-field">
+                <label className="ti-form-label">
+                  Name & Code of State (Enter Manually)
+                </label>
+                <input
+                  className="ti-form-input"
+                  value={formData.stateNameCode}
+                  onChange={(e) =>
+                    updateField("stateNameCode", e.target.value)
+                  }
+                  placeholder="e.g. Tamilnadu & 33"
+                />
+              </div>
+            </div>
           </div>
-          <div className="form-field">
-            <label>Name & Code of State (Enter Manually)</label>
-            <input
-              value={formData.stateNameCode}
-              onChange={(e) => updateField("stateNameCode", e.target.value)}
-              placeholder="e.g. Tamilnadu & 33"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 5. Invoice Items */}
-      <section className="form-section">
-        <h2>Invoice Items</h2>
-        <table className="items-editor">
-          <thead>
-            <tr>
-              <th style={{ width: 40 }}>SL</th>
-              <th>Description of Goods</th>
-              <th style={{ width: 100 }}>HSN/SAC</th>
-              <th style={{ width: 90 }}>Quantity</th>
-              <th style={{ width: 80 }}>Unit</th>
-              <th style={{ width: 110 }}>Rate</th>
-              <th style={{ width: 120 }}>Amount</th>
-              <th style={{ width: 130 }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {itemsWithAmount.map((it, idx) => (
-              <tr key={it.id}>
-                <td>{idx + 1}</td>
-                <td>
+        {/* 5. Invoice Items */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">05</span>
+            <h2 className="ti-form-section-title">Invoice Items</h2>
+          </div>
+
+          <div className="ti-form-section-body">
+            <div className="ti-form-items-wrapper">
+              <table className="ti-form-items-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>SL</th>
+                    <th>Description of Goods</th>
+                    <th style={{ width: 100 }}>HSN/SAC</th>
+                    <th style={{ width: 90 }}>Quantity</th>
+                    <th style={{ width: 80 }}>Unit</th>
+                    <th style={{ width: 110 }}>Rate</th>
+                    <th style={{ width: 120 }}>Amount</th>
+                    <th style={{ width: 130 }}>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {itemsWithAmount.map((it, idx) => (
+                    <tr key={it.id}>
+                      <td className="ti-form-item-sl">{idx + 1}</td>
+
+                      <td>
+                        <input
+                          className="ti-form-item-input"
+                          value={it.description}
+                          onChange={(e) =>
+                            updateItem(
+                              it.id,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          className="ti-form-item-input"
+                          value={it.hsn}
+                          onChange={(e) =>
+                            updateItem(it.id, "hsn", e.target.value)
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          className="ti-form-item-input ti-form-item-number"
+                          type="number"
+                          value={it.quantity}
+                          onChange={(e) =>
+                            updateItem(
+                              it.id,
+                              "quantity",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          className="ti-form-item-input"
+                          value={it.unit}
+                          onChange={(e) =>
+                            updateItem(it.id, "unit", e.target.value)
+                          }
+                          placeholder="Mtrs"
+                        />
+                      </td>
+
+                      <td>
+                        <input
+                          className="ti-form-item-input ti-form-item-number"
+                          type="number"
+                          value={it.rate}
+                          onChange={(e) =>
+                            updateItem(it.id, "rate", e.target.value)
+                          }
+                        />
+                      </td>
+
+                      <td className="ti-form-item-amount">
+                        ₹
+                        {it.amount.toLocaleString("en-IN", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </td>
+
+                      <td className="ti-form-row-actions">
+                        <button
+                          type="button"
+                          className="ti-form-row-btn"
+                          onClick={() => duplicateRow(it.id)}
+                        >
+                          Duplicate
+                        </button>
+
+                        <button
+                          type="button"
+                          className="ti-form-row-btn ti-form-row-btn--delete"
+                          onClick={() => deleteRow(it.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              type="button"
+              className="ti-form-add-row"
+              onClick={addRow}
+            >
+              + Add Row
+            </button>
+          </div>
+        </section>
+
+        {/* 6. Amount Summary */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">06</span>
+            <h2 className="ti-form-section-title">Amount Summary</h2>
+          </div>
+
+          <div className="ti-form-section-body">
+            <div className="ti-form-summary-layout">
+              <div className="ti-form-tax-grid">
+                <div className="ti-form-field">
+                  <label className="ti-form-label">Subtotal</label>
                   <input
-                    value={it.description}
+                    className="ti-form-input"
+                    value={subtotal.toFixed(2)}
+                    readOnly
+                  />
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">CGST %</label>
+                  <input
+                    className="ti-form-input"
+                    type="number"
+                    value={formData.cgstPct}
                     onChange={(e) =>
-                      updateItem(it.id, "description", e.target.value)
+                      updateField("cgstPct", e.target.value)
                     }
                   />
-                </td>
-                <td>
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">CGST Amount</label>
                   <input
-                    value={it.hsn}
-                    onChange={(e) => updateItem(it.id, "hsn", e.target.value)}
+                    className="ti-form-input"
+                    value={cgstAmount.toFixed(2)}
+                    readOnly
                   />
-                </td>
-                <td>
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">SGST %</label>
                   <input
+                    className="ti-form-input"
                     type="number"
-                    value={it.quantity}
+                    value={formData.sgstPct}
                     onChange={(e) =>
-                      updateItem(it.id, "quantity", e.target.value)
+                      updateField("sgstPct", e.target.value)
                     }
                   />
-                </td>
-                <td>
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">SGST Amount</label>
                   <input
-                    value={it.unit}
-                    onChange={(e) => updateItem(it.id, "unit", e.target.value)}
-                    placeholder="Mtrs"
+                    className="ti-form-input"
+                    value={sgstAmount.toFixed(2)}
+                    readOnly
                   />
-                </td>
-                <td>
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">IGST %</label>
                   <input
+                    className="ti-form-input"
                     type="number"
-                    value={it.rate}
-                    onChange={(e) => updateItem(it.id, "rate", e.target.value)}
+                    value={formData.igstPct}
+                    onChange={(e) =>
+                      updateField("igstPct", e.target.value)
+                    }
                   />
-                </td>
-                <td className="amount-cell">
-                  ₹
-                  {it.amount.toLocaleString("en-IN", {
-                    minimumFractionDigits: 2,
-                  })}
-                </td>
-                <td className="row-actions">
-                  <button type="button" onClick={() => duplicateRow(it.id)}>
-                    Duplicate
-                  </button>
-                  <button type="button" onClick={() => deleteRow(it.id)}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <button type="button" className="add-row-btn" onClick={addRow}>
-          + Add Row
-        </button>
-      </section>
+                </div>
 
-      {/* 6. Amount Summary */}
-      <section className="form-section">
-        <h2>Amount Summary</h2>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Subtotal</label>
-            <input value={subtotal.toFixed(2)} readOnly />
+                <div className="ti-form-field">
+                  <label className="ti-form-label">IGST Amount</label>
+                  <input
+                    className="ti-form-input"
+                    value={igstAmount.toFixed(2)}
+                    readOnly
+                  />
+                </div>
+
+                <div className="ti-form-field">
+                  <label className="ti-form-label">Rounded Off</label>
+                  <input
+                    className="ti-form-input"
+                    value={roundedOffAuto.toFixed(2)}
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              <div className="ti-form-grand-total">
+                <div className="ti-form-grand-total-header">
+                  Grand Total
+                </div>
+
+                <div className="ti-form-grand-total-body">
+                  <p className="ti-form-total-label">Grand Total</p>
+
+                  <p className="ti-form-total-value">
+                    ₹
+                    {grandTotal.toLocaleString("en-IN", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
+
+                  <div className="ti-form-amount-words">
+                    <div className="ti-form-amount-words-label">
+                      Total Amount in Words
+                    </div>
+
+                    <div className="ti-form-amount-words-value">
+                      {amountInWords}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="form-field">
-            <label>CGST %</label>
-            <input
-              type="number"
-              value={formData.cgstPct}
-              onChange={(e) => updateField("cgstPct", e.target.value)}
+        </section>
+
+        {/* 7. Bank Details */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">07</span>
+            <h2 className="ti-form-section-title">
+              Company Bank Details
+            </h2>
+          </div>
+
+          <div className="ti-form-section-body">
+            <div className="ti-form-grid">
+              <div className="ti-form-field">
+                <label className="ti-form-label">Bank Name</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.bankName}
+                  onChange={(e) =>
+                    updateField("bankName", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Account Number</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.accountNumber}
+                  onChange={(e) =>
+                    updateField("accountNumber", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">Branch</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.branch}
+                  onChange={(e) =>
+                    updateField("branch", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">IFSC</label>
+                <input
+                  className="ti-form-input"
+                  value={formData.ifsc}
+                  onChange={(e) =>
+                    updateField("ifsc", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="ti-form-field">
+                <label className="ti-form-label">PAN</label>
+                <input
+                  className="ti-form-input"
+                  value={COMPANY.pan}
+                  readOnly
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+                {/* 8. Declaration */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">08</span>
+            <h2 className="ti-form-section-title">Declaration</h2>
+          </div>
+
+          <div className="ti-form-section-body">
+            <textarea
+              className="ti-form-textarea"
+              rows={4}
+              value={formData.declaration}
+              onChange={(e) =>
+                updateField("declaration", e.target.value)
+              }
             />
           </div>
-          <div className="form-field">
-            <label>CGST Amount</label>
-            <input value={cgstAmount.toFixed(2)} readOnly />
+        </section>
+
+        {/* 9. Enclosures */}
+        <section className="ti-form-section">
+          <div className="ti-form-section-header">
+            <span className="ti-form-section-number">09</span>
+            <h2 className="ti-form-section-title">Enclosures</h2>
           </div>
-          <div className="form-field">
-            <label>SGST %</label>
-            <input
-              type="number"
-              value={formData.sgstPct}
-              onChange={(e) => updateField("sgstPct", e.target.value)}
-            />
+
+          <div className="ti-form-section-body">
+            <div className="ti-form-enclosure-list">
+              {Object.keys(formData.enclosures).map((label) => (
+                <label
+                  key={label}
+                  className="ti-form-checkbox"
+                >
+                  <input
+                    type="checkbox"
+                    checked={formData.enclosures[label]}
+                    onChange={() => toggleEnclosure(label)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
           </div>
-          <div className="form-field">
-            <label>SGST Amount</label>
-            <input value={sgstAmount.toFixed(2)} readOnly />
-          </div>
-          <div className="form-field">
-            <label>IGST %</label>
-            <input
-              type="number"
-              value={formData.igstPct}
-              onChange={(e) => updateField("igstPct", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>IGST Amount</label>
-            <input value={igstAmount.toFixed(2)} readOnly />
-          </div>
-          <div className="form-field">
-            <label>Rounded Off</label>
-            <input value={roundedOffAuto.toFixed(2)} readOnly />
-          </div>
-          <div className="form-field">
-            <label>Grand Total</label>
-            <input value={grandTotal.toFixed(2)} readOnly />
-          </div>
-          <div className="form-field span-2">
-            <label>Total Amount in Words</label>
-            <input value={amountInWords} readOnly />
-          </div>
+        </section>
+
+        <div className="ti-form-actions">
+          <button
+            type="button"
+            className="ti-form-preview-btn"
+            onClick={goToPrint}
+          >
+            Preview Invoice
+          </button>
         </div>
-      </section>
-
-      {/* 7. Bank Details */}
-      <section className="form-section">
-        <h2>Company Bank Details</h2>
-        <div className="form-grid">
-          <div className="form-field">
-            <label>Bank Name</label>
-            <input
-              value={formData.bankName}
-              onChange={(e) => updateField("bankName", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>Account Number</label>
-            <input
-              value={formData.accountNumber}
-              onChange={(e) => updateField("accountNumber", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>Branch</label>
-            <input
-              value={formData.branch}
-              onChange={(e) => updateField("branch", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>IFSC</label>
-            <input
-              value={formData.ifsc}
-              onChange={(e) => updateField("ifsc", e.target.value)}
-            />
-          </div>
-          <div className="form-field">
-            <label>PAN</label>
-            <input value={COMPANY.pan} readOnly />
-          </div>
-        </div>
-      </section>
-
-      {/* 8. Declaration */}
-      <section className="form-section">
-        <h2>Declaration</h2>
-        <textarea
-          rows={4}
-          value={formData.declaration}
-          onChange={(e) => updateField("declaration", e.target.value)}
-        />
-      </section>
-
-      {/* 9. Enclosures */}
-      <section className="form-section">
-        <h2>Enclosures</h2>
-        <div className="checkbox-list">
-          {Object.keys(formData.enclosures).map((label) => (
-            <label key={label} className="checkbox-item">
-              <input
-                type="checkbox"
-                checked={formData.enclosures[label]}
-                onChange={() => toggleEnclosure(label)}
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-      </section>
-
-      <div className="form-footer-actions">
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => setView("preview")}
-        >
-          Preview
-        </button>
       </div>
     </div>
+    </>
   );
 }

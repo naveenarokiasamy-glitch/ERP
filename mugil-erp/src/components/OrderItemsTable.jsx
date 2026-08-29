@@ -28,7 +28,7 @@ export function createDefaultColumns(variant = "po") {
       makeCol(variant, "sizeThickness", "Size / Thickness", "text"),
       makeCol(variant, "qty", "Qty", "number"),
       makeCol(variant, "unit", "Unit", "text"),
-      makeCol(variant, "rate", "Rate", "number"),
+      makeCol(variant, "rate", "Rate per Unit (₹)", "number"),
       makeCol(variant, "total", "Total", "computed"),
       makeCol(variant, "actions", "Actions", "actions"),
     ];
@@ -39,7 +39,7 @@ export function createDefaultColumns(variant = "po") {
     makeCol(variant, "specification", "Specification", "text"),
     makeCol(variant, "qty", "Qty", "number"),
     makeCol(variant, "unit", "Unit", "text"),
-    makeCol(variant, "amount", "Amount (₹)", "number"),
+    makeCol(variant, "amount", "Rate per Unit (₹)", "number"),
     makeCol(variant, "actions", "Actions", "actions"),
   ];
 }
@@ -127,6 +127,21 @@ export default function OrderItemsTable({
     const meta = getBuiltInMeta(variant, c.id);
     const style = meta.minWidth ? { minWidth: meta.minWidth } : undefined;
     const handleChange = (e) => updateItem(item.id, c.id, e.target.value);
+
+    
+if (c.type === "computed") {
+  const qty = Number(item.qty) || 0;
+  const rate = Number(item.rate) || 0;
+  const total = qty * rate;
+
+  return (
+    <span className="computed-total">
+      {formatINR(total, { withSymbol: false })}
+    </span>
+  );
+}
+
+
 
     if (c.type === "dropdown") {
       if (!c.options || !c.options.length) {

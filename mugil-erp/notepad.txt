@@ -1,0 +1,6 @@
+mugil engineering industry
+
+po db
+
+git stash apply "stash@{0}"
+

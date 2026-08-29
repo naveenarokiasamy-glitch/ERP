@@ -3,13 +3,52 @@ import VendorDetails from "../../components/VendorDetails";
 import OrderItemsTable from "../../components/OrderItemsTable";
 import AmountSummary from "../../components/AmountSummary";
 import TermsEditor from "../../components/TermsEditor";
-import QuotationPreview from "./QuotationPreview";
+// import QuotationPreview from "./QuotationPreview";
 import { initialQuoteData } from "../../utils/initialData";
 import { summarizeQuoteItems } from "../../utils/calculations";
 import "./Quotation.css";
 import { useNavigate } from "react-router-dom";
-
+import Header from "../../components/Header";
 const DRAFT_KEY = "mei-erp-quotation-draft";
+
+// ---------------------------------------------------------------------------
+// Lazy-loads the standalone print engine (QuotationPrint.js) into the page
+// on first use, so no manual <script> tag needs to be added to index.html.
+// Safe to call repeatedly — later calls reuse the same in-flight/loaded
+// script instead of injecting it again.
+// ---------------------------------------------------------------------------
+let quotationPrintEnginePromise = null;
+function loadQuotationPrintEngine() {
+  if (typeof window.generateQuotationPrint === "function") {
+    return Promise.resolve();
+  }
+  if (quotationPrintEnginePromise) return quotationPrintEnginePromise;
+
+  quotationPrintEnginePromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector(
+      'script[data-quotation-print-engine="true"]',
+    );
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () =>
+        reject(new Error("QuotationPrint.js failed to load")),
+      );
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "/QuotationPrint.js";
+    script.async = true;
+    script.dataset.quotationPrintEngine = "true";
+    script.onload = () => resolve();
+    script.onerror = () => {
+      quotationPrintEnginePromise = null; // allow retrying on a later click
+      reject(new Error("QuotationPrint.js failed to load"));
+    };
+    document.head.appendChild(script);
+  });
+
+  return quotationPrintEnginePromise;
+}
 
 // Default technical sections based on the PDF
 const DEFAULT_TECHNICAL_SECTIONS = [
@@ -56,7 +95,6 @@ const DEFAULT_TECHNICAL_SECTIONS = [
 ];
 
 export default function QuotationForm() {
-  const [view, setView] = useState("form");
   const [data, setData] = useState(() => {
     const initial = initialQuoteData();
     // Set default technical details if not already set
@@ -87,17 +125,30 @@ export default function QuotationForm() {
 
   const set = (key, value) => setData((d) => ({ ...d, [key]: value }));
 
-  const summary = summarizeQuoteItems(data.items, {
-    gstPercent: Number(data.gstPercent) || 0,
-  });
+  const setNested = (parent, key, value) => {
+  setData((d) => ({
+    ...d,
+    [parent]: {
+      ...d[parent],
+      [key]: value,
+    },
+  }));
+};
+
+  const quotationSubtotal = data.items.reduce((total, item) => { const qty = Number(item.qty) || 0; 
+    const rate = Number(item.rate) || 0; return total + qty * rate; }, 0); 
+    const quotationGstPercent = Number(data.gstPercent) || 0; 
+    const quotationGstAmount = (quotationSubtotal * quotationGstPercent) / 100; 
+    const quotationFinalTotal = quotationSubtotal + quotationGstAmount; 
+    const summary = { subtotal: quotationSubtotal, gstPercent: quotationGstPercent, gstAmount: quotationGstAmount, grandTotal: quotationFinalTotal, };
 
   const validate = () => {
     const next = {};
     if (!data.quotationNumber.trim())
       next.quotationNumber = "Quotation Number is required";
     if (!data.quotationDate) next.quotationDate = "Quotation Date is required";
-    if (!data.vendor.companyName.trim())
-      next.vendorCompany = "Customer company name is required";
+if (!data.vendor.companyName.trim())
+  next.vendorCompany = "Customer company name is required";
     const hasItem = data.items.some(
       (it) => it.description.trim() && Number(it.qty) > 0,
     );
@@ -122,10 +173,31 @@ export default function QuotationForm() {
     setSavedAt(null);
   };
 
-  const goToPreview = () => {
+  const goToPreview = async () => {
     if (!validate()) return;
     saveDraft();
-    setView("preview");
+    // Opens the new standalone print system (QuotationPrint.html/css/js) in
+    // its own tab, handing it the exact same `data` and `summary` this form
+    // already computes. See QuotationPrint.js for the pagination engine.
+    //
+    // QuotationPrint.js only defines window.generateQuotationPrint once it
+    // has actually been loaded into a page. It's normally loaded inside the
+    // new print tab (via QuotationPrint.html) — but on the very first click
+    // it hasn't been loaded into THIS page (the form) yet either, so we lazy
+    // -load it here on demand rather than requiring an <script> tag to be
+    // hand-added to index.html.
+    try {
+      await loadQuotationPrintEngine();
+      window.generateQuotationPrint(data, summary);
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Print preview isn't available: couldn't load /QuotationPrint.js. " +
+          "Make sure QuotationPrint.html, QuotationPrint.css, and QuotationPrint.js " +
+          "are deployed as static files reachable at the site root (e.g. copied into " +
+          "your app's public/ folder)."
+      );
+    }
   };
 
   // ---- Technical Details helpers ----
@@ -187,482 +259,659 @@ export default function QuotationForm() {
     set("technicalDetails", DEFAULT_TECHNICAL_SECTIONS);
   };
 
-  if (view === "preview") {
-    return (
-      <QuotationPreview
-        data={data}
-        summary={summary}
-        onBack={() => setView("form")}
-      />
-    );
-  }
-
   const handleBack = () => {
     navigate("/accounts");
   };
   return (
-    <div className="form-page">
-      <div className="form-page__header">
-         <button
-            onClick={handleBack}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            Back
-          </button>
-        <div className="form-page__heading">
-          <h1>Quotation</h1>
-          <p>Fill in the details below, then preview the official document.</p>
-        </div>
-        <div className="form-page__actions">
-          <button className="btn btn-ghost" onClick={clearForm}>
-            Clear
-          </button>
-          <button className="btn btn-secondary" onClick={saveDraft}>
-            Save Draft
-          </button>
-          <button className="btn btn-primary" onClick={goToPreview}>
-            Preview →
-          </button>
-        </div>
-      </div>
+    <>
+      <Header />
+    <div className="qt-page">
 
-      {Object.keys(errors).length > 0 && (
-        <div className="validation-banner">
-          Please fix the highlighted fields before previewing:{" "}
-          {Object.values(errors).join(" · ")}
-        </div>
-      )}
+  <div className="qt-header">
 
-      {/* Quotation Details */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">1</span> Quotation Details
-        </h3>
-        <div className="field-grid">
-          <label className="field">
-            <span className="field__label">
-              Quotation Number<span className="field__required">*</span>
-            </span>
-            <input
-              className={`field__input ${errors.quotationNumber ? "has-error" : ""}`}
-              value={data.quotationNumber}
-              onChange={(e) => set("quotationNumber", e.target.value)}
-              placeholder="e.g. MEI/QTN/0626-05"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">
-              Quotation Date<span className="field__required">*</span>
-            </span>
-            <input
-              type="date"
-              className={`field__input ${errors.quotationDate ? "has-error" : ""}`}
-              value={data.quotationDate}
-              onChange={(e) => set("quotationDate", e.target.value)}
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Validity</span>
-            <input
-              className="field__input"
-              value={data.validity}
-              onChange={(e) => set("validity", e.target.value)}
-              placeholder="e.g. 7 days from the date of issue"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Delivery Time</span>
-            <input
-              className="field__input"
-              value={data.deliveryTime}
-              onChange={(e) => set("deliveryTime", e.target.value)}
-              placeholder="e.g. 4-6 weeks from PO"
-            />
-          </label>
-          <label className="field field--wide">
-            <span className="field__label">
-              Subject<span className="field__required">*</span>
-            </span>
-            <input
-              className="field__input"
-              value={data.subject}
-              onChange={(e) => set("subject", e.target.value)}
-              placeholder="e.g. Quotation for Manufacturing and Supply of Fabricated M.S. Longitudinal Pipes"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Prepared By</span>
-            <input
-              className="field__input"
-              value={data.preparedBy}
-              onChange={(e) => set("preparedBy", e.target.value)}
-              placeholder="e.g. P. Rajappa"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Company Name</span>
-            <input
-              className="field__input"
-              value={data.companyName || "Mugil Engineering Industry"}
-              onChange={(e) => set("companyName", e.target.value)}
-              placeholder="e.g. Mugil Engineering Industry"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Designation</span>
-            <input
-              className="field__input"
-              value={data.designation || "Proprietor"}
-              onChange={(e) => set("designation", e.target.value)}
-              placeholder="e.g. Proprietor"
-            />
-          </label>
-        </div>
-      </section>
+    <div className="qt-header__left">
 
-      {/* Customer Details */}
-      <VendorDetails
-        mode="form"
-        vendor={data.vendor}
-        onChange={(v) => set("vendor", v)}
-        heading="Customer Details"
-      />
-
-      {/* Intro Paragraph */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">3</span> Intro Paragraph
-        </h3>
-        <textarea
-          className="field__textarea"
-          value={data.introText}
-          onChange={(e) => set("introText", e.target.value)}
-          placeholder="e.g. We thank you for your valuable enquiry and are pleased to submit our quotation for the manufacturing and supply of fabricated Mild Steel Pipes as per your requirements."
-          rows={3}
-        />
-      </section>
-
-      {/* Quotation Items */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">4</span> Quotation Items
-          <span className="form-card__hint">
-            Totals calculate automatically
-          </span>
-        </h3>
-        <OrderItemsTable
-          variant="quote"
-          mode="form"
-          items={data.items}
-          onChange={(items) => set("items", items)}
-        />
-      </section>
-
-      {/* Amount Summary */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">5</span> Amount Summary
-        </h3>
-        <div
-          className="field-grid field-grid--tight"
-          style={{ marginBottom: 12, maxWidth: 220 }}
+      <button
+        onClick={handleBack}
+        className="qt-back-btn"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <label className="field">
-            <span className="field__label">GST %</span>
-            <input
-              type="number"
-              className="field__input"
-              value={data.gstPercent}
-              onChange={(e) => set("gstPercent", e.target.value)}
-              placeholder="18"
-            />
-          </label>
-        </div>
-        <AmountSummary mode="form" docType="quote" summary={summary} />
-      </section>
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
 
-      {/* Technical Details */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">6</span> Technical Details
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm"
-            onClick={resetToDefaultTechnical}
-            style={{ marginLeft: "auto" }}
-          >
-            ↻ Reset to Default
-          </button>
-        </h3>
-        <p className="form-card__hint" style={{ marginBottom: 16 }}>
-          Each section represents a main heading (e.g., Material, Pipe
-          Specification) with sub-points underneath.
+        <span>Back</span>
+
+      </button>
+
+      <div className="qt-title">
+
+        <h1>Quotation</h1>
+
+        <p>
+          Fill in the details below, then preview the official document.
         </p>
 
-        {data.technicalDetails.map((sec, secIdx) => (
-          <div
-            key={secIdx}
-            style={{
-              marginBottom: 20,
-              padding: 16,
-              border: "1px solid var(--border-color)",
-              borderRadius: 6,
-              background: "#fafafa",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                marginBottom: 12,
-                alignItems: "center",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: 13,
-                    fontWeight: 500,
-                    marginBottom: 4,
-                    color: "#666",
-                  }}
-                >
-                  Section Heading <span className="field__required">*</span>
-                </label>
-                <input
-                  className="field__input"
-                  value={sec.heading}
-                  onChange={(e) => updateSectionHeading(secIdx, e.target.value)}
-                  placeholder="e.g. Material, Pipe Specification, Fabrication Scope"
-                  style={{ fontWeight: 600 }}
-                />
-              </div>
-              <button
-                type="button"
-                className="btn btn-danger btn-sm"
-                onClick={() => removeSection(secIdx)}
-                title="Remove section"
-                style={{ marginTop: 20 }}
-              >
-                ✕ Remove Section
-              </button>
+      </div>
+
+    </div>
+
+    <div className="qt-header__actions">
+
+      <button
+        className="btn btn-ghost"
+        onClick={clearForm}
+      >
+        Clear
+      </button>
+
+      <button
+        className="btn btn-secondary"
+        onClick={saveDraft}
+      >
+        Save Draft
+      </button>
+
+      <button
+        className="btn btn-primary"
+        onClick={goToPreview}
+      >
+        Preview →
+      </button>
+
+    </div>
+
+  </div>
+
+  {Object.keys(errors).length > 0 && (
+
+    <div className="qt-alert">
+
+      <div className="qt-alert__icon">!</div>
+
+      <div className="qt-alert__content">
+
+        <strong>
+          Validation Required
+        </strong>
+
+        <span>
+          Please fix the highlighted fields before previewing:
+          {" "}
+          {Object.values(errors).join(" · ")}
+        </span>
+
+      </div>
+
+    </div>
+
+  )}
+
+  <section className="qt-card">
+
+    <div className="qt-card__header">
+
+      <div className="qt-step">
+        01
+      </div>
+
+      <div className="qt-card__heading">
+
+        <h3>
+          Quotation Details
+        </h3>
+
+        <p>
+          Basic quotation information
+        </p>
+
+      </div>
+
+    </div>
+
+    <div className="qt-grid">
+
+      <label className="qt-field">
+
+        <span className="qt-label">
+          Quotation Number
+          <span className="qt-required">*</span>
+        </span>
+
+        <input
+          className={`qt-input ${
+            errors.quotationNumber ? "qt-input--error" : ""
+          }`}
+          value={data.quotationNumber}
+          onChange={(e) => set("quotationNumber", e.target.value)}
+          placeholder="e.g. MEI/QTN/0626-05"
+        />
+
+      </label>
+
+      <label className="qt-field">
+
+        <span className="qt-label">
+          Quotation Date
+          <span className="qt-required">*</span>
+        </span>
+
+        <input
+          type="date"
+          className={`qt-input ${
+            errors.quotationDate ? "qt-input--error" : ""
+          }`}
+          value={data.quotationDate}
+          onChange={(e) => set("quotationDate", e.target.value)}
+        />
+
+      </label>
+
+
             </div>
 
-            <div style={{ marginBottom: 8 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  marginBottom: 4,
-                  color: "#666",
-                }}
-              >
-                Points / Sub-details
-              </label>
-              {sec.points.map((pt, ptIdx) => (
-                <div
-                  key={ptIdx}
-                  className="terms-list__item"
-                  style={{
-                    marginBottom: 6,
-                    display: "flex",
-                    gap: 8,
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{ color: "#999", fontWeight: 300, minWidth: 20 }}
-                  >
-                    •
-                  </span>
-                  <input
-                    className="field__input"
-                    value={pt}
-                    onChange={(e) => updatePoint(secIdx, ptIdx, e.target.value)}
-                    placeholder={`Point ${ptIdx + 1}`}
-                  />
-                  <button
-                    type="button"
-                    className="icon-btn icon-btn--danger"
-                    onClick={() => removePoint(secIdx, ptIdx)}
-                    title="Remove point"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+    </section>
+
+    {/* Customer Details */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          02
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Customer Details
+          </h3>
+
+          <p>
+            Customer / Company information
+          </p>
+
+        </div>
+
+      </div>
+
+      <VendorDetails
+  mode="form"
+  vendor={data.vendor}
+  onChange={(value) => set("vendor", value)}
+  heading=""
+/>
+
+    </section>
+
+    {/* Intro */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          03
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Introduction
+          </h3>
+
+          <p>
+            Opening paragraph shown in the quotation
+          </p>
+
+        </div>
+
+      </div>
+
+     
+<label className="qt-field qt-field--full">
+
+  <span className="qt-label">
+    Subject
+  </span>
+
+  <input
+    type="text"
+    className="qt-input"
+    value={data.subject || ""}
+    onChange={(e) => set("subject", e.target.value)}
+    placeholder="Enter quotation subject..."
+  />
+
+</label>
+
+<label className="qt-field qt-field--full">
+
+  <span className="qt-label">
+    Intro Paragraph
+  </span>
+
+  <textarea
+    className="qt-textarea"
+    rows={5}
+    value={data.intro}
+    onChange={(e) => set("intro", e.target.value)}
+    placeholder="Enter introduction..."
+  />
+
+</label>
+```
+
+
+    </section>
+
+    {/* Quotation Items */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          04
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Quotation Items
+          </h3>
+
+          <p>
+            Products and pricing
+          </p>
+
+        </div>
+
+      </div>
+
+      
+<OrderItemsTable
+  variant="quote"
+  mode="form"
+  items={data.items}
+  onChange={(items) => set("items", items)}
+/>
+
+
+
+    </section>
+
+    {/* Amount Summary */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          05
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Amount Summary
+          </h3>
+
+          <p>
+            Overall quotation value
+          </p>
+
+        </div>
+
+      </div>
+
+
+<div className="qt-grid">
+
+  <label className="qt-field">
+
+    <span className="qt-label">
+      Total Amount (₹)
+    </span>
+
+    <input
+      type="number"
+      className="qt-input"
+      value={quotationSubtotal.toFixed(2)}
+      readOnly
+    />
+
+  </label>
+
+  <label className="qt-field">
+
+    <span className="qt-label">
+      GST %
+    </span>
+
+    <input
+      type="number"
+      className="qt-input"
+      value={data.gstPercent || ""}
+      onChange={(e) => set("gstPercent", e.target.value)}
+      placeholder="18"
+      min="0"
+    />
+
+  </label>
+
+  <label className="qt-field">
+
+    <span className="qt-label">
+      GST Amount (₹)
+    </span>
+
+    <input
+      type="number"
+      className="qt-input"
+      value={quotationGstAmount.toFixed(2)}
+      readOnly
+    />
+
+  </label>
+
+  <label className="qt-field">
+
+    <span className="qt-label">
+      Final Total (₹)
+    </span>
+
+    <input
+      type="number"
+      className="qt-input"
+      value={quotationFinalTotal.toFixed(2)}
+      readOnly
+    />
+
+  </label>
+
+</div>
+
+
+
+    </section>
+
+    {/* Technical Details */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          06
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Technical Details
+          </h3>
+
+          <p>
+            Product specifications and fabrication scope
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={resetToDefaultTechnical}
+        >
+          ↻ Reset to Default
+        </button>
+
+      </div>
+
+      {data.technicalDetails.map((sec, secIdx) => (
+
+        <div
+          key={secIdx}
+          className="qt-tech-card"
+        >
+
+          <div className="qt-tech-header">
+
+            <label className="qt-field qt-field--grow">
+
+              <span className="qt-label">
+                Section Heading
+              </span>
+
+              <input
+                className="qt-input qt-input--bold"
+                value={sec.heading}
+                onChange={(e) =>
+                  updateSectionHeading(secIdx, e.target.value)
+                }
+                placeholder="Section Heading"
+              />
+
+            </label>
 
             <button
               type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => addPoint(secIdx)}
+              className="btn btn-danger"
+              onClick={() => removeSection(secIdx)}
             >
-              + Add Point
+              Remove Section
             </button>
-          </div>
-        ))}
 
-        <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+          </div>
+
+          <div className="qt-tech-points">
+
+            {sec.points.map((pt, ptIdx) => (
+
+              <div
+                key={ptIdx}
+                className="qt-tech-point"
+              >
+
+                <span className="qt-tech-index">
+                  {ptIdx + 1}
+                </span>
+
+                <input
+                  className="qt-input"
+                  value={pt}
+                  onChange={(e) =>
+                    updatePoint(secIdx, ptIdx, e.target.value)
+                  }
+                  placeholder="Enter point"
+                />
+
+                <button
+                  type="button"
+                  className="btn btn-danger btn-sm"
+                  onClick={() =>
+                    removePoint(secIdx, ptIdx)
+                  }
+                >
+                  ✕
+                </button>
+
+              </div>
+
+            ))}
+
+          </div>
+
           <button
             type="button"
-            className="btn btn-secondary"
-            onClick={addSection}
+            className="btn btn-secondary btn-sm"
+            onClick={() => addPoint(secIdx)}
           >
-            + Add Technical Section
+            + Add Point
           </button>
+
         </div>
-      </section>
 
-      {/* Payment Terms */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">7</span> Payment Terms
-        </h3>
-        <textarea
-          className="field__textarea"
-          value={data.paymentTerms}
-          onChange={(e) => set("paymentTerms", e.target.value)}
-          placeholder="e.g. 80% advance along with the Purchase Order and the balance 20% before dispatch"
-          rows={3}
-        />
-      </section>
+      ))}
 
-      {/* Terms & Conditions */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">8</span> Terms &amp; Conditions
-        </h3>
-        <TermsEditor
-          mode="form"
-          terms={data.terms}
-          onChange={(t) => set("terms", t)}
-        />
-      </section>
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={addSection}
+      >
+        + Add Section
+      </button>
 
-      {/* Notes */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">9</span> Notes
-        </h3>
-        <textarea
-          className="field__textarea field__textarea--lg"
-          value={data.notes}
-          onChange={(e) => set("notes", e.target.value)}
-          placeholder="Any additional notes for this quotation..."
-          rows={4}
-        />
-      </section>
+    </section>
 
-      {/* Signature */}
-      <section className="form-card">
-        <h3 className="form-card__title">
-          <span className="step-number">10</span> Signature
-        </h3>
-        <div className="field-grid field-grid--tight">
-          <label className="field">
-            <span className="field__label">Prepared By</span>
-            <input
-              className="field__input"
-              value={data.signatures.preparedBy}
-              onChange={(e) =>
-                set("signatures", {
-                  ...data.signatures,
-                  preparedBy: e.target.value,
-                })
-              }
-              placeholder="e.g. P. Rajappa"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Checked By</span>
-            <input
-              className="field__input"
-              value={data.signatures.checkedBy}
-              onChange={(e) =>
-                set("signatures", {
-                  ...data.signatures,
-                  checkedBy: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Approved By</span>
-            <input
-              className="field__input"
-              value={data.signatures.approvedBy}
-              onChange={(e) =>
-                set("signatures", {
-                  ...data.signatures,
-                  approvedBy: e.target.value,
-                })
-              }
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Designation</span>
-            <input
-              className="field__input"
-              value={data.signatures.designation || "Proprietor"}
-              onChange={(e) =>
-                set("signatures", {
-                  ...data.signatures,
-                  designation: e.target.value,
-                })
-              }
-              placeholder="e.g. Proprietor"
-            />
-          </label>
-          <label className="field">
-            <span className="field__label">Company</span>
-            <input
-              className="field__input"
-              value={data.signatures.company || "Mugil Engineering Industry"}
-              onChange={(e) =>
-                set("signatures", {
-                  ...data.signatures,
-                  company: e.target.value,
-                })
-              }
-              placeholder="e.g. Mugil Engineering Industry"
-            />
-          </label>
+
+
+    {/* Terms & Conditions */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          07
         </div>
-      </section>
 
-      <div className="sticky-actionbar">
-        <span className="sticky-actionbar__status">
-          {savedAt
-            ? `Draft saved at ${savedAt.toLocaleTimeString()}`
-            : "Not saved yet"}
-        </span>
-        <button className="btn btn-ghost" onClick={clearForm}>
-          Clear
-        </button>
-        <button className="btn btn-secondary" onClick={saveDraft}>
+        <div className="qt-card__heading">
+
+          <h3>
+            Terms & Conditions
+          </h3>
+
+        </div>
+
+      </div>
+
+      <TermsEditor
+        mode="form"
+        terms={data.terms}
+        onChange={(terms) => set("terms", terms)}
+      />
+
+    </section>
+
+
+
+    {/* Signature */}
+
+    <section className="qt-card">
+
+      <div className="qt-card__header">
+
+        <div className="qt-step">
+          08
+        </div>
+
+        <div className="qt-card__heading">
+
+          <h3>
+            Signature Details
+          </h3>
+
+        </div>
+
+      </div>
+
+      <div className="qt-grid">
+
+        <label className="qt-field">
+
+          <span className="qt-label">
+            Prepared By
+          </span>
+
+          <input
+            className="qt-input"
+            value={data.signatures.preparedBy}
+            onChange={(e) =>
+              setNested("signatures", "preparedBy", e.target.value)
+            }
+          />
+
+        </label>
+
+        <label className="qt-field">
+
+          <span className="qt-label">
+            Company Name
+          </span>
+
+          <input
+            className="qt-input"
+            value={data.companyName}
+            onChange={(e) =>
+              set("companyName", e.target.value)
+            }
+          />
+
+        </label>
+
+        <label className="qt-field">
+
+          <span className="qt-label">
+            Designation
+          </span>
+
+          <input
+            className="qt-input"
+            value={data.designation}
+            onChange={(e) =>
+              set("designation", e.target.value)
+            }
+          />
+
+        </label>
+
+      </div>
+
+    </section>
+
+    <div className="qt-footer-actions">
+
+      <div className="qt-footer-status">
+        {savedAt && (
+          <span>
+            Draft saved
+          </span>
+        )}
+      </div>
+
+      <div className="qt-footer-buttons">
+
+        <button
+          className="btn btn-secondary"
+          onClick={saveDraft}
+        >
           Save Draft
         </button>
-        <button className="btn btn-primary" onClick={goToPreview}>
+
+        <button
+          className="btn btn-primary"
+          onClick={goToPreview}
+        >
           Preview →
         </button>
+
       </div>
+
     </div>
+
+  </div>
+  </>
   );
 }

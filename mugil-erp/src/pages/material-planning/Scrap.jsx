@@ -448,8 +448,15 @@ return (
               Scrap
             </span>
 
-          </div>
+            
 
+          </div>
+<button
+            className="back-btn"
+            onClick={handleBack}
+          >
+            ← Back
+          </button>
           <h1>
             Scrap Inventory
           </h1>
@@ -463,12 +470,7 @@ return (
 
         <div className="page-actions">
 
-          <button
-            className="back-btn"
-            onClick={handleBack}
-          >
-            ← Back
-          </button>
+          
 
           <button
             className="primary-btn"

@@ -225,12 +225,11 @@ export default function LoginTemplate({
         if (department === "material-planning") {
           navigate("/inventory", { replace: true });
         } else if (department === "hr") {
-          navigate("/hr", { replace: true });
+          navigate("/hr/employees", { replace: true });
         } else if (department === "accounts") {
           navigate("/accounts", { replace: true });
-        }  else if (department === "production") {
+        } else if (department === "production") {
           navigate("/inventory", { replace: true });
-
         } else if (department === "supervisor") {
           navigate("/inventory", { replace: true });
         } else {
@@ -277,70 +276,17 @@ export default function LoginTemplate({
       </div>
 
       <div className="login-brand">
-        <p className="brand-eyebrow">Enterprise Resource Planning</p>
-
-        <h1 className="brand-name">
-          Mugil
-          <br />
-          Industries
-        </h1>
-
-        <p className="brand-sub">Integrated Business Platform</p>
-
-        <div className="brand-divider" />
-
-        <ul className="brand-features">
-          <li>
-            <span className="feature-dot" />
-            End-to-end operations management
-          </li>
-          <li>
-            <span className="feature-dot" />
-            Real-time analytics and reporting
-          </li>
-          <li>
-            <span className="feature-dot" />
-            Procurement, inventory and logistics
-          </li>
-          <li>
-            <span className="feature-dot" />
-            Finance and compliance automation
-          </li>
-          <li>
-            <span className="feature-dot" />
-            Custom workflows built for your business
-          </li>
-        </ul>
-
-        <div className="erp-stats">
-          <div className="stat-card">
-            <ShieldCheck aria-hidden="true" />
-            <h3>
-              <CountUp end={99.9} duration={3} suffix="%" />
-            </h3>
-            <p>Reliability</p>
-          </div>
-
-          <div className="stat-card">
-            <h3>
-              <CountUp end={24} duration={3} suffix="/7" />
-            </h3>
-            <p>Support</p>
-          </div>
-
-          <div className="stat-card">
-            <h3>ERP</h3>
-            <p>Ready</p>
-          </div>
-        </div>
-      </div>
+  <h1 className="brand-name">
+    Mugil Engineering Industries
+  </h1>
+</div>
 
       <div className="login-form-panel">
         <div className="login-card">
           <div className="card-header">
-            <div className="card-logo-mark">
-              <BriefcaseIcon />
-            </div>
+           <div className="card-logo-mark">
+  <img src="/mugil-logo1.png" alt="Mugil Engineering Industries" />
+</div>
 
             <h2 className="card-title">{selectedDepartment.label} Login</h2>
 

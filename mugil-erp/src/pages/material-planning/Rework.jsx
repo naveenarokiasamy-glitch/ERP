@@ -178,18 +178,10 @@ return (
   <span className="separator">/</span>
 
   <span className="active">Rework Materials</span>
+
+  
 </div>
-
-          <p className="page-description">
-            Manage rejected materials sent for rework, monitor repair progress,
-            complete successful rework, or transfer failed items to scrap.
-          </p>
-
-        </div>
-
-        <div className="page-header-right">
-
-          <button
+<button
             onClick={handleBack}
             className="back-btn"
           >
@@ -210,6 +202,17 @@ return (
 
             Back to Materials
           </button>
+
+          <p className="page-description">
+            Manage rejected materials sent for rework, monitor repair progress,
+            complete successful rework, or transfer failed items to scrap.
+          </p>
+
+        </div>
+
+        <div className="page-header-right">
+
+          
 
         </div>
 
