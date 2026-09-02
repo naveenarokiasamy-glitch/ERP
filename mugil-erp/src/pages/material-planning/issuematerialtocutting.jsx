@@ -53,24 +53,43 @@ export default function IssueMaterialToCutting() {
   // Filter available stock (availableQty > 0)
   const availableStock = materialStock.filter((r) => r.availableQty > 0);
 
-  const rows = availableStock.filter((r) => {
-    const matchesSearch =
-      !search ||
-      [
-        r.material,
-        r.grade,
-        r.heatNumber,
-        r.plateNumber,
-        r.poNumber,
-        r.batchNumber,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase());
+ const rows = availableStock.filter((r) => {
+    const searchValue = search.trim().toLowerCase();
+ 
     const matchesWarehouse =
       !warehouseFilter || r.warehouse === warehouseFilter;
+ 
     const matchesMaterial = !materialFilter || r.material === materialFilter;
-    return matchesSearch && matchesWarehouse && matchesMaterial;
+ 
+    if (!searchValue) {
+      return matchesWarehouse && matchesMaterial;
+    }
+ 
+    // If searching a number, prioritize thickness
+    const isNumericSearch = /^\d+(\.\d+)?$/.test(searchValue);
+ 
+    if (isNumericSearch) {
+      const thicknessMatches = String(r.thickness ?? "")
+        .toLowerCase()
+        .includes(searchValue);
+ 
+      return thicknessMatches && matchesWarehouse && matchesMaterial;
+    }
+ 
+    // Otherwise search text fields
+    const matchesText = [
+      r.material,
+      r.grade,
+      r.heatNumber,
+      r.plateNumber,
+      r.poNumber,
+      r.batchNumber,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchValue);
+ 
+    return matchesText && matchesWarehouse && matchesMaterial;
   });
 
   // Calculate total available for stats
@@ -303,7 +322,7 @@ export default function IssueMaterialToCutting() {
           </svg>
           <input
             type="text"
-            placeholder="Search by material, grade, heat no., plate no., or batch..."
+            placeholder="Search by material, material thickness , grade, heat no., plate no., or batch..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
