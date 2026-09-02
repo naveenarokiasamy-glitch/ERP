@@ -8,6 +8,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import EmployeeForm from "./Employeeform.jsx";
 import "./Employee.css";
+import Header from "../../components/Header";
 
 /* ==========================================================================
    CONSTANTS — shared master lists used across the employee module.
@@ -1138,27 +1139,7 @@ export function createBlankEmployee(suggestedId) {
    TOP NAVIGATION
    ========================================================================== */
 
-const NAV_ITEMS = [
-  "Employees",
-  "Management",
-  "Directory",
-  "Departments",
-  "Learning",
-  "Reporting",
-  "Configuration",
-];
 
-function TopNav() {
-  const [active, setActive] = useState("Employees");
-  return (
-    <header className="emp-topnav">
-      <div className="emp-topnav-brand">
-        <span className="emp-topnav-mark">HR</span>
-        <span className="emp-topnav-title">People Ops</span>
-      </div>
-    </header>
-  );
-}
 
 /* ==========================================================================
    STATUS BADGE
@@ -1391,7 +1372,7 @@ export default function Employees() {
 
   return (
     <div className="emp-app">
-      <TopNav />
+  <Header />
 
       <div className="emp-page-header">
         <div className="emp-page-header-titles">

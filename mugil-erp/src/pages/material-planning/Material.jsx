@@ -10,7 +10,9 @@ import {
   Factory,
 } from "lucide-react";
 import "./Material.css";
+import InventoryModuleSwitcher from "../../components/InventoryModuleSwitcher";
 import Header from "../../components/Header";
+
 const materialActions = [
   {
     code: "GRN",
@@ -44,14 +46,14 @@ const materialActions = [
   },
   {
     code: "CUT",
-    title: "Issue Material to Cutting",
+    title: "Issue Material to Job Work",
     description: "Issue raw materials from stock to the cutting department.",
     icon: Scissors,
     path: "/inventory/material/issue-cutting",
   },
   {
     code: "RCD",
-    title: "Receive From Cutting",
+    title: "Receive From Job Work",
     description:
       "Receive cut pieces, balance plates, scrap and rejected materials.",
     icon: PackagePlus,
@@ -183,29 +185,32 @@ return (
 
         {/* ================= MAIN CONTENT ================= */}
 
-        <main className="material-main">
+<main className="material-main">
 
-          <Link to="/inventory" className="material-back">
-            <ArrowLeft size={15} />
-            Inventory
-          </Link>
+  <div className="inventory-top-row">
+    <Link to="/inventory" className="material-back">
+      <ArrowLeft size={15} />
+      Inventory
+    </Link>
 
+    <InventoryModuleSwitcher />
+  </div>
 
-          <header className="material-header">
+  <header className="material-header">
 
-            <span className="material-eyebrow">
-              Materials
-            </span>
+    <span className="material-eyebrow">
+      Materials
+    </span>
 
-            <h1 className="material-title">
-              Material Inventory
-            </h1>
+    <h1 className="material-title">
+      Material Inventory
+    </h1>
 
-            <p className="material-subtitle">
-              Manage all raw materials used in production.
-            </p>
+    <p className="material-subtitle">
+      Manage all raw materials used in production.
+    </p>
 
-          </header>
+  </header>
 
 
           {/* ================= FEATURED STOCK ================= */}

@@ -10,7 +10,8 @@ import { summarizePOItems } from "../../utils/calculations";
 import "./PurchaseOrder.css";
 import "../../styles/form.css";
 import "../../styles/print.css";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 
 const DRAFT_KEY = "mei-erp-po-draft";
@@ -124,7 +125,7 @@ const [includeAmountDetails, setIncludeAmountDetails] = useState(true);
   const [newColLabel, setNewColLabel] = useState("");
   const [newColType, setNewColType] = useState("text");
   const [newColOptions, setNewColOptions] = useState("");
-  const navigate = useNavigate();
+  
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -344,9 +345,7 @@ columns
 
 
 
-  const handleBack = () => {
-    navigate("/accounts");
-  };
+
 return (
   <>
   <Header />
@@ -354,23 +353,10 @@ return (
     <div className="po-container">
       <section className="po-hero">
         <div className="po-hero__top">
-          <button type="button" className="po-back-btn" onClick={handleBack}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            <span>Back</span>
-          </button>
+          <Link to="/accounts" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
           <div className="po-hero__actions">
             <button
@@ -537,13 +523,22 @@ return (
         </div>
       </section>
 
-      <div className="po-section">
-        <VendorDetails
-          mode="form"
-          vendor={data.vendor}
-          onChange={(v) => set("vendor", v)}
-        />
-      </div>
+      <section className="po-card">
+  <div className="po-card__header">
+    <div className="po-card__step">02</div>
+
+    <div className="po-card__heading">
+      <h3>Customer Details</h3>
+    </div>
+  </div>
+
+  <VendorDetails
+    mode="form"
+    vendor={data.vendor}
+    onChange={(v) => set("vendor", v)}
+    heading=""
+  />
+</section>
 
        <section className="po-card">
         <div className="po-card__header">

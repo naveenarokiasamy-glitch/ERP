@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useMaterialStore, issueToCutting } from "../../data/materialStore";
 import "./issuematerialtocutting.css";
 import Header from "../../components/Header";
+import "../../styles/BackButton.css";
 import { Link } from "react-router-dom";
 let jobSeq = 2003;
 // Separate sequence for Outsourcing jobs so job numbers never collide with
@@ -231,10 +232,6 @@ export default function IssueMaterialToCutting() {
     }
   };
 
-  // Navigation function
-  const goBack = () => {
-    window.history.back();
-  };
 
   // Get status badge class
   const getStatusBadgeClass = (status) => {
@@ -272,10 +269,10 @@ export default function IssueMaterialToCutting() {
         <span className="imtc-breadcrumb-item">Issue to Cutting</span>
         
       </div>
-      {/* Back Button */}
-      <button className="imtc-back-btn" onClick={goBack}>
-        <ArrowLeft size={18} /> Back
-      </button>
+   <Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
       
 
       {/* Header */}

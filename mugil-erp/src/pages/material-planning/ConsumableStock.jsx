@@ -73,18 +73,10 @@ export default function ConsumableStock() {
 
           <section className="cons-stock-page-header">
 
-            <Link
-              to="/inventory/consumable"
-              className="cons-stock-page-backlink"
-            >
-              <span className="cons-stock-page-backicon">
-                <ArrowLeft size={15} />
-              </span>
-
-              <span className="cons-stock-page-backtext">
-                Back to Consumables
-              </span>
-            </Link>
+            <Link to="/inventory/consumable" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
             <div className="cons-stock-page-headingblock">
 

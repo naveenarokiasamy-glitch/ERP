@@ -1,574 +1,774 @@
-/* ==================================================================
+/* =========================================================================
    ProformaInvoicePrint.css
-   Print stylesheet for the Proforma Invoice.
-   Built to match the original "ROYAL ANCHORS" Proforma Invoice PDF
-   as closely as technically possible: A4 portrait, traditional
-   bordered ledger layout, Times New Roman, no modern UI styling.
-   ================================================================== */
+   (Cloned verbatim from TaxInvoicePrint.css — same class names, same page
+   geometry — so the Proforma Invoice PDF is pixel-identical to the Tax
+   Invoice PDF. Do not rename the .tip-* classes here; ProformaInvoicePrint.js
+   builds its DOM using the same class names on purpose.)
+   -------------------------------------------------------------------------
+   Standalone stylesheet for the Tax Invoice print / PDF system.
+
+   - Namespaced entirely under "tip-" so it can never collide with
+     TaxInvoice.css, Quotation.css, or QuotationPrint.css.
+   - Traditional tabular/bordered invoice look (matches 001_Inv.pdf),
+     NOT the modern quotation styling — no gradients, no rounded cards,
+     no purple/orange accents.
+   - Times New Roman throughout, A4 portrait.
+   ========================================================================= */
 
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
-  background: #e9e9ec;
+  background: #ecedf0;
   font-family: "Times New Roman", Times, serif;
-  color: #000;
+  color: #000000;
 }
 
-/* ------------------------------------------------------------------
-   Print controls (screen only, hidden on print)
-   ------------------------------------------------------------------ */
-.print-controls {
+/* ========================================================================
+   TOOLBAR — screen-only, never printed
+   ======================================================================== */
+
+.tip-toolbar {
   position: sticky;
   top: 0;
   z-index: 10;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+  align-items: center;
   gap: 12px;
-  padding: 10px;
-  background: #dcdce2;
-  border-bottom: 1px solid #b8b8c2;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-.pc-btn {
-  font-family: Arial, Helvetica, sans-serif;
+.tip-toolbar__status {
+  margin-right: auto;
   font-size: 13px;
-  padding: 7px 20px;
-  border: 1px solid #555;
-  background: #fff;
-  color: #222;
+  color: #4b5563;
+}
+
+.tip-btn {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
   cursor: pointer;
-  border-radius: 3px;
 }
 
-.pc-btn:hover {
-  opacity: 0.88;
-}
-
-.pc-btn--print {
-  background: #2f6f4f;
-  border-color: #2f6f4f;
+.tip-btn--primary {
+  background: #1f2937;
   color: #fff;
 }
 
-/* ------------------------------------------------------------------
-   Empty state (no data found)
-   ------------------------------------------------------------------ */
-.empty-state {
-  max-width: 420px;
-  margin: 70px auto;
-  text-align: center;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  color: #555;
-  line-height: 1.5;
-}
-
-.empty-state code {
-  background: #eee;
-  padding: 1px 4px;
-  border-radius: 3px;
-}
-
-/* ------------------------------------------------------------------
-   Page
-   ------------------------------------------------------------------ */
-.page-wrap {
-  display: flex;
-  justify-content: center;
-  padding: 10mm 0 20mm;
-}
-
-.page {
-  width: 210mm;
-  min-height: 297mm;
+.tip-btn--ghost {
   background: #fff;
-  padding: 6mm 8mm;
+  border-color: #d0d7e2;
+  color: #1f2937;
 }
 
-.outer-border {
-  border: 1px solid #000;
-  width: 100%;
-  font-size: 9.3pt;
-  line-height: 1.32;
+.tip-error {
+  margin: 60px auto;
+  max-width: 520px;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #4b5563;
 }
+
+/* ========================================================================
+   PAGES
+   ======================================================================== */
+
+.tip-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 0 60px;
+}
+
+.tip-page {
+  position: relative;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+}
+
+/* ========================================================================
+   SHARED TABLE RESET
+   Every structural block of the invoice is a real bordered table so the
+   stacked tables read as one continuous ruled box, exactly like the
+   original document.
+   ======================================================================== */
+
+.tip-content table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 10px;
+  line-height: 1.25;
+  color: #000000;
+}
+
+.tip-content table td,
+.tip-content table th {
+  border: 1px solid #000000;
+  padding: 3px 5px;
+  vertical-align: top;
+  font-family: "Times New Roman", Times, serif;
+}
+
+/* Adjacent structural tables share one ruled line, rather than drawing two
+   stacked borders where their sections meet. */
+.tip-content > table + table > thead:first-child > tr:first-child > th,
+.tip-content > table + table > tbody:first-child > tr:first-child > td {
+  border-top-width: 0;
+}
+
+/* ========================================================================
+   HEADER (letterhead) — repeats on every page
+   ======================================================================== */
+
+/* ========================================================================
+   HEADER (letterhead) — repeats on every page
+   ======================================================================== */
+/* ========================================================================
+   HEADER - FIXED TO FIT A4
+   ======================================================================== */
+
+/* ========================================================================
+   HEADER - FIXED TO FIT A4
+   ======================================================================== */
+
 /* =========================================================
-   PROFORMA INVOICE HEADER
+   HEADER
+   ========================================================= */
+/* =========================================================
+   HEADER — LARGE VERSION
    ========================================================= */
 
-.title-row {
+/* ================= HEADER ================= */
+
+.tip-header {
+  width: auto;
+  max-width: none;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.tip-header-table {
   width: 100%;
-  height: 7mm;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border: 1px solid #000;
+  border-bottom: none;
+  box-sizing: border-box;
+}
+
+/* No internal header lines */
+.tip-header-table td {
+  border: none;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ---------- TOP ROW ---------- */
+
+.tip-h-gstin {
+  width: 28%;
+  font-size: 10px;
+  line-height: 1.45;
+  font-weight: 700;
+  padding: 6px 10px !important;
+  vertical-align: top !important;
+}
+
+.tip-h-title {
+  width: 44%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 6px 5px !important;
+  vertical-align: top !important;
+}
+
+.tip-h-cell {
+  width: 28%;
+  font-size: 10px;
+  line-height: 1.45;
+  text-align: right;
+  padding: 6px 10px !important;
+  vertical-align: top !important;
+}
+
+
+/* ---------- LOGO + COMPANY ROW ---------- */
+
+.tip-h-logo {
+  width: 13%;
+  vertical-align: middle !important;
+  padding: 5px !important;
+}
+
+.tip-h-logo--right {
+  text-align: right !important;
+  padding-right: 2px !important;
+}
+
+.tip-h-logo--right img {
+  display: block;
+  width: 85px;
+  height: 85px;
+  max-width: 85px;
+  max-height: 85px;
+  object-fit: contain;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+.right-logo {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.tip-h-logo img {
+  display: block;
+
+  width: 85px;
+  height: 85px;
+
+  max-width: 85px;
+  max-height: 85px;
+
+  object-fit: contain;
+  margin: 0;
+}
+
+.tip-h-company {
+  width: 74%;
+  text-align: center;
+  vertical-align: middle !important;
+  
+  padding: 8px 5px 10px !important;
+
+  overflow: visible !important;
+}
+
+.tip-company-name {
+  font-family: "Times New Roman", Times, serif;
+
+  font-size: 24px;
+  font-weight: 700;
+  font-style: italic;
+
+  line-height: 1.15;
+
+  margin: 0 0 8px 0;
+
+  white-space: nowrap;
+  overflow: visible;
+  
+  position: relative;
+  left: -15px;
+
+  text-align: center;
+}
+
+.tip-works-line {
+  font-family: "Times New Roman", Times, serif;
+
+  font-size: 11px;
+  position: relative;
+  left: 12px;
+
+  line-height: 1.45;
+
+  margin: 0;
+}
+/* ========================================================================
+   FOOTER — repeats on every page
+   ======================================================================== */
+
+.tip-footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 14px;
+}
 
-  font-family: "Times New Roman", Times, serif;
-  font-size: 13pt;
-  font-weight: bold;
+.tip-footer__logo {
+  display: block;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
 
-  padding: 0;
+.tip-footer__tagline {
   margin: 0;
-
-  border-bottom: 1px solid #000;
-
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-
-/* MAIN HEADER */
-.header-row {
-  display: flex;
-  width: 100%;
-  min-height: 47mm;
-  height: 47mm;
-  border-bottom: 1px solid #000;
-}
-
-
-/* LEFT SIDE */
-.header-left {
-  width: 50%;
-  flex: 0 0 50%;
-
-  padding: 2mm 3mm;
-
-  border-right: 1px solid #000;
-
   font-family: "Times New Roman", Times, serif;
-  font-size: 13pt;
-  line-height: 1.3;
-
-  overflow: hidden;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #000000;
+  white-space: nowrap;
 }
 
+/* ========================================================================
+   META TABLE (Invoice No / Date / Vehicle / Transport / etc.)
+   ======================================================================== */
 
-/* RIGHT SIDE */
-.header-right {
+.tip-meta-table td {
   width: 50%;
-  flex: 0 0 50%;
-
-  padding: 0;
-  margin: 0;
-
-  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
-
-/* SUPPLIER NAME */
-.supplier-name {
-  font-family: "Times New Roman", Times, serif;
-
-  font-size: 13pt;
-  font-weight: bold;
-
-  margin: 0 0 1mm 0;
-
-  line-height: 1.2;
+.tip-meta-table td strong {
+  font-weight: 700;
 }
 
+/* ========================================================================
+   RECEIVER / CONSIGNEE TABLE
+   ======================================================================== */
 
-/* SUPPLIER TEXT */
-.supplier-line {
-  margin: 0.6mm 0;
-
-  line-height: 1.2;
-
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-
-/* =========================================================
-   RIGHT INVOICE DETAILS TABLE
-   ========================================================= */
-
-.details-grid {
-  width: 100%;
-  height: 100%;
-
-  margin: 0;
-  padding: 0;
-
-  border-collapse: collapse;
-  table-layout: fixed;
-
-  font-family: "Times New Roman", Times, serif;
-  font-size: 6.8pt;
-
-  line-height: 1.05;
-}
-
-
-/* EVERY CELL */
-.details-grid td {
-  border-right: 1px solid #000;
-  border-bottom: 1px solid #000;
-
-  padding: 1.05mm 1.2mm;
-
-  vertical-align: middle;
-
-  overflow: hidden;
-}
-
-
-/* REMOVE LAST VERTICAL LINE */
-.details-grid td:last-child {
-  border-right: none;
-}
-
-
-/* REMOVE LAST HORIZONTAL LINE */
-.details-grid tr:last-child td {
-  border-bottom: none;
-}
-
-
-/* LABEL CELLS */
-.details-grid .dg-label {
-  font-size: 6.7pt;
-
-  font-weight: normal;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: clip;
-}
-
-
-/* VALUE CELLS */
-.details-grid .dg-value {
-  font-size: 6.8pt;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: clip;
-}
-
-
-/* =========================================================
-   COLUMN WIDTHS
-   ========================================================= */
-
-/*
-   1 = label
-   2 = value
-   3 = label
-   4 = value
-*/
-
-.details-grid col:nth-child(1) {
-  width: 22%;
-}
-
-.details-grid col:nth-child(2) {
-  width: 28%;
-}
-
-.details-grid col:nth-child(3) {
-  width: 23%;
-}
-
-.details-grid col:nth-child(4) {
-  width: 27%;
-}
-
-/* ------------------------------------------------------------------
-   Consignee / Buyer
-   ------------------------------------------------------------------ */
-.party-row {
-  display: flex;
-  border-bottom: 1px solid #000;
-}
-
-.party-box {
+.tip-party-table td {
   width: 50%;
-  padding: 2mm 3mm;
-  min-height: 18mm;
-}
-
-.party-box:first-child {
-  border-right: 1px solid #000;
-}
-
-.party-title {
-  font-weight: bold;
-  margin-bottom: 1mm;
-}
-
-.party-name {
-  font-weight: bold;
-}
-
-.party-line {
-  margin: 0.3mm 0;
-}
-
-/* ------------------------------------------------------------------
-   Item table
-   ------------------------------------------------------------------ */
-.item-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.item-table th,
-.item-table td {
-  border-right: 1px solid #000;
-  border-bottom: 1px solid #000;
-  padding: 1mm 1.5mm;
+  font-size: 10px;
+  line-height: 1.4;
   vertical-align: top;
-  text-align: left;
-  font-weight: normal;
 }
 
-.item-table th:last-child,
-.item-table td:last-child {
-  border-right: none;
-}
-
-.item-table thead th {
-  font-weight: bold;
+.tip-party-heading td {
   text-align: center;
-  padding: 1.2mm 1.5mm;
+  font-weight: 700;
+  font-size: 10.5px;
+  background: #f1f5f9;
 }
 
-.item-table td.num,
-.item-table th.num {
+.tip-party-table p {
+  margin: 1px 0;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.tip-party-table p.tip-party-name {
+  font-weight: 700;
+}
+
+/* ========================================================================
+   ITEMS TABLE
+   ======================================================================== */
+
+.tip-items-table th {
+  background: #f1f5f9;
+  font-weight: 700;
+  font-size: 9.5px;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.tip-items-table td {
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.tip-col-sno {
+  width: 6%;
+  text-align: center;
+}
+
+.tip-col-desc {
+  width: 32%;
+  text-align: left;
+}
+
+.tip-col-hsn {
+  width: 12%;
+  text-align: center;
+}
+
+.tip-col-qty {
+  width: 15%;
+  text-align: center;
+}
+
+.tip-col-rate {
+  width: 17.5%;
   text-align: right;
 }
 
-.item-table td.center {
+.tip-col-amt {
+  width: 17.5%;
+  text-align: right;
+}
+
+.tip-items-table td.tip-col-sno,
+.tip-items-table td.tip-col-hsn,
+.tip-items-table td.tip-col-qty {
   text-align: center;
 }
 
-.item-sl {
+.tip-items-table td.tip-col-rate,
+.tip-items-table td.tip-col-amt {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tip-empty-row td {
   text-align: center;
+  font-style: italic;
+  color: #4b5563;
 }
 
-.item-desc {
-  white-space: pre-line;
-  word-break: break-word;
-}
-
-.spacer-row td {
+/* Filler row is now six real column cells (see buildFillerRow in JS),
+   so each one keeps its normal left/right column border — that is what
+   makes the vertical lines continue through the empty goods-table area.
+   Only the top/bottom borders are suppressed so the blank area reads as
+   one continuous space instead of being cut by a stray horizontal rule. */
+.tip-filler-row td {
+  border-top: none;
+  border-bottom: none;
   padding: 0;
 }
 
-.right-label {
+.tip-total-row td {
+  font-weight: 700;
   text-align: right;
-  padding-right: 3mm;
 }
 
-.total-row td {
-  font-weight: bold;
-  border-top: 1px solid #000;
+.tip-total-row td.tip-total-label {
+  text-align: right;
+    padding-right: -100px;
+    font-weight: bold;
 }
 
-/* ------------------------------------------------------------------
-   Amount in words
-   ------------------------------------------------------------------ */
-.words-row {
+/* ========================================================================
+   WORDS + TAX BREAKDOWN TABLE
+   ======================================================================== */
+
+.tip-words-table td {
+  font-size: 10px;
+  line-height: 1.4;
+  border: 0.5px solid #000;
+}
+
+.tip-words-cell {
+  vertical-align: top !important;
+}
+
+.tip-words-column {
+  width: 30%;
+}
+
+.tip-words-label {
+  font-weight: 700;
+  margin: 0 0 3px;
+}
+
+.tip-words-value {
+  margin: 0;
+  font-weight: 400;
+}
+
+.tip-tax-label-column {
+  width: 17.5%;
+}
+
+/* Label + % now share one cell (colSpan=2), so this cell's box already
+   spans the old label + pct columns — same total width as before, just
+   no border down the middle. Flex just places the two text pieces
+   inside that one existing box; no new elements, borders, or positioning. */
+.tip-tax-label {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  padding: 1.5mm 3mm 0.8mm;
+  justify-content: space-between;
+  text-align: left;
+  padding-right: 6px;
 }
 
-.words-label {
-  font-weight: bold;
+.tip-tax-pct-column {
+  width: 0;
 }
 
-.words-value {
-  padding: 0 3mm 1.5mm;
-  border-bottom: 1px solid #000;
-  font-weight: bold;
-  min-height: 5mm;
+.tip-tax-value-column {
+  width: 17.5%;
 }
 
-/* ------------------------------------------------------------------
-   HSN/SAC summary
-   ------------------------------------------------------------------ */
-.hsn-section {
-  border-bottom: 1px solid #000;
-  padding: 2mm 0 2.5mm;
-}
-
-.hsn-table {
-  width: 65%;
-  margin: 0 0 0 0;
-  border-collapse: collapse;
-  table-layout: fixed;
-  border-top: 1px solid #000;
-  border-right: 1px solid #000;
-  border-bottom: 1px solid #000;
-}
-
-.hsn-table th,
-.hsn-table td {
-  border-right: 1px solid #000;
-  border-bottom: 1px solid #000;
-  padding: 1mm 2mm;
-}
-
-.hsn-table th:last-child,
-.hsn-table td:last-child {
-  border-right: none;
-}
-
-.hsn-table thead th {
-  font-weight: bold;
-  text-align: center;
-}
-
-.hsn-table td.num {
+.tip-tax-pct-text {
   text-align: right;
 }
 
-.hsn-table tfoot td {
-  font-weight: bold;
-  border-bottom: none;
+.tip-tax-value {
+  text-align: right;
+  white-space: nowrap;
 }
 
-/* ------------------------------------------------------------------
-   Tax amount in words
-   ------------------------------------------------------------------ */
-.tax-words-row {
-  border-bottom: 1px solid #000;
-  padding: 1.5mm 3mm;
+.tip-grand-total-row td {
+  font-weight: 700;
+  background: #f1f5f9;
 }
 
-/* ------------------------------------------------------------------
-   Declaration / Bank details
-   ------------------------------------------------------------------ */
-.bottom-grid {
-  display: flex;
-  border-bottom: 1px solid #000;
-}
+/* ========================================================================
+   PAN / BANK / DECLARATION / ENCLOSURE / SIGNATURE BLOCK
+   ======================================================================== */
 
-.bottom-left,
-.bottom-right {
+.tip-bottom-table td {
   width: 50%;
-  padding: 2mm 3mm;
+  vertical-align: top;
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 6px 8px;
 }
 
-.bottom-left {
-  border-right: 1px solid #000;
+.tip-bottom-table {
+  border-collapse: collapse;
 }
 
-.section-title {
-  font-weight: bold;
-  margin-bottom: 1mm;
+.tip-bottom-table p {
+  margin: 2px 0;
+  font-family: "Times New Roman", Times, serif;
 }
 
-.declaration-text {
-  white-space: pre-line;
+.tip-bottom-heading {
+  font-weight: 700;
 }
 
-.bank-line {
-  display: flex;
-  gap: 2mm;
-  margin: 0.5mm 0;
+.tip-pan-line {
+  font-weight: 700;
+  margin-bottom: 6px !important;
 }
 
-.bank-label {
-  width: 38mm;
-  flex-shrink: 0;
+.tip-declaration-text {
+  text-align: justify;
+  margin-top: 2px !important;
 }
 
-.bank-colon {
-  width: 3mm;
+.tip-encl-list {
+  margin: 6px 0 0;
+  padding-left: 16px;
 }
 
-.signatory-for {
-  margin-top: 4mm;
-  font-weight: bold;
+.tip-encl-list li {
+  margin-bottom: 1px;
+  font-family: "Times New Roman", Times, serif;
 }
 
-.signatory-space {
-  height: 11mm;
+.tip-bank-line {
+  margin-bottom: 2px !important;
 }
 
-.signatory-label {
+.tip-sig-for {
+  font-weight: 700;
+  margin-top: 10px !important;
+}
+
+.tip-sig-space {
+  height: 46px;
+}
+
+.tip-sig-authorised {
   text-align: center;
-  font-weight: bold;
+  font-weight: 700;
+  margin-top: 2px !important;
 }
 
-/* ------------------------------------------------------------------
-   Footer
-   ------------------------------------------------------------------ */
-.footer-row {
-  text-align: center;
-  font-size: 8pt;
-  font-style: italic;
-  padding: 1.5mm 0;
-}
+/* ========================================================================
+   PRINT
+   ======================================================================== */
 
-/* ------------------------------------------------------------------
-   Compact mode — applied by JS only when content risks spilling
-   onto a second A4 page. Reduced, but still comfortably readable.
-   ------------------------------------------------------------------ */
-.compact .outer-border {
-  font-size: 8.8pt;
-}
-
-.compact .item-table th,
-.compact .item-table td {
-  padding: 0.6mm 1.2mm;
-}
-
-.compact-2 .outer-border {
-  font-size: 8.4pt;
-  line-height: 1.22;
-}
-
-.compact-2 .item-table th,
-.compact-2 .item-table td {
-  padding: 0.4mm 1mm;
-}
-
-/* ------------------------------------------------------------------
-   Print
-   ------------------------------------------------------------------ */
 @page {
   size: A4 portrait;
   margin: 0;
 }
 
 @media print {
-  .print-controls,
-  .empty-state {
+  html,
+  body {
+    background: #fff !important;
+    font-family: "Times New Roman", Times, serif !important;
+  }
+
+  .tip-toolbar {
     display: none !important;
   }
 
-  html, body {
-    background: #fff;
-  }
-
-  .page-wrap {
+  .tip-pages {
     padding: 0;
-    display: block;
+    gap: 0;
   }
 
-  .page {
-    width: 210mm;
-    min-height: 297mm;
-    padding: 6mm 8mm;
-    margin: 0;
-  }
-
-  .page-wrap,
-  .page {
+  .tip-page {
     box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    break-after: page;
+    page-break-after: always;
   }
+
+  .tip-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .tip-content,
+  .tip-content *,
+  .tip-header,
+  .tip-header *,
+  .tip-footer,
+  .tip-footer * {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+}
+
+
+/* IGST label divider now matches CGST/SGST — full-height line, no
+   special-case removal (that produced a short stray stub instead of a
+   clean line). */
+
+/* IGST row now uses the same plain default borders as CGST/SGST — no
+   special-case overrides. The previous overrides fought with the
+   restored label divider above and produced a short stray line stub
+   instead of one clean line. */
+.tip-words-table tr:first-of-type td {
+  border-bottom: 0.5px solid #000 !important;
+}
+.tip-words-table {
+  border-collapse: collapse !important;
+}
+
+.tip-words-table td {
+  border: 0.5px solid #000 !important;
+}
+/* --------------------------------
+   IMPORTANT:
+   KEEP THE BOTTOM LINE
+   -------------------------------- */
+
+.tip-words-table tr:last-child td {
+  border-bottom: 0.2px solid #000 !important;
+}
+
+
+/* TOTAL ROW */
+.tip-words-table .tip-grand-total-row td {
+  border-top: 0.2px solid #000 !important;
+  border-bottom: 0.2px solid #000 !important;
+}
+
+
+/* Keep the horizontal line between
+   TAX section and BANK DETAILS */
+.tip-words-table + * {
+  border-top: 0.2px solid #000 !important;
+}
+
+
+
+
+
+/* Keep the outer/top border of the IGST section */
+.tip-words-table tbody tr:first-child td {
+  border-top: 1px solid #000 !important;
+}
+
+/* Fix alignment between the upper details section
+   and the Quantity column in the items table */
+
+.tip-details-table {
+  table-layout: fixed !important;
+}
+
+/* Keep the left/right sections at the same 50/50 position */
+.tip-details-table td {
+  box-sizing: border-box;
+}
+
+/* Make the divider exactly 50%
+.tip-details-table tr > td:first-child {
+  width: 50% !important;
+}
+
+.tip-details-table tr > td:last-child {
+  width: 50% !important;
+} */
+ /* Move the Vehicle/Details center divider slightly left */
+.tip-details-table tr > td:first-child {
+  width: 49.5% !important;
+  box-sizing: border-box !important;
+}
+
+.tip-details-table tr > td:last-child {
+  width: 50.5% !important;
+  box-sizing: border-box !important;
+}
+
+/* Items table - preserve existing widths but ensure
+   borders are calculated from the same table width */
+.tip-items-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Prevent padding/border from changing column position */
+.tip-items-table th,
+.tip-items-table td {
+  box-sizing: border-box !important;
+}
+
+
+
+.tip-words-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+}
+
+.tip-words-column {
+  width: 65% !important;
+}
+
+.tip-tax-label-column {
+  width: 17.5% !important;
+}
+
+.tip-tax-pct-column {
+  width: 0 !important;
+}
+
+.tip-tax-value-column {
+  width: 17.5% !important;
+}
+
+.tip-tax-value {
+  text-align: right !important;
+}
+
+
+
+
+
+.tip-words-table {
+  border-collapse: collapse !important;
+}
+
+.tip-words-table td {
+  border: 0.5px solid #000 !important;
+}
+
+
+.tip-words-table,
+.tip-words-table td {
+  border: 0.5px solid #000 !important;
+  border-collapse: collapse;
 }

@@ -151,10 +151,10 @@ return (
     <Header />
 
     <div className="crpt-page">
-      <Link to="/inventory/consumable" className="crpt-back-link">
-        <ArrowLeft size={15} />
-        <span>Consumables</span>
-      </Link>
+      <Link to="/inventory/consumable" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
       <section className="crpt-header-card">
         <div className="crpt-header-content">

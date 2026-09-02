@@ -604,6 +604,29 @@ footer.appendChild(
       "",
     );
 
+    var contactPerson = pick(
+  vendor,
+  [
+    "contactPerson",
+    "contact",
+    "contactName",
+    "person",
+  ],
+  "",
+);
+
+var phone = pick(
+  vendor,
+  [
+    "phone",
+    "phoneNumber",
+    "mobile",
+    "mobileNumber",
+    "contactNumber",
+  ],
+  "",
+);
+
     var leftHtml =
       '<div class="pop-meta-row__left">' +
       '<div class="pop-vendor">' +
@@ -652,12 +675,26 @@ footer.appendChild(
       leftHtml += "</p>";
     }
 
-    if (gst) {
-      leftHtml +=
-        "<p>GST : " +
-        escapeHtml(gst) +
-        "</p>";
-    }
+if (contactPerson) {
+  leftHtml +=
+    "<p>Contact Person : " +
+    escapeHtml(contactPerson) +
+    "</p>";
+}
+
+if (phone) {
+  leftHtml +=
+    "<p>Phone : " +
+    escapeHtml(phone) +
+    "</p>";
+}
+
+if (gst) {
+  leftHtml +=
+    "<p>GST : " +
+    escapeHtml(gst) +
+    "</p>";
+}
 
     leftHtml += "</div></div>";
 

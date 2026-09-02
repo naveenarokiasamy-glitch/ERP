@@ -15,7 +15,8 @@ import {
   statusOptions,
 } from "../../data/materialStore";
 import "./Scrap.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 const emptyEntryForm = {
   poNumber: "",
@@ -153,9 +154,7 @@ export default function Scrap() {
 
   const navigate = useNavigate();
 
-  const handleBack = () => {
-    navigate("/inventory/material");
-  };
+
 
   /* ---------------- Purchase Orders ---------------- */
 
@@ -451,12 +450,12 @@ return (
             
 
           </div>
-<button
-            className="back-btn"
-            onClick={handleBack}
-          >
-            ← Back
-          </button>
+
+          <Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
+
           <h1>
             Scrap Inventory
           </h1>

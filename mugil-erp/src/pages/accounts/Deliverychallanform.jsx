@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import "./Deliverychallanform.css";
 import Header from "../../components/Header";
 
@@ -148,7 +149,7 @@ function createEmptyFormData() {
    ======================================================================== */
 
 export default function DeliveryChallanForm() {
-    const navigate = useNavigate();
+    
     const [formData, setFormData] = useState(createEmptyFormData);
     const [draftStatus, setDraftStatus] = useState("");
     const [draftSavedTime, setDraftSavedTime] = useState(null);
@@ -370,9 +371,7 @@ export default function DeliveryChallanForm() {
     // BACK TO FORM
     // ================================================================
 
-    const handleBack = useCallback(() => {
-        navigate(-1);
-    }, [navigate]);
+
 
     // ================================================================
     // RENDER
@@ -384,25 +383,10 @@ export default function DeliveryChallanForm() {
               <Header />
         <div className="form-page">
             <div className="form-header">
-                <button
-                    onClick={handleBack}
-                    className="btn-back">                   
-                     <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M19 12H5" />
-                        <path d="M12 19l-7-7 7-7" />
-                    </svg>
-                    Back
-                </button>
+               <Link to="/accounts" className="erp-back-button">
+    <ArrowLeft size={16} />
+    Back
+</Link>
                 <h2>Delivery Challan</h2>
                 <div className="form-header-actions">
                     {draftStatus && <span className="form-status">{draftStatus}</span>}

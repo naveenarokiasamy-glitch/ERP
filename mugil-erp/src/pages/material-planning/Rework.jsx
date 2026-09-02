@@ -15,7 +15,8 @@ import {
   statusOptions,
 } from "../../data/materialStore";
 import "./Rework.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 
 const STATUS_STYLES = {
@@ -144,7 +145,7 @@ export default function Rework() {
     setScrapTarget(null);
   }
   const navigate = useNavigate();
-  const handleBack = () => navigate("/inventory/material");
+  
 return (
   <>
     <Header />
@@ -181,27 +182,10 @@ return (
 
   
 </div>
-<button
-            onClick={handleBack}
-            className="back-btn"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-
-            Back to Materials
-          </button>
+<Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
           <p className="page-description">
             Manage rejected materials sent for rework, monitor repair progress,

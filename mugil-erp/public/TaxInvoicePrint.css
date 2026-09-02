@@ -350,7 +350,7 @@ body {
   text-align: center;
   font-weight: 700;
   font-size: 10.5px;
-  background: #f1f5f9;
+  background: transparent;
 }
 
 .tip-party-table p {
@@ -367,12 +367,12 @@ body {
    ======================================================================== */
 
 .tip-items-table th {
-  background: #f1f5f9;
+  background: transparent;
   font-weight: 700;
   font-size: 9.5px;
   text-align: center;
   line-height: 1.25;
-}
+} 
 
 .tip-items-table td {
   font-size: 10px;
@@ -512,7 +512,7 @@ body {
 
 .tip-grand-total-row td {
   font-weight: 700;
-  background: #f1f5f9;
+  background: transparent;
 }
 
 /* ========================================================================
@@ -651,32 +651,19 @@ body {
    KEEP THE BOTTOM LINE
    -------------------------------- */
 
-.tip-words-table tr:last-child td {
-  border-bottom: 0.2px solid #000 !important;
-}
 
-
-/* TOTAL ROW */
-.tip-words-table .tip-grand-total-row td {
-  border-top: 0.2px solid #000 !important;
-  border-bottom: 0.2px solid #000 !important;
-}
 
 
 /* Keep the horizontal line between
    TAX section and BANK DETAILS */
-.tip-words-table + * {
-  border-top: 0.2px solid #000 !important;
-}
+
 
 
 
 
 
 /* Keep the outer/top border of the IGST section */
-.tip-words-table tbody tr:first-child td {
-  border-top: 1px solid #000 !important;
-}
+
 
 /* Fix alignment between the upper details section
    and the Quantity column in the items table */
@@ -755,6 +742,8 @@ body {
 
 
 .tip-words-table {
+  width: 100% !important;
+  table-layout: fixed !important;
   border-collapse: collapse !important;
 }
 
@@ -762,9 +751,44 @@ body {
   border: 0.5px solid #000 !important;
 }
 
+/* Let the items table provide the single line
+   between the items section and words/tax section */
 
-.tip-words-table,
+
+/* Keep one normal bottom border */
+.tip-words-table tr:last-child td {
+  border-bottom: 0.5px solid #000 !important;
+}
+
+/* TOTAL row */
+.tip-words-table .tip-grand-total-row td {
+  border-top: 0.5px solid #000 !important;
+  border-bottom: 0.5px solid #000 !important;
+}
+
+/* FINAL WORDS + TAX BORDER CONTROL */
+.tip-words-table {
+  border-collapse: collapse !important;
+  border: none !important;
+}
+
 .tip-words-table td {
   border: 0.5px solid #000 !important;
-  border-collapse: collapse;
+}
+
+/* =========================================================
+   FINAL INVOICE BORDER THICKNESS
+   Make all invoice table lines uniform
+   ========================================================= */
+
+.tip-content table,
+.tip-content table td,
+.tip-content table th {
+  border-width: 0.5px !important;
+  border-style: solid !important;
+  border-color: #000 !important;
+}
+
+.tip-content table {
+  border-collapse: collapse !important;
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useMaterialStore } from "../../data/materialStore";
 import "./Materialstock.css";  
+import "../../styles/BackButton.css";
 import Header from "../../components/Header";
 export default function MaterialStock() {
   const { materialStock } = useMaterialStore();
@@ -54,9 +55,7 @@ export default function MaterialStock() {
   );
 
   // Navigation function
-  const goBack = () => {
-    window.history.back();
-  };
+
 
   // Get status badge class
   const getStatusBadgeClass = (status) => {
@@ -75,10 +74,8 @@ export default function MaterialStock() {
     <>
           <Header />
     <div className="ms-page">
-      {/* Back Button */}
-      <button className="ms-back-btn" onClick={goBack}>
-        <ArrowLeft size={18} /> Back
-      </button>
+
+
 
     <div className="ms-breadcrumb">
   <Link to="/inventory" className="ms-breadcrumb-item">
@@ -95,7 +92,10 @@ export default function MaterialStock() {
 
   <span className="ms-breadcrumb-item">Material Stock</span>
 </div>
-
+<Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
       {/* Header */}
       <div className="ms-header">
         <h1 className="ms-title">Material Stock</h1>

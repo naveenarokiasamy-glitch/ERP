@@ -1,13 +1,13 @@
 /* =========================================================
    MUGIL ERP - UNIVERSAL HEADER
-   Solid branded header with subtle geometric pattern
+   Premium Dark Teal Header
 ========================================================= */
 
 .erp-header {
   position: relative;
 
-  height: 68px;
   width: 100%;
+  height: 68px;
 
   display: flex;
   align-items: center;
@@ -16,16 +16,22 @@
 
   box-sizing: border-box;
 
-  background: #172a46;
+  background:
+    linear-gradient(
+      110deg,
+      #062f35 0%,
+      #073b40 48%,
+      #062d34 100%
+    );
 
   color: #ffffff;
 
-  overflow: visible;
+  overflow: hidden;
 
   z-index: 1000;
 
   box-shadow:
-    0 2px 8px rgba(15, 23, 42, 0.18);
+    0 3px 12px rgba(3, 35, 40, 0.25);
 }
 
 
@@ -42,70 +48,71 @@
 
   overflow: hidden;
 
-  opacity: 0.16;
+  opacity: 0.20;
 
   background-image:
     linear-gradient(
       135deg,
       transparent 0,
       transparent 48%,
-      rgba(255, 255, 255, 0.35) 49%,
+      rgba(92, 200, 232, 0.20) 49%,
       transparent 50%
     ),
     linear-gradient(
       45deg,
       transparent 0,
       transparent 48%,
-      rgba(255, 255, 255, 0.22) 49%,
+      rgba(92, 200, 232, 0.12) 49%,
       transparent 50%
     );
 
   background-size:
-    42px 42px,
-    42px 42px;
+    48px 48px,
+    48px 48px;
 
   background-position:
     0 0,
-    21px 21px;
+    24px 24px;
 }
 
 
-/* Additional soft geometric glow */
+/* Large decorative diagonal shape */
 
 .erp-header-pattern::before {
   content: "";
 
   position: absolute;
 
-  width: 260px;
-  height: 260px;
+  width: 330px;
+  height: 330px;
 
   right: 18%;
+  top: -215px;
 
-  top: -180px;
-
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(92, 200, 232, 0.16);
 
   border-radius: 50%;
 
   box-shadow:
-    0 0 0 32px rgba(255, 255, 255, 0.025),
-    0 0 0 64px rgba(255, 255, 255, 0.018);
+    0 0 0 38px rgba(92, 200, 232, 0.025),
+    0 0 0 76px rgba(92, 200, 232, 0.018);
 }
+
+
+/* Bottom decorative shape */
 
 .erp-header-pattern::after {
   content: "";
 
   position: absolute;
 
-  width: 170px;
-  height: 170px;
+  width: 180px;
+  height: 180px;
 
-  right: 5%;
+  right: 7%;
+  bottom: -140px;
 
-  bottom: -130px;
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(92, 200, 232, 0.13);
 
   transform: rotate(45deg);
 }
@@ -117,6 +124,7 @@
 
 .erp-brand {
   position: relative;
+
   z-index: 2;
 
   height: 100%;
@@ -124,78 +132,44 @@
   display: flex;
   align-items: center;
 
-  gap: 11px;
-
-  cursor: pointer;
+  gap: 13px;
 
   user-select: none;
-}
 
-.erp-brand:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.8);
-  outline-offset: 5px;
-
-  border-radius: 4px;
+  white-space: nowrap;
 }
 
 
-/* Brand vertical line */
+/* Teal vertical accent */
 
 .erp-brand-line {
-  width: 4px;
-  height: 27px;
-
-  background: #5cc8e8;
-
-  border-radius: 4px;
-
-  box-shadow:
-    0 0 10px rgba(92, 200, 232, 0.25);
+  width: 5px;
+  height: 36px;
 
   flex-shrink: 0;
+
+  background: #21c7c7;
+
+  border-radius: 2px;
+
+  box-shadow:
+    0 0 12px rgba(33, 199, 199, 0.35);
 }
 
 
-/* Brand name */
+/* Company name */
 
 .erp-brand-name {
   color: #ffffff;
 
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
 
-  letter-spacing: -0.2px;
+  letter-spacing: -0.25px;
+
+  line-height: 1;
 
   white-space: nowrap;
-}
-
-
-/* =========================================================
-   MODULE NAME
-========================================================= */
-
-.erp-module-name {
-  position: absolute;
-
-  left: 50%;
-
-  transform: translateX(-50%);
-
-  z-index: 2;
-
-  color: #ffffff;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  letter-spacing: 0.1px;
-
-  white-space: nowrap;
-
-  padding: 7px 16px;
-
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 
@@ -206,53 +180,34 @@
 .erp-user-area {
   position: relative;
 
-  z-index: 20;
+  z-index: 2;
 
   margin-left: auto;
 
+  height: 100%;
+
   display: flex;
   align-items: center;
+
+  gap: 0;
 }
 
 
 /* =========================================================
-   PROFILE TRIGGER
+   USER INFORMATION
 ========================================================= */
 
-.erp-profile-trigger {
-  position: relative;
-
-  height: 46px;
+.erp-user-info {
+  height: 100%;
 
   display: flex;
   align-items: center;
 
-  gap: 9px;
+  gap: 10px;
 
-  padding: 4px 9px 4px 5px;
+  padding: 0 17px 0 0;
 
-  border: 1px solid transparent;
-
-  border-radius: 9px;
-
-  background: transparent;
-
-  color: #ffffff;
-
-  font-family: inherit;
-
-  cursor: pointer;
-
-  transition:
-    background 0.16s ease,
-    border-color 0.16s ease;
-}
-
-.erp-profile-trigger:hover,
-.erp-profile-trigger.erp-profile-trigger-active {
-  background: rgba(255, 255, 255, 0.10);
-
-  border-color: rgba(255, 255, 255, 0.14);
+  box-sizing: border-box;
 }
 
 
@@ -261,11 +216,11 @@
 ========================================================= */
 
 .erp-avatar {
-  width: 34px !important;
-  height: 34px !important;
+  width: 38px !important;
+  height: 38px !important;
 
-  min-width: 34px !important;
-  max-width: 34px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
 
   display: flex !important;
   align-items: center !important;
@@ -275,22 +230,35 @@
 
   border-radius: 50%;
 
-  background: #ffffff;
+  background:
+    linear-gradient(
+      145deg,
+      #27caca,
+      #129e9e
+    );
 
-  color: #294664;
+  color: #ffffff;
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.20);
 
   overflow: hidden;
+
+  flex-shrink: 0;
 }
 
+
 .erp-avatar svg {
-  width: 18px !important;
-  height: 18px !important;
+  width: 21px !important;
+  height: 21px !important;
 
-  min-width: 18px !important;
-  max-width: 18px !important;
+  min-width: 21px !important;
+  max-width: 21px !important;
 
-  min-height: 18px !important;
-  max-height: 18px !important;
+  min-height: 21px !important;
+  max-height: 21px !important;
 
   display: block;
 
@@ -309,13 +277,16 @@
 
   align-items: flex-start;
 
-  gap: 1px;
+  justify-content: center;
+
+  gap: 3px;
 
   min-width: 0;
 }
 
+
 .erp-username {
-  max-width: 125px;
+  max-width: 140px;
 
   overflow: hidden;
 
@@ -325,195 +296,55 @@
 
   color: #ffffff;
 
-  font-size: 12.5px;
-  font-weight: 600;
+  font-size: 13px;
 
-  line-height: 1.35;
+  font-weight: 650;
+
+  line-height: 1.2;
 }
+
 
 .erp-user-role {
-  color: rgba(255, 255, 255, 0.58);
-
-  font-size: 10px;
-  font-weight: 500;
-
-  line-height: 1.3;
-}
-
-
-/* =========================================================
-   CHEVRON
-========================================================= */
-
-.erp-chevron {
-  width: 15px !important;
-  height: 15px !important;
-
-  min-width: 15px !important;
-  max-width: 15px !important;
-
-  color: rgba(255, 255, 255, 0.70);
-
-  transition: transform 0.18s ease;
-}
-
-.erp-chevron-open {
-  transform: rotate(180deg);
-}
-
-
-/* =========================================================
-   PROFILE DROPDOWN
-========================================================= */
-
-.erp-profile-dropdown {
-  position: absolute;
-
-  top: calc(100% + 9px);
-
-  right: 0;
-
-  width: 220px;
-
-  padding: 7px;
-
-  box-sizing: border-box;
-
-  background: #ffffff;
-
-  border: 1px solid #e2e8f0;
-
-  border-radius: 10px;
-
-  box-shadow:
-    0 16px 35px rgba(15, 23, 42, 0.16),
-    0 3px 8px rgba(15, 23, 42, 0.08);
-
-  animation: erpDropdownOpen 0.14s ease-out;
-
-  transform-origin: top right;
-}
-
-@keyframes erpDropdownOpen {
-  from {
-    opacity: 0;
-    transform: translateY(-5px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-
-/* =========================================================
-   DROPDOWN USER
-========================================================= */
-
-.erp-dropdown-user {
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 9px 8px 11px;
-}
-
-.erp-dropdown-avatar {
-  width: 36px !important;
-  height: 36px !important;
-
-  min-width: 36px !important;
-  max-width: 36px !important;
-
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  border-radius: 50%;
-
-  background: #eaf3f7;
-
-  color: #285b75;
-
-  overflow: hidden;
-}
-
-.erp-dropdown-avatar svg {
-  width: 18px !important;
-  height: 18px !important;
-
-  min-width: 18px !important;
-  max-width: 18px !important;
-
-  min-height: 18px !important;
-  max-height: 18px !important;
-
-  display: block;
-}
-
-
-.erp-dropdown-user-info {
-  min-width: 0;
-
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-.erp-dropdown-user-info strong {
-  color: #172033;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-}
-
-.erp-dropdown-user-info span {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.62);
 
   font-size: 10.5px;
+
+  font-weight: 500;
+
+  line-height: 1.2;
 }
 
 
 /* =========================================================
-   DIVIDER
+   ACTION DIVIDER
 ========================================================= */
 
-.erp-dropdown-divider {
-  height: 1px;
+.erp-action-divider {
+  width: 1px;
+  height: 28px;
 
-  margin: 1px 4px 5px;
+  flex-shrink: 0;
 
-  background: #edf0f3;
+  background: rgba(55, 199, 199, 0.40);
 }
 
 
 /* =========================================================
-   DROPDOWN ITEMS
+   HEADER ACTIONS
 ========================================================= */
 
-.erp-dropdown-item {
-  width: 100%;
-
-  height: 39px;
+.erp-header-action {
+  height: 42px;
 
   display: flex;
-
   align-items: center;
+  justify-content: center;
 
-  gap: 10px;
+  gap: 8px;
 
-  padding: 0 10px;
+  padding: 0 18px;
+
+  margin: 0;
 
   border: none;
 
@@ -521,45 +352,61 @@
 
   background: transparent;
 
-  color: #374151;
+  color: #ffffff;
 
   font-family: inherit;
 
-  font-size: 12.5px;
-  font-weight: 500;
+  font-size: 13px;
 
-  text-align: left;
+  font-weight: 600;
+
+  white-space: nowrap;
 
   cursor: pointer;
 
   box-sizing: border-box;
 
   transition:
-    background 0.14s ease,
-    color 0.14s ease;
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
 }
 
-.erp-dropdown-item:hover {
-  background: #f1f5f9;
 
-  color: #111827;
+.erp-header-action:hover {
+  background: rgba(33, 199, 199, 0.14);
+
+  color: #5ce0df;
 }
 
-.erp-dropdown-item svg {
-  width: 17px !important;
-  height: 17px !important;
 
-  min-width: 17px !important;
-  max-width: 17px !important;
+.erp-header-action:active {
+  transform: translateY(1px);
+}
 
-  min-height: 17px !important;
-  max-height: 17px !important;
+
+.erp-header-action:focus-visible {
+  outline: 2px solid rgba(92, 224, 223, 0.85);
+
+  outline-offset: 2px;
+}
+
+
+/* Action icons */
+
+.erp-header-action svg {
+  width: 20px !important;
+  height: 20px !important;
+
+  min-width: 20px !important;
+  max-width: 20px !important;
+
+  min-height: 20px !important;
+  max-height: 20px !important;
 
   display: block;
 
   flex-shrink: 0;
-
-  color: #64748b;
 }
 
 
@@ -567,18 +414,16 @@
    SIGN OUT
 ========================================================= */
 
-.erp-signout-item {
-  color: #b91c1c;
+.erp-signout-action {
+  padding-left: 18px;
+  padding-right: 0;
 }
 
-.erp-signout-item:hover {
-  background: #fef2f2;
 
-  color: #b91c1c;
-}
+.erp-signout-action:hover {
+  background: rgba(220, 38, 38, 0.12);
 
-.erp-signout-item svg {
-  color: #dc2626;
+  color: #ff8b8b;
 }
 
 
@@ -594,16 +439,37 @@
     padding: 0 20px;
   }
 
-  .erp-module-name {
-    display: none;
+
+  .erp-brand-name {
+    font-size: 17px;
   }
+
+
+  .erp-brand-line {
+    height: 31px;
+  }
+
+
+  .erp-user-info {
+    padding-right: 12px;
+  }
+
 
   .erp-user-text {
     display: none;
   }
 
-  .erp-profile-trigger {
-    padding-right: 5px;
+
+  .erp-header-action {
+    padding: 0 12px;
+
+    gap: 6px;
+  }
+
+
+  .erp-signout-action {
+    padding-left: 12px;
+    padding-right: 0;
   }
 }
 
@@ -615,20 +481,71 @@
 @media (max-width: 480px) {
 
   .erp-header {
-    padding: 0 15px;
+    height: 60px;
+
+    padding: 0 14px;
   }
+
+
+  .erp-brand {
+    gap: 9px;
+  }
+
 
   .erp-brand-name {
-    font-size: 17px;
+    font-size: 15px;
   }
+
 
   .erp-brand-line {
-    height: 23px;
+    width: 4px;
+
+    height: 26px;
   }
 
-  .erp-profile-dropdown {
-    right: -4px;
 
-    width: 215px;
+  .erp-avatar {
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+    max-width: 34px !important;
+  }
+
+
+  .erp-avatar svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+
+  .erp-header-action {
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+
+    gap: 0;
+  }
+
+
+  .erp-header-action span {
+    display: none;
+  }
+
+
+  .erp-header-action svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+
+
+  .erp-action-divider {
+    height: 24px;
+  }
+
+
+  .erp-signout-action {
+    padding: 0;
   }
 }

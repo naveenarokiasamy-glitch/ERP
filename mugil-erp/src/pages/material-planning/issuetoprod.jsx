@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useMaterialStore, issueToProduction } from "../../data/materialStore";
 import "./issuetoprod.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
-
+import "../../styles/BackButton.css";
+import { ArrowLeft } from "lucide-react";
 const badgeClass = (status) => {
   switch (status) {
     case "Ready":
@@ -91,9 +92,7 @@ export default function IssueToProduction() {
     closeModal();
   };
 
-  const handleBack = () => {
-    navigate("/inventory/material");
-  };
+
 
   const totalPieces = issuablePieces.length;
 
@@ -143,13 +142,13 @@ export default function IssueToProduction() {
               <span className="crumb-active">
                 Issue Material To Production
               </span>
-            <button
-            className="back-btn"
-            onClick={handleBack}
-          >
-            ← Back
-          </button>
+          
             </div>
+
+            <Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
             <h1>
               Issue Material To Production

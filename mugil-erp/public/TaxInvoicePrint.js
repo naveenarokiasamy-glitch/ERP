@@ -343,11 +343,11 @@
     return html;
   }
 
-  function buildPartyTableNode(receiver, consignee) {
-    var table = el("table", "tip-party-table");
-    var tbody = el("tbody");
+function buildPartyTableNode(receiver, consignee) {
+  var table = el("table", "tip-party-table");
+  var tbody = el("tbody");
 
-    tbody.appendChild(
+  tbody.appendChild(
       el(
         "tr",
         "tip-party-heading",
@@ -458,6 +458,7 @@ fmtINR(subtotal) +
   '<col class="tip-tax-label-column" />' +
   '<col class="tip-tax-value-column" />';
     var tbody = el("tbody");
+    
 
     var wordsHtml =
       '<p class="tip-words-label">Total Invoice Amount ( in Words ):</p>' +
@@ -465,8 +466,7 @@ fmtINR(subtotal) +
       escapeHtml(totals.amountInWords || "") +
       "</p>";
     var wordsTd = el("td", "tip-words-cell", wordsHtml);
-    wordsTd.rowSpan = 5;
-
+wordsTd.rowSpan = 5;
     function taxRow(label, pct, value, isTotal) {
       var tr = el("tr", isTotal ? "tip-grand-total-row" : "");
       var pctText =
@@ -488,6 +488,7 @@ fmtINR(subtotal) +
   "tip-tax-value",
   fmtINR(value)
 );
+
       tr.appendChild(labelTd);
       tr.appendChild(valueTd);
       return tr;

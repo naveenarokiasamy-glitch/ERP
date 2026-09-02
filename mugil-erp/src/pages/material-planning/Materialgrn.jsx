@@ -14,6 +14,7 @@ import {
 } from "../../data/materialStore";
 import "./Materialgrn.css";
 import Header from "../../components/Header";
+import "../../styles/BackButton.css";
 export default function MaterialGRN() {
   const { purchaseOrders } = useMaterialStore();
   const [search, setSearch] = useState("");
@@ -166,18 +167,13 @@ export default function MaterialGRN() {
   };
 
   // Navigation function
-  const goBack = () => {
-    window.history.back();
-  };
+
 
   return (
     <>
           <Header />
     <div className="grn-page">
-      {/* Back Button */}
-      <button className="grn-back-btn" onClick={goBack}>
-        <ArrowLeft size={18} /> Back
-      </button>
+      
 
       {/* Breadcrumb */}
       <div className="grn-breadcrumb">
@@ -195,7 +191,10 @@ export default function MaterialGRN() {
 
         <span className="grn-breadcrumb-item">GRN</span>
       </div>
-
+<Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
       {/* Header */}
       <div className="grn-header">
         <h1 className="grn-title">GRN — Goods Receipt Note</h1>

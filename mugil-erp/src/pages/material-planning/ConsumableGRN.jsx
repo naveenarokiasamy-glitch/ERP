@@ -154,9 +154,9 @@ export default function ConsumableGRN() {
     <>
       <Header />
       <div className="consumable-grn-page">
-      <Link to="/inventory/consumable" className="consumable-grn-back">
-  <ArrowLeft size={15} />
-  <span>Consumables</span>
+      <Link to="/inventory/consumable" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
 </Link>
 
 <header className="consumable-grn-header">
@@ -165,9 +165,7 @@ export default function ConsumableGRN() {
 
     <div className="consumable-grn-title-section">
 
-      <span className="consumable-grn-eyebrow">
-        Consumables
-      </span>
+      
 
       <h1 className="consumable-grn-title">
         Consumable GRN

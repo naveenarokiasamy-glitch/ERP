@@ -3,6 +3,11 @@ import { useMaterialStore, receiveFromCutting } from "../../data/materialStore";
 import "./Receivefromcutting.css";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import "../../styles/BackButton.css";
+import {
+  ArrowLeft,
+  // keep all your existing icons here
+} from "lucide-react";
 const badgeClass = (status) => {
   switch (status) {
     case "Open":
@@ -264,8 +269,6 @@ export default function ReceiveFromCutting() {
     closeModal();
   };
 
-const navigate = useNavigate();
-const handleBack = () => navigate("/inventory/material");
 
   return (
 <>
@@ -301,28 +304,10 @@ const handleBack = () => navigate("/inventory/material");
 
 </div>
 
-<button
-  type="button"
-  onClick={handleBack}
-  className="rfc-back-btn"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M19 12H5" />
-    <path d="M12 19l-7-7 7-7" />
-  </svg>
-
+<Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
   Back
-</button>
+</Link>
 
         <h1 className="rfc-page-title">
           Receive From Cutting

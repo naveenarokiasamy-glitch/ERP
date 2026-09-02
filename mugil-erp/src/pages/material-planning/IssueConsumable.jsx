@@ -97,13 +97,10 @@ return (
 
     <div className="issue-consumable-page">
       <div className="issue-consumable-container">
-        <Link
-          to="/inventory/consumable"
-          className="issue-consumable-back-link"
-        >
-          <ArrowLeft size={15} />
-          <span>Consumables</span>
-        </Link>
+       <Link to="/inventory/consumable" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
         <section className="issue-consumable-hero">
           <div className="issue-consumable-hero-content">

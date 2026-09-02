@@ -7,7 +7,8 @@
 // -----------------------------------------------------------------------------
 
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   useMaterialStore,
   buildPOTimeline,
@@ -22,7 +23,7 @@ const card = {
   background: "#fff",
   flex: "1 1 200px",
   minWidth: 180,
-};
+};  
 
 const label = {
   fontSize: 12,
@@ -191,8 +192,7 @@ export default function MaterialMovementHistory() {
     () => (timelinePO ? buildPOTimeline(store, timelinePO) : []),
     [store, timelinePO],
   );
-const navigate = useNavigate();
-const handleBack = () => navigate("/inventory/material");
+
   return (
 <>
   <Header />
@@ -220,27 +220,10 @@ const handleBack = () => navigate("/inventory/material");
     Material Movement History
   </span>
 </div>
-<button
-            onClick={handleBack}
-            className="back-button"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-
-            Back
-          </button>
+<Link to="/inventory/material" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
           <p className="page-subtitle">
             Complete, read-only traceability of every material movement across the module.
           </p>

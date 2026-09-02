@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import "./Consumable.css";
 import Header from "../../components/Header";
+import InventoryModuleSwitcher from "../../components/InventoryModuleSwitcher";
 
 const consumableActions = [
   {
@@ -141,29 +142,30 @@ return (
 
         <main className="consumable-main">
 
-          
+  <div className="inventory-top-row">
+    <Link to="/inventory" className="consumable-back-link">
+      <ArrowLeft size={15} />
+      Inventory
+    </Link>
 
+    <InventoryModuleSwitcher />
+  </div>
 
-          <header className="consumable-header">
+  <header className="consumable-header">
 
-              <Link to="/inventory" className="consumable-back-link">
-            <ArrowLeft size={15} />
-            Inventory
-          </Link>
+    <span className="consumable-eyebrow">
+      Consumables
+    </span>
 
-            <span className="consumable-eyebrow">
-              Consumables
-            </span>
+    <h1 className="consumable-title">
+      Consumable Inventory
+    </h1>
 
-            <h1 className="consumable-title">
-              Consumable Inventory
-            </h1>
+    <p className="consumable-subtitle">
+      Manage all production consumables.
+    </p>
 
-            <p className="consumable-subtitle">
-              Manage all production consumables.
-            </p>
-
-          </header>
+  </header>
 
 
           {/* ================= FEATURED STOCK ================= */}

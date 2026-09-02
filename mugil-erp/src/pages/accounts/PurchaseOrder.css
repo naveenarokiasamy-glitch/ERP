@@ -1072,3 +1072,37 @@
   height: 15px;
   cursor: pointer;
 }
+
+/* =========================================================
+   CUSTOMER DETAILS - PURCHASE ORDER
+   ========================================================= */
+
+.po-card > .form-card {
+  margin: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.po-card > .form-card__title {
+  display: none;
+}
+
+.po-card .vendor-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.po-card .field {
+  min-width: 0;
+}
+
+.po-card .field__input {
+  width: 100%;
+  box-sizing: border-box;
+}

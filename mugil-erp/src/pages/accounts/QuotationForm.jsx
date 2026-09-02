@@ -7,7 +7,8 @@ import TermsEditor from "../../components/TermsEditor";
 import { initialQuoteData } from "../../utils/initialData";
 import { summarizeQuoteItems } from "../../utils/calculations";
 import "./Quotation.css";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 const DRAFT_KEY = "mei-erp-quotation-draft";
 
@@ -105,7 +106,7 @@ export default function QuotationForm() {
   });
   const [errors, setErrors] = useState({});
   const [savedAt, setSavedAt] = useState(null);
-  const navigate = useNavigate();
+  
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_KEY);
@@ -259,40 +260,21 @@ if (!data.vendor.companyName.trim())
     set("technicalDetails", DEFAULT_TECHNICAL_SECTIONS);
   };
 
-  const handleBack = () => {
-    navigate("/accounts");
-  };
+
   return (
     <>
       <Header />
     <div className="qt-page">
+      <Link to="/accounts" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
   <div className="qt-header">
 
     <div className="qt-header__left">
 
-      <button
-        onClick={handleBack}
-        className="qt-back-btn"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-
-        <span>Back</span>
-
-      </button>
+      
 
       <div className="qt-title">
 

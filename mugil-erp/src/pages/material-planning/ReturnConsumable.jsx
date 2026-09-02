@@ -80,10 +80,10 @@ export default function ReturnConsumable() {
       <Header />
       <div className="rcn-page">
 <div className="rcn-header-section">
-  <Link to="/inventory/consumable" className="rcn-back-link">
-    <ArrowLeft size={15} />
-    <span>Consumables</span>
-  </Link>
+  <Link to="/inventory/consumable" className="erp-back-button">
+  <ArrowLeft size={16} />
+  Back
+</Link>
 
   <div className="rcn-header-card">
     <div className="rcn-header-content">
