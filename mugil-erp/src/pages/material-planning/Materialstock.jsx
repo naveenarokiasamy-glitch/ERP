@@ -14,18 +14,31 @@ export default function MaterialStock() {
   const warehouses = [...new Set(materialStock.map((r) => r.warehouse))];
   const statuses = [...new Set(materialStock.map((r) => r.status))];
 
-const rows = materialStock.filter((r) => {
-  const searchValue = search.trim().toLowerCase();
+ const rows = availableStock.filter((r) => {
+    const searchValue = search.trim().toLowerCase();
  
-  // Exact thickness match
-  const matchesThickness =
-    !searchValue ||
-    String(r.thickness ?? "").toLowerCase() === searchValue;
+    const matchesWarehouse =
+      !warehouseFilter || r.warehouse === warehouseFilter;
  
-  // Partial search for other fields
-  const matchesOtherFields =
-    !searchValue ||
-    [
+    const matchesMaterial = !materialFilter || r.material === materialFilter;
+ 
+    if (!searchValue) {
+      return matchesWarehouse && matchesMaterial;
+    }
+ 
+    // If searching a number, prioritize thickness
+    const isNumericSearch = /^\d+(\.\d+)?$/.test(searchValue);
+ 
+    if (isNumericSearch) {
+      const thicknessMatches = String(r.thickness ?? "")
+        .toLowerCase()
+        .includes(searchValue);
+ 
+      return thicknessMatches && matchesWarehouse && matchesMaterial;
+    }
+ 
+    // Otherwise search text fields
+    const matchesText = [
       r.material,
       r.grade,
       r.heatNumber,
@@ -37,38 +50,8 @@ const rows = materialStock.filter((r) => {
       .toLowerCase()
       .includes(searchValue);
  
-  const matchesSearch =
-    !searchValue ||
-    matchesThickness ||
-    matchesOtherFields;
- 
-  const matchesWarehouse =
-    !warehouseFilter || r.warehouse === warehouseFilter;
- 
-  const matchesStatus =
-    !statusFilter || r.status === statusFilter;
- 
-  return matchesSearch && matchesWarehouse && matchesStatus;
-});
-  const totalAvailable = materialStock.reduce(
-    (sum, r) => sum + r.availableQty,
-    0,
-  );
-
-  const totalReserved = materialStock.reduce(
-    (sum, r) => sum + (r.reservedQty || 0),
-    0,
-  );
-
-  const totalIssuedToCutting = materialStock.reduce(
-    (sum, r) => sum + (r.issuedToCutting || 0),
-    0,
-  );
-
-  const totalWeight = materialStock.reduce(
-    (sum, r) => sum + (r.weight * r.availableQty || 0),
-    0,
-  );
+    return matchesText && matchesWarehouse && matchesMaterial;
+  });
 
   // Navigation function
 

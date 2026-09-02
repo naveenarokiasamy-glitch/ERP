@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import "./Deliverychallanform.css";
 import Header from "../../components/Header";
@@ -155,7 +155,7 @@ export default function DeliveryChallanForm() {
     const [draftSavedTime, setDraftSavedTime] = useState(null);
     const [isDraftRestored, setIsDraftRestored] = useState(false);
     const [isPreviewMode, setIsPreviewMode] = useState(false);
-
+    const navigate = useNavigate();
     const hasLoadedRef = useRef(false);
     const saveTimeoutRef = useRef(null);
     const isInitialLoadRef = useRef(true);
@@ -383,10 +383,14 @@ export default function DeliveryChallanForm() {
               <Header />
         <div className="form-page">
             <div className="form-header">
-               <Link to="/accounts" className="erp-back-button">
-    <ArrowLeft size={16} />
-    Back
-</Link>
+               <button
+  type="button"
+  className="erp-back-button"
+  onClick={() => navigate(-1)}
+>
+  <ArrowLeft size={16} />
+  Back
+</button>
                 <h2>Delivery Challan</h2>
                 <div className="form-header-actions">
                     {draftStatus && <span className="form-status">{draftStatus}</span>}
