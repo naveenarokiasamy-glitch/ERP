@@ -14,26 +14,42 @@ export default function MaterialStock() {
   const warehouses = [...new Set(materialStock.map((r) => r.warehouse))];
   const statuses = [...new Set(materialStock.map((r) => r.status))];
 
-  const rows = materialStock.filter((r) => {
-    const matchesSearch =
-      !search ||
-      [
-        r.material,
-        r.grade,
-        r.heatNumber,
-        r.plateNumber,
-        r.poNumber,
-        r.batchNumber,
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(search.toLowerCase());
-    const matchesWarehouse =
-      !warehouseFilter || r.warehouse === warehouseFilter;
-    const matchesStatus = !statusFilter || r.status === statusFilter;
-    return matchesSearch && matchesWarehouse && matchesStatus;
-  });
-
+const rows = materialStock.filter((r) => {
+  const searchValue = search.trim().toLowerCase();
+ 
+  // Exact thickness match
+  const matchesThickness =
+    !searchValue ||
+    String(r.thickness ?? "").toLowerCase() === searchValue;
+ 
+  // Partial search for other fields
+  const matchesOtherFields =
+    !searchValue ||
+    [
+      r.material,
+      r.grade,
+      r.heatNumber,
+      r.plateNumber,
+      r.poNumber,
+      r.batchNumber,
+    ]
+      .join(" ")
+      .toLowerCase()
+      .includes(searchValue);
+ 
+  const matchesSearch =
+    !searchValue ||
+    matchesThickness ||
+    matchesOtherFields;
+ 
+  const matchesWarehouse =
+    !warehouseFilter || r.warehouse === warehouseFilter;
+ 
+  const matchesStatus =
+    !statusFilter || r.status === statusFilter;
+ 
+  return matchesSearch && matchesWarehouse && matchesStatus;
+});
   const totalAvailable = materialStock.reduce(
     (sum, r) => sum + r.availableQty,
     0,
