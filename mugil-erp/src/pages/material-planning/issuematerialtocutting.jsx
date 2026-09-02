@@ -296,7 +296,7 @@ export default function IssueMaterialToCutting() {
 
       {/* Header */}
       <div className="imtc-header">
-        <h1 className="imtc-title">Issue Material to Cutting</h1>
+        <h1 className="imtc-title">Issue Material to Job Work</h1>
         <p className="imtc-subtitle">
           Issue raw plates from Material Stock to a cutting job. Reduces
           available stock immediately and creates a cutting job record.
