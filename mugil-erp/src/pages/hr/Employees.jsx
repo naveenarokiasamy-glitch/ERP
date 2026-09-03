@@ -9,7 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import EmployeeForm from "./EmployeeForm.jsx";
 import "./Employee.css";
 
-/* ==========================================================================
+/* =========================================================================
    CONSTANTS — shared master lists used across the employee module.
    In production these would come from lookup/config APIs.
    ========================================================================== */
