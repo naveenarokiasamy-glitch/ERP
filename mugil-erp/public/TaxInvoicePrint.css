@@ -627,96 +627,50 @@ body {
   }
 }
 
+/* =========================================================
+   FINAL PRINT ALIGNMENT + BORDER CONTROL
+   ========================================================= */
 
-/* IGST label divider now matches CGST/SGST — full-height line, no
-   special-case removal (that produced a short stray stub instead of a
-   clean line). */
-
-/* IGST row now uses the same plain default borders as CGST/SGST — no
-   special-case overrides. The previous overrides fought with the
-   restored label divider above and produced a short stray line stub
-   instead of one clean line. */
-.tip-words-table tr:first-of-type td {
-  border-bottom: 0.5px solid #000 !important;
-}
-.tip-words-table {
-  border-collapse: collapse !important;
-}
-
-.tip-words-table td {
-  border: 0.5px solid #000 !important;
-}
-/* --------------------------------
-   IMPORTANT:
-   KEEP THE BOTTOM LINE
-   -------------------------------- */
-
-
-
-
-/* Keep the horizontal line between
-   TAX section and BANK DETAILS */
-
-
-
-
-
-
-/* Keep the outer/top border of the IGST section */
-
-
-/* Fix alignment between the upper details section
-   and the Quantity column in the items table */
-
+/* Details table alignment */
 .tip-details-table {
   table-layout: fixed !important;
 }
 
-/* Keep the left/right sections at the same 50/50 position */
 .tip-details-table td {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
 }
 
-/* Make the divider exactly 50%
-.tip-details-table tr > td:first-child {
-  width: 50% !important;
-}
-
-.tip-details-table tr > td:last-child {
-  width: 50% !important;
-} */
- /* Move the Vehicle/Details center divider slightly left */
 .tip-details-table tr > td:first-child {
   width: 49.5% !important;
-  box-sizing: border-box !important;
 }
 
 .tip-details-table tr > td:last-child {
   width: 50.5% !important;
-  box-sizing: border-box !important;
 }
 
-/* Items table - preserve existing widths but ensure
-   borders are calculated from the same table width */
+
+/* Items table alignment */
 .tip-items-table {
   table-layout: fixed !important;
   width: 100% !important;
 }
 
-/* Prevent padding/border from changing column position */
 .tip-items-table th,
 .tip-items-table td {
   box-sizing: border-box !important;
 }
 
 
-
+/* Words + Tax table */
 .tip-words-table {
   width: 100% !important;
   table-layout: fixed !important;
   border-collapse: collapse !important;
+  border-spacing: 0 !important;
 }
 
+
+/* Column widths */
 .tip-words-column {
   width: 65% !important;
 }
@@ -725,70 +679,99 @@ body {
   width: 17.5% !important;
 }
 
-.tip-tax-pct-column {
-  width: 0 !important;
-}
-
 .tip-tax-value-column {
   width: 17.5% !important;
 }
 
+
+/* Tax text alignment */
 .tip-tax-value {
   text-align: right !important;
 }
 
 
+/* =========================================================
+   TAX ROW BORDERS
+   ========================================================= */
 
-
-
-.tip-words-table {
-  width: 100% !important;
-  table-layout: fixed !important;
-  border-collapse: collapse !important;
+/* Remove the default horizontal borders from the tax rows */
+.tip-words-table .tip-tax-label,
+.tip-words-table .tip-tax-value {
+  border-top: none !important;
+  border-bottom: none !important;
 }
 
-.tip-words-table td {
-  border: 0.5px solid #000 !important;
-}
 
-/* Let the items table provide the single line
-   between the items section and words/tax section */
-
-
-/* Keep one normal bottom border */
-.tip-words-table tr:last-child td {
+/* Draw ONE horizontal line between each tax row */
+.tip-words-table tr:not(:last-child) .tip-tax-label,
+.tip-words-table tr:not(:last-child) .tip-tax-value {
   border-bottom: 0.5px solid #000 !important;
 }
 
-/* TOTAL row */
-.tip-words-table .tip-grand-total-row td {
-  border-top: 0.5px solid #000 !important;
+
+/* Keep the bottom border of TOTAL */
+.tip-words-table .tip-grand-total-row .tip-tax-label,
+.tip-words-table .tip-grand-total-row .tip-tax-value {
   border-bottom: 0.5px solid #000 !important;
 }
 
-/* FINAL WORDS + TAX BORDER CONTROL */
-.tip-words-table {
-  border-collapse: collapse !important;
-  border: none !important;
+
+/* Keep the vertical divider between tax label and amount */
+.tip-words-table .tip-tax-value {
+  border-left: 0.5px solid #000 !important;
 }
 
-.tip-words-table td {
-  border: 0.5px solid #000 !important;
+
+/* Keep the outer right edge */
+.tip-words-table .tip-tax-value {
+  border-right: 0.5px solid #000 !important;
+}
+
+
+/* Words cell owns the vertical divider on its right */
+.tip-words-table .tip-words-cell {
+  border-right: 0.5px solid #000 !important;
 }
 
 /* =========================================================
-   FINAL INVOICE BORDER THICKNESS
-   Make all invoice table lines uniform
+   FINAL SHARED BORDER THINNING
+   Remove duplicate borders on the specific thick seams
    ========================================================= */
 
-.tip-content table,
-.tip-content table td,
-.tip-content table th {
-  border-width: 0.5px !important;
-  border-style: solid !important;
-  border-color: #000 !important;
+/* 1. ITEMS TABLE → WORDS/TAX TABLE
+   Keep only the words/tax table's top edge */
+.tip-items-table tbody tr:last-child td {
+  border-bottom: 0 !important;
 }
 
-.tip-content table {
-  border-collapse: collapse !important;
+.tip-words-table tbody tr:first-child td {
+  border-top: 0.5px solid #000 !important;
+}
+
+
+/* 2. AMOUNT-IN-WORDS → TAX SECTION
+   Keep only the right border of the words cell */
+.tip-words-table .tip-words-cell {
+  border-right: 0.5px solid #000 !important;
+}
+
+.tip-words-table .tip-tax-label {
+  border-left: 0 !important;
+}
+
+
+/* 3. TAX LABEL → TAX VALUE
+   Keep only the left border of the value cell */
+.tip-words-table .tip-tax-label {
+  border-right: 0 !important;
+}
+
+.tip-words-table .tip-tax-value {
+  border-left: 0.5px solid #000 !important;
+}
+
+
+/* Keep the outside right edge */
+.tip-words-table .tip-tax-value {
+  border-right: 0.5px solid #000 !important;
 }

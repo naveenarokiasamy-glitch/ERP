@@ -678,9 +678,7 @@ body {
 
 
 /* Keep the outer/top border of the IGST section */
-.tip-words-table tbody tr:first-child td {
-  border-top: 1px solid #000 !important;
-}
+
 
 /* Fix alignment between the upper details section
    and the Quantity column in the items table */
@@ -771,4 +769,97 @@ body {
 .tip-words-table td {
   border: 0.5px solid #000 !important;
   border-collapse: collapse;
+}
+
+/* =========================================================
+   PROFORMA INVOICE - FINAL SHARED BORDER FIX
+   ========================================================= */
+
+/* 1. ITEMS TABLE → WORDS / TAX TABLE
+   Keep only one horizontal border at the seam */
+.tip-items-table tbody tr:last-child td {
+  border-bottom: 0 !important;
+}
+
+
+
+/* 2. AMOUNT IN WORDS → TAX SECTION
+   Keep only one vertical divider */
+.tip-words-table .tip-words-cell {
+  border-right: 0.5px solid #000 !important;
+}
+
+.tip-words-table .tip-tax-label {
+  border-left: 0 !important;
+}
+
+
+/* 3. TAX LABEL → TAX VALUE
+   Keep only one vertical divider */
+.tip-words-table .tip-tax-label {
+  border-right: 0 !important;
+}
+
+.tip-words-table .tip-tax-value {
+  border-left: 0.5px solid #000 !important;
+}
+
+
+/* 4. TAX ROW HORIZONTAL LINES
+   Each separator is drawn only once */
+.tip-words-table .tip-tax-label,
+.tip-words-table .tip-tax-value {
+  border-top: 0 !important;
+  border-bottom: 0.5px solid #000 !important;
+}
+
+
+/* 5. TOTAL ROW */
+.tip-words-table .tip-grand-total-row .tip-tax-label,
+.tip-words-table .tip-grand-total-row .tip-tax-value {
+  border-top: 0 !important;
+  border-bottom: 0.5px solid #000 !important;
+}
+
+
+/* 6. OUTER RIGHT EDGE */
+.tip-words-table .tip-tax-value {
+  border-right: 0.5px solid #000 !important;
+}
+
+
+/* 7. WORDS / TAX → PAN / BANK
+   Keep only one horizontal border */
+.tip-words-table {
+  border-bottom: 0 !important;
+}
+
+.tip-bottom-table {
+  border-top: 0 !important;
+}
+
+/* Fix the doubled line above the Tax TOTAL row */
+.tip-words-table .tip-grand-total-row td {
+  border-top: 0 !important;
+}
+
+/* Final fix: keep the IGST top border the same thickness
+   as the other invoice borders */
+.tip-words-table tbody tr:first-child td {
+  border-top: 0.5px solid #000 !important;
+}
+
+/* =========================================================
+   FINAL FIX - TOP EDGE OF WORDS / TAX TABLE
+   ========================================================= */
+
+/* The items table owns the shared horizontal line.
+   Do not draw another line from the words/tax table itself. */
+.tip-words-table {
+  border-top: 0 !important;
+}
+
+/* Do not add another top border to the first tax row */
+.tip-words-table tbody tr:first-child td {
+  border-top: 0 !important;
 }

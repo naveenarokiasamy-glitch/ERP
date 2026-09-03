@@ -255,9 +255,9 @@
       '<div class="tip-works-line">' + escapeHtml(worksLine1) + "</div>" +
       (worksLine2 ? '<div class="tip-works-line">' + escapeHtml(worksLine2) + "</div>" : "");
     
-    var logoRightTd = el("td", "tip-h-logo tip-h-logo--right");
-    logoLeftTd.innerHTML =
-  '<img src="/mugil-logo.png" alt="Mugil Engineering Industry" style="width:90px;height:90px;object-fit:contain;" />';
+var logoRightTd = el("td", "tip-h-logo tip-h-logo--right");
+logoRightTd.innerHTML =
+  '<img src="/globe-logo.png" alt="Mugil Engineering Industry" style="width:90px;height:90px;object-fit:contain;" />';
     
     row2.appendChild(logoLeftTd);
     row2.appendChild(companyTd);
