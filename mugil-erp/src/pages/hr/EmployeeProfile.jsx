@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEmployees, StatusBadge } from "./Employees.jsx";
-import EmployeeForm from "./Employeeform.jsx";
+import EmployeeForm from "./EmployeeForm.jsx";
 import "./Employee.css";
 
 
