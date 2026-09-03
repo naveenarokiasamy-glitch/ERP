@@ -6,9 +6,8 @@ import {
   useCallback,
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import EmployeeForm from "./Employeeform.jsx";
+import EmployeeForm from "./EmployeeForm.jsx";
 import "./Employee.css";
-import Header from "../../components/Header";
 
 /* ==========================================================================
    CONSTANTS — shared master lists used across the employee module.
@@ -1139,7 +1138,49 @@ export function createBlankEmployee(suggestedId) {
    TOP NAVIGATION
    ========================================================================== */
 
+const NAV_ITEMS = [
+  "Employees",
+  "Management",
+  "Directory",
+  "Departments",
+  "Learning",
+  "Reporting",
+  "Configuration",
+];
 
+function TopNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const links = [
+    { label: "Employees", path: "/hr/employees" },
+    { label: "Attendance & Wages", path: "/hr/attendance" },
+    { label: "Salary", path: "/hr/salary" },
+  ];
+  return (
+    <header className="emp-topnav">
+      <div className="emp-topnav-brand">
+        <span className="emp-topnav-mark">HR</span>
+        <span className="emp-topnav-title">People Ops</span>
+      </div>
+      <nav className="emp-topnav-links">
+        {links.map((link) => (
+          <button
+            key={link.path}
+            type="button"
+            className={`emp-topnav-link ${
+              location.pathname.startsWith(link.path)
+                ? "emp-topnav-link-active"
+                : ""
+            }`}
+            onClick={() => navigate(link.path)}
+          >
+            {link.label}
+          </button>
+        ))}
+      </nav>
+    </header>
+  );
+}
 
 /* ==========================================================================
    STATUS BADGE
@@ -1158,6 +1199,8 @@ export function StatusBadge({ status }) {
 /* ==========================================================================
    EMPLOYEE LIST PAGE
    ========================================================================== */
+
+const PAGE_SIZE = 8;
 
 const emptyFilters = {
   department: [],
@@ -1179,6 +1222,7 @@ export default function Employees() {
 
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(emptyFilters);
+  const [page, setPage] = useState(1);
   const [showArchived, setShowArchived] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(location.state?.openCreate || false);
@@ -1257,12 +1301,20 @@ export default function Employees() {
     });
   }, [employees, search, filters, showArchived]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const pageItems = filtered.slice(
+    (pageSafe - 1) * PAGE_SIZE,
+    pageSafe * PAGE_SIZE,
+  );
+
   const activeFilterCount = Object.values(filters).reduce(
     (sum, arr) => sum + arr.length,
     0,
   );
 
   function updateFilter(group, value) {
+    setPage(1);
     setFilters((prev) => ({
       ...prev,
       [group]: toggleInArray(prev[group], value),
@@ -1271,6 +1323,7 @@ export default function Employees() {
 
   function clearFilters() {
     setFilters(emptyFilters);
+    setPage(1);
   }
 
   function openCreateForm() {
@@ -1341,6 +1394,7 @@ export default function Employees() {
           checked={showArchived}
           onChange={() => {
             setShowArchived((v) => !v);
+            setPage(1);
           }}
         />
         <span>Show archived employees</span>
@@ -1372,7 +1426,7 @@ export default function Employees() {
 
   return (
     <div className="emp-app">
-  <Header />
+      <TopNav />
 
       <div className="emp-page-header">
         <div className="emp-page-header-titles">
@@ -1396,6 +1450,7 @@ export default function Employees() {
               placeholder="Search employees..."
               onChange={(e) => {
                 setSearch(e.target.value);
+                setPage(1);
               }}
               aria-label="Search employees"
             />
@@ -1451,7 +1506,7 @@ export default function Employees() {
                 </div>
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : pageItems.length === 0 ? (
             <div className="emp-empty-state">
               <div className="emp-empty-icon">🗂️</div>
               <h3>
@@ -1475,161 +1530,190 @@ export default function Employees() {
               )}
             </div>
           ) : (
-            <div className="emp-grid">
-              {filtered.map((emp) => (
-                <article
-                  className={`emp-card emp-card-container emp-card-accent-${emp.employmentStatus.toLowerCase().replace(/\s+/g, "-")}${flippedIds.has(emp.id) ? " is-flipped" : ""}`}
-                  key={emp.id}
-                >
-                  <div className="emp-card-flip">
-                    {/* FRONT — identity, badge-style */}
-                    <div className="emp-card-front">
-                      <div className="emp-card-face-top">
-                        <StatusBadge status={emp.employmentStatus} />
-                        <div className="emp-menu-wrap">
+            <>
+              <div className="emp-grid">
+                {pageItems.map((emp) => (
+                  <article
+                    className={`emp-card emp-card-container emp-card-accent-${emp.employmentStatus.toLowerCase().replace(/\s+/g, "-")}${flippedIds.has(emp.id) ? " is-flipped" : ""}`}
+                    key={emp.id}
+                  >
+                    <div className="emp-card-flip">
+                      {/* FRONT — identity, badge-style */}
+                      <div className="emp-card-front">
+                        <div className="emp-card-face-top">
+                          <StatusBadge status={emp.employmentStatus} />
+                          <div className="emp-menu-wrap">
+                            <button
+                              className="emp-icon-btn"
+                              type="button"
+                              aria-label="More actions"
+                              onClick={() =>
+                                setOpenMenuId(
+                                  openMenuId === emp.id ? null : emp.id,
+                                )
+                              }
+                            >
+                              ⋮
+                            </button>
+                            {openMenuId === emp.id && (
+                              <div className="emp-menu">
+                                {!emp.archived ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      setArchiveTarget(emp);
+                                    }}
+                                  >
+                                    Archive employee
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      navigate(`/hr/employees/${emp.id}`);
+                                    }}
+                                  >
+                                    View archived record
+                                  </button>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="emp-card-identity"
+                          onClick={() => navigate(`/hr/employees/${emp.id}`)}
+                        >
+                          <div className="emp-card-avatar-wrap">
+                            <img
+                              className="emp-card-avatar"
+                              src={emp.photo}
+                              alt=""
+                            />
+                            <span
+                              className="emp-card-avatar-dot"
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <h3>
+                            {emp.firstName} {emp.lastName}
+                          </h3>
+                          <p className="emp-card-role">{emp.designation}</p>
+                          <span className="emp-card-id">{emp.id}</span>
+                          <span className="emp-card-dept-pill">
+                            {emp.department}
+                          </span>
+                        </button>
+
+                        <div className="emp-card-face-footer">
                           <button
-                            className="emp-icon-btn"
                             type="button"
-                            aria-label="More actions"
-                            onClick={() =>
-                              setOpenMenuId(
-                                openMenuId === emp.id ? null : emp.id,
-                              )
+                            className="emp-card-flip-btn"
+                            aria-label={
+                              flippedIds.has(emp.id)
+                                ? "Show employee identity"
+                                : "Show employee details"
                             }
+                            onClick={() => toggleCardFlip(emp.id)}
                           >
-                            ⋮
+                            Details
                           </button>
-                          {openMenuId === emp.id && (
-                            <div className="emp-menu">
-                              {!emp.archived ? (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    setArchiveTarget(emp);
-                                  }}
-                                >
-                                  Archive employee
-                                </button>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setOpenMenuId(null);
-                                    navigate(`/hr/employees/${emp.id}`);
-                                  }}
-                                >
-                                  View archived record
-                                </button>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        className="emp-card-identity"
-                        onClick={() => navigate(`/hr/employees/${emp.id}`)}
-                      >
-                        <div className="emp-card-avatar-wrap">
-                          <img
-                            className="emp-card-avatar"
-                            src={emp.photo}
-                            alt=""
-                          />
-                          <span
-                            className="emp-card-avatar-dot"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <h3>
-                          {emp.firstName} {emp.lastName}
-                        </h3>
-                        <p className="emp-card-role">{emp.designation}</p>
-                        <span className="emp-card-id">{emp.id}</span>
-                        <span className="emp-card-dept-pill">
-                          {emp.department}
-                        </span>
-                      </button>
-
-                      <div className="emp-card-face-footer">
+                      {/* BACK — department & employment details, no sensitive data */}
+                      <div className="emp-card-back">
+                        <p className="emp-card-back-eyebrow">
+                          Employee Details
+                        </p>
+                        <dl className="emp-card-detail-list">
+                          <div>
+                            <dt>Department</dt>
+                            <dd>{emp.department}</dd>
+                          </div>
+                          <div>
+                            <dt>Designation</dt>
+                            <dd>{emp.designation}</dd>
+                          </div>
+                          <div>
+                            <dt>Location</dt>
+                            <dd>{emp.city}</dd>
+                          </div>
+                          <div>
+                            <dt>Branch</dt>
+                            <dd>{emp.branch}</dd>
+                          </div>
+                          <div>
+                            <dt>Employment Type</dt>
+                            <dd>{emp.employmentType}</dd>
+                          </div>
+                          <div>
+                            <dt>Joining Date</dt>
+                            <dd>{emp.joiningDate}</dd>
+                          </div>
+                          <div>
+                            <dt>Manager</dt>
+                            <dd>{emp.reportingManager || "—"}</dd>
+                          </div>
+                        </dl>
+                        {emp.skills.length > 0 && (
+                          <div className="emp-card-skills">
+                            {emp.skills.slice(0, 3).map((s) => (
+                              <span className="emp-tag" key={s}>
+                                {s}
+                              </span>
+                            ))}
+                            {emp.skills.length > 3 && (
+                              <span className="emp-tag emp-tag-more">
+                                +{emp.skills.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <button
                           type="button"
-                          className="emp-card-flip-btn"
-                          aria-label={
-                            flippedIds.has(emp.id)
-                              ? "Show employee identity"
-                              : "Show employee details"
-                          }
-                          onClick={() => toggleCardFlip(emp.id)}
+                          className="emp-card-view-profile"
+                          onClick={() => navigate(`/hr/employees/${emp.id}`)}
                         >
-                          Details
+                          View Profile →
                         </button>
                       </div>
                     </div>
+                  </article>
+                ))}
+              </div>
 
-                    {/* BACK — department & employment details, no sensitive data */}
-                    <div className="emp-card-back">
-                      <p className="emp-card-back-eyebrow">
-                        Employee Details
-                      </p>
-                      <dl className="emp-card-detail-list">
-                        <div>
-                          <dt>Department</dt>
-                          <dd>{emp.department}</dd>
-                        </div>
-                        <div>
-                          <dt>Designation</dt>
-                          <dd>{emp.designation}</dd>
-                        </div>
-                        <div>
-                          <dt>Location</dt>
-                          <dd>{emp.city}</dd>
-                        </div>
-                        <div>
-                          <dt>Branch</dt>
-                          <dd>{emp.branch}</dd>
-                        </div>
-                        <div>
-                          <dt>Employment Type</dt>
-                          <dd>{emp.employmentType}</dd>
-                        </div>
-                        <div>
-                          <dt>Joining Date</dt>
-                          <dd>{emp.joiningDate}</dd>
-                        </div>
-                        <div>
-                          <dt>Manager</dt>
-                          <dd>{emp.reportingManager || "—"}</dd>
-                        </div>
-                      </dl>
-                      {emp.skills.length > 0 && (
-                        <div className="emp-card-skills">
-                          {emp.skills.slice(0, 3).map((s) => (
-                            <span className="emp-tag" key={s}>
-                              {s}
-                            </span>
-                          ))}
-                          {emp.skills.length > 3 && (
-                            <span className="emp-tag emp-tag-more">
-                              +{emp.skills.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <button
-                        type="button"
-                        className="emp-card-view-profile"
-                        onClick={() => navigate(`/hr/employees/${emp.id}`)}
-                      >
-                        View Profile →
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+              {totalPages > 1 && (
+                <nav
+                  className="emp-pagination"
+                  aria-label="Employee list pagination"
+                >
+                  <button
+                    className="emp-btn-outline"
+                    type="button"
+                    disabled={pageSafe === 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <span className="emp-pagination-status">
+                    Page {pageSafe} of {totalPages}
+                  </span>
+                  <button
+                    className="emp-btn-outline"
+                    type="button"
+                    disabled={pageSafe === totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  >
+                    Next
+                  </button>
+                </nav>
+              )}
+            </>
           )}
         </main>
       </div>

@@ -38,289 +38,318 @@ import DeliveryChallan from "./pages/accounts/Deliverychallanform";
 import ProformaInvoiceForm from "./pages/accounts/Proformainvoiceform";
 import Employees, { EmployeesProvider } from "./pages/hr/Employees.jsx";
 import Profile from "./components/Profile.jsx";
+import Salary from "./pages/hr/Salary.jsx";
+import Attendance from "./pages/hr/Attendancewages.jsx";
+import { AttendanceProvider } from "./pages/hr/Attendancewages.jsx";
+import { SalaryAdjustmentsProvider } from "./pages/hr/Salary.jsx";
 
 import EmployeeProfile from "./pages/hr/EmployeeProfile.jsx";
 export default function App() {
   return (
     <AuthProvider>
       <EmployeesProvider>
-        <Routes>
-          <Route
-            path="/"
-            element={<Navigate to="/production/login" replace />}
-          />
-          <Route path="/production/login" element={<ProductionLoginPage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/hr/login" element={<HrLoginPage />} />
-          <Route
-            path="/material-planning/login"
-            element={<MaterialPlanningLoginPage />}
-          />
-          <Route path="/supervisor/login" element={<SupervisorLoginPage />} />
-          <Route path="/accounts/login" element={<AccountsLoginPage />} />
-          <Route
-            path="/welcome"
-            element={
-              <ProtectedRoute>
-                <WelcomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <ProtectedRoute>
-                <Inventory />
-              </ProtectedRoute>
-            }
-          />
+        <AttendanceProvider>
+          <SalaryAdjustmentsProvider>
+            <Routes>
+              <Route
+                path="/"
+                element={<Navigate to="/production/login" replace />}
+              />
+              <Route
+                path="/production/login"
+                element={<ProductionLoginPage />}
+              />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="/hr/login" element={<HrLoginPage />} />
+              <Route
+                path="/material-planning/login"
+                element={<MaterialPlanningLoginPage />}
+              />
+              <Route
+                path="/supervisor/login"
+                element={<SupervisorLoginPage />}
+              />
+              <Route path="/accounts/login" element={<AccountsLoginPage />} />
+              <Route
+                path="/welcome"
+                element={
+                  <ProtectedRoute>
+                    <WelcomePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory"
+                element={
+                  <ProtectedRoute>
+                    <Inventory />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material"
-            element={
-              <ProtectedRoute>
-                <Material />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material"
+                element={
+                  <ProtectedRoute>
+                    <Material />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/consumable"
-            element={
-              <ProtectedRoute>
-                <Consumable />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/consumable"
+                element={
+                  <ProtectedRoute>
+                    <Consumable />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/grn"
-            element={
-              <ProtectedRoute>
-                <MaterialGRN />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/grn"
+                element={
+                  <ProtectedRoute>
+                    <MaterialGRN />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/stock"
-            element={
-              <ProtectedRoute>
-                <MaterialStock />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/stock"
+                element={
+                  <ProtectedRoute>
+                    <MaterialStock />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/issue-cutting"
-            element={
-              <ProtectedRoute>
-                <IssueMaterialToCutting />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/material/receive-cutting"
-            element={
-              <ProtectedRoute>
-                <ReceiveFromCutting />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/issue-cutting"
+                element={
+                  <ProtectedRoute>
+                    <IssueMaterialToCutting />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/material/receive-cutting"
+                element={
+                  <ProtectedRoute>
+                    <ReceiveFromCutting />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/stock/cutting-balance"
-            element={
-              <ProtectedRoute>
-                <CuttingBalanceStock />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/stock/cutting-balance"
+                element={
+                  <ProtectedRoute>
+                    <CuttingBalanceStock />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/issue-production"
-            element={
-              <ProtectedRoute>
-                <IssueToProduction />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/material/rework"
-            element={
-              <ProtectedRoute>
-                <Rework />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/material/scrap"
-            element={
-              <ProtectedRoute>
-                <Scrap />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/issue-production"
+                element={
+                  <ProtectedRoute>
+                    <IssueToProduction />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/material/rework"
+                element={
+                  <ProtectedRoute>
+                    <Rework />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/material/scrap"
+                element={
+                  <ProtectedRoute>
+                    <Scrap />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/rejection"
-            element={
-              <ProtectedRoute>
-                <Rejection />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/rejection"
+                element={
+                  <ProtectedRoute>
+                    <Rejection />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/rework"
-            element={
-              <ProtectedRoute>
-                <Rework />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/material/movement-history"
-            element={
-              <ProtectedRoute>
-                <MaterialMovementHistory />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/rework"
+                element={
+                  <ProtectedRoute>
+                    <Rework />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/material/movement-history"
+                element={
+                  <ProtectedRoute>
+                    <MaterialMovementHistory />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/material/reports"
-            element={
-              <ProtectedRoute>
-                <Reports />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/consumable/grn"
-            element={
-              <ProtectedRoute>
-                <ConsumableGRN />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/material/reports"
+                element={
+                  <ProtectedRoute>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/consumable/grn"
+                element={
+                  <ProtectedRoute>
+                    <ConsumableGRN />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/consumable/stock"
-            element={
-              <ProtectedRoute>
-                <ConsumableStock />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory/consumable/issue"
-            element={
-              <ProtectedRoute>
-                <IssueConsumable />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/consumable/stock"
+                element={
+                  <ProtectedRoute>
+                    <ConsumableStock />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/inventory/consumable/issue"
+                element={
+                  <ProtectedRoute>
+                    <IssueConsumable />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/consumable/return"
-            element={
-              <ProtectedRoute>
-                <ReturnConsumable />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/consumable/return"
+                element={
+                  <ProtectedRoute>
+                    <ReturnConsumable />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/inventory/consumable/reports"
-            element={
-              <ProtectedRoute>
-                <ConsumableReports />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/inventory/consumable/reports"
+                element={
+                  <ProtectedRoute>
+                    <ConsumableReports />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/accounts"
-            element={
-              <ProtectedRoute>
-                <AccountsHome />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/po"
-            element={
-              <ProtectedRoute>
-                <PO />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/qo"
-            element={
-              <ProtectedRoute>
-                <QO />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/TaxInvoice"
-            element={
-              <ProtectedRoute>
-                <TaxInvoice />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/DeliveryChallan"
-            element={
-              <ProtectedRoute>
-                <DeliveryChallan />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/accounts/ProformaInvoice"
-            element={
-              <ProtectedRoute>
-                <ProformaInvoiceForm />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/hr/employees"
-            element={
-              <ProtectedRoute>
-                <Employees />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/accounts"
+                element={
+                  <ProtectedRoute>
+                    <AccountsHome />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts/po"
+                element={
+                  <ProtectedRoute>
+                    <PO />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts/qo"
+                element={
+                  <ProtectedRoute>
+                    <QO />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts/TaxInvoice"
+                element={
+                  <ProtectedRoute>
+                    <TaxInvoice />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts/DeliveryChallan"
+                element={
+                  <ProtectedRoute>
+                    <DeliveryChallan />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/accounts/ProformaInvoice"
+                element={
+                  <ProtectedRoute>
+                    <ProformaInvoiceForm />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/employees"
+                element={
+                  <ProtectedRoute>
+                    <Employees />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/hr/employees/:id"
-            element={
-              <ProtectedRoute>
-                <EmployeeProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile/>
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/hr/employees/:id"
+                element={
+                  <ProtectedRoute>
+                    <EmployeeProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/salary"
+                element={
+                  <ProtectedRoute>
+                    <Salary />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/hr/attendance"
+                element={
+                  <ProtectedRoute>
+                    <Attendance />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="*"
-            element={<Navigate to="/production/login" replace />}
-          />
-        </Routes>
+              <Route
+                path="*"
+                element={<Navigate to="/production/login" replace />}
+              />
+            </Routes>
+          </SalaryAdjustmentsProvider>
+        </AttendanceProvider>
       </EmployeesProvider>
     </AuthProvider>
   );
 }
-

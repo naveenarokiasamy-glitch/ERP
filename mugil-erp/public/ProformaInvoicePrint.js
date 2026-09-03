@@ -31,11 +31,11 @@
     headerGap: 0,
   };
 
-  var LOGO_LEFT_SRC = "src/assets/mugil-logo.png";
-  var LOGO_RIGHT_SRC = "src/assets/globe-logo.png";
+  var LOGO_LEFT_SRC = "/mugil-logo.png";
+  var LOGO_RIGHT_SRC = "/globe-logo.png";
 
-  var FOOTER_BLOOD_SRC = "src/assets/eye-donation.png";
-  var FOOTER_EYE_SRC = "src/assets/blood-donation.png";
+  var FOOTER_BLOOD_SRC = "/eye-donation.png";
+  var FOOTER_EYE_SRC = "/blood-donation.png";
 
   var DEFAULT_TAGLINE = "கண்தானம் செய்வீர்! இரத்ததானம் செய்வீர்!!";
 
@@ -597,7 +597,7 @@ tbody.appendChild(taxRow("TOTAL", "", totals.grandTotal, true));
 
     // Row 3: Enclosures  |  Signature block
     var enclLeftHtml = enclosureText
-      ? '<p class="tip-bottom-heading">Encl :</p>' + enclosureHtml
+      ? '<p class="tip-bottom-heading">Terms :</p>' + enclosureHtml
       : "";
     var sigRightHtml =
       '<p class="tip-sig-for">For ' +

@@ -100,18 +100,42 @@ body {
 }
 
 .dc-brand {
-  display: grid;
-  grid-template-columns: 15mm minmax(0, 1fr) 15mm;
+  position: relative;
+  display: flex;
   align-items: center;
+  justify-content: center;
   min-height: 17.5mm;
 }
 
+/* Keep company name/address exactly centered */
+.dc-brand-copy {
+  width: 100%;
+  text-align: center;
+}
+
+/* Header logos */
 .dc-logo-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
   width: 15mm;
   height: 15mm;
+
+  display: flex;
+  align-items: center;
+}
+
+/* LEFT LOGO */
+.dc-logo-wrap:first-child {
+  left: 1mm;
+  justify-content: flex-start;
+}
+
+/* RIGHT LOGO */
+.dc-logo-wrap:last-child {
+  right: 3mm;
+  justify-content: flex-end;
 }
 
 .dc-logo-wrap img {
@@ -121,6 +145,9 @@ body {
   object-fit: contain;
 }
 
+.dc-logo-wrap.is-missing {
+  visibility: hidden;
+}
 .dc-logo-wrap.is-missing { visibility: hidden; }
 
 .dc-brand-copy { text-align: center; }

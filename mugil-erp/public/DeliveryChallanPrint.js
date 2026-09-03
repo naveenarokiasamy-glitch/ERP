@@ -3,12 +3,12 @@
 
 const ASSETS = {
   // Header logos
-  logo: './src/assets/mugil-logo.png',
-  logoRight: './src/assets/globe-logo.png',
+  logo: '/mugil-logo.png',
+  logoRight: '/globe-logo.png',
 
   // Footer logos
-  eyeDonation: './src/assets/eye-donation.png',
-  bloodDonation: './src/assets/blood-donation.png',
+  eyeDonation: '/eye-donation.png',
+  bloodDonation: '/blood-donation.png',
 };
 
 const COMPANY_ADDRESSES = [
