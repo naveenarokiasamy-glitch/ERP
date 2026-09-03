@@ -241,7 +241,8 @@
     var row2 = el("tr");
     
     var logoLeftTd = el("td", "tip-h-logo tip-h-logo--left");
-    logoLeftTd.innerHTML = '<img src="' + LOGO_LEFT_SRC + '" alt="Logo" />';
+    logoLeftTd.innerHTML =
+  '<img src="/mugil-logo.png" alt="Mugil Engineering Industry" style="width:90px;height:90px;object-fit:contain;" />';
     
     var companyTd = el("td", "tip-h-company");
     var worksLine1 = company.worksLine1 || "Works: 2/89. SF No 105, Thanjavur Main Road, Devarayaneri, Assoor Post, Trichy - 620 015.";
@@ -255,7 +256,8 @@
       (worksLine2 ? '<div class="tip-works-line">' + escapeHtml(worksLine2) + "</div>" : "");
     
     var logoRightTd = el("td", "tip-h-logo tip-h-logo--right");
-    logoRightTd.innerHTML = '<img src="' + LOGO_RIGHT_SRC + '" alt="Logo" />';
+    logoLeftTd.innerHTML =
+  '<img src="/mugil-logo.png" alt="Mugil Engineering Industry" style="width:90px;height:90px;object-fit:contain;" />';
     
     row2.appendChild(logoLeftTd);
     row2.appendChild(companyTd);
