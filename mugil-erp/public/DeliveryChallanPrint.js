@@ -203,30 +203,37 @@ function customerExtras(customer) {
     </div>
   </div>
 
-  <div class="dc-brand">
-    <span class="dc-logo-wrap dc-logo-wrap--right">
-  <img
-    src="/globe-logo.png"
-    alt="MEI"
-    style="width:90px;height:90px;object-fit:contain;"
-  >
-</span>
+<div class="dc-brand">
 
-    <div class="dc-brand-copy">
-      <div class="dc-company-name">MUGIL ENGINEERING INDUSTRY</div>
+  <span class="dc-logo-wrap dc-logo-wrap--left">
+    <img
+      src="/mugil-logo.png"
+      alt="Mugil Engineering Industry"
+      style="width:90px;height:90px;object-fit:contain;"
+    >
+  </span>
 
-      <div class="dc-company-address">
-  Works: ${escapeHtml(
-    (COMPANY_ADDRESSES.find(
-      (address) => address.id === data.companyAddressId
-    ) || COMPANY_ADDRESSES[0]).address
-  )}
-</div>
+  <div class="dc-brand-copy">
+    <div class="dc-company-name">MUGIL ENGINEERING INDUSTRY</div>
 
-    <span class="dc-logo-wrap">
-      <img src="${ASSETS.logoRight}" alt="Mugil Engineering Industry logo">
-    </span>
+    <div class="dc-company-address">
+      Works: ${escapeHtml(
+        (COMPANY_ADDRESSES.find(
+          (address) => address.id === data.companyAddressId
+        ) || COMPANY_ADDRESSES[0]).address
+      )}
+    </div>
   </div>
+
+  <span class="dc-logo-wrap dc-logo-wrap--right">
+    <img
+      src="/globe-logo.png"
+      alt="MEI"
+      style="width:90px;height:90px;object-fit:contain;"
+    >
+  </span>
+
+</div>
 </header>
 
         <section class="dc-document">
