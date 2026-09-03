@@ -310,7 +310,7 @@ export default function ReceiveFromCutting() {
 </Link>
 
         <h1 className="rfc-page-title">
-          Receive From Cutting
+          Receive From Job work
         </h1>
 
         <p className="rfc-page-subtitle">
