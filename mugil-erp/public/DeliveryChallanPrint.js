@@ -204,9 +204,13 @@ function customerExtras(customer) {
   </div>
 
   <div class="dc-brand">
-    <span class="dc-logo-wrap">
-      <img src="${ASSETS.logo}" alt="Mugil Engineering Industry logo">
-    </span>
+    <span class="dc-logo-wrap dc-logo-wrap--right">
+  <img
+    src="/globe-logo.png"
+    alt="MEI"
+    style="width:90px;height:90px;object-fit:contain;"
+  >
+</span>
 
     <div class="dc-brand-copy">
       <div class="dc-company-name">MUGIL ENGINEERING INDUSTRY</div>
