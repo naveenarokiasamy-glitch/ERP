@@ -1438,3 +1438,28 @@
   object-fit: contain;
   display: block;
 }
+
+.department-input-wrapper {
+  position: relative;
+}
+
+.department-input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.department-input-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.department-select {
+  padding-left: 42px !important;
+}

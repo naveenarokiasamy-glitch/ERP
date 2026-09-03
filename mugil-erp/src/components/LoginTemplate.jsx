@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import CountUp from "react-countup";
-import { ShieldCheck } from "lucide-react";
+import {
+  Factory,
+  Settings,
+  Users,
+  Package,
+  ShieldCheck,
+  Wallet,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/login.css";
@@ -37,6 +44,21 @@ const DEPARTMENTS = [
     loginPath: "/accounts/login",
   },
 ];
+
+const DEPARTMENT_ICONS = {
+  production: Factory,
+  admin: Settings,
+  hr: Users,
+  "material-planning": Package,
+  supervisor: ShieldCheck,
+  accounts: Wallet,
+};
+
+function DepartmentIcon({ department }) {
+  const Icon = DEPARTMENT_ICONS[department] || Factory;
+
+  return <Icon aria-hidden="true" focusable="false" />;
+}
 
 const DEFAULT_DEPARTMENT = DEPARTMENTS[0];
 const AUTHENTICATION_DELAY_MS = 500;
@@ -295,24 +317,30 @@ export default function LoginTemplate({
             </p>
 
             <div className="department-group">
-              <label className="form-label" htmlFor="department">
-                Department
-              </label>
+  <label className="form-label" htmlFor="department">
+    Department
+  </label>
 
-              <select
-                id="department"
-                className="form-input"
-                value={department}
-                onChange={handleDepartmentChange}
-                disabled={loading}
-              >
-                {DEPARTMENTS.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <div className="input-wrapper department-input-wrapper">
+    <span className="input-icon department-input-icon">
+      <DepartmentIcon department={department} />
+    </span>
+
+    <select
+      id="department"
+      className="form-input department-select"
+      value={department}
+      onChange={handleDepartmentChange}
+      disabled={loading}
+    >
+      {DEPARTMENTS.map((item) => (
+        <option key={item.value} value={item.value}>
+          {item.label}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
           </div>
 
           {error && (
