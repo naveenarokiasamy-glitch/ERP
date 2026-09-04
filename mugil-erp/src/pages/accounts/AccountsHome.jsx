@@ -148,6 +148,34 @@ export default function AccountsHome() {
     </svg>
   ),
 },
+
+{
+  title: "Expense & Profit",
+  short: "EP",
+  description: "Track expenses, income and profitability.",
+  path: "/accounts/ExpenseProfit",
+  color: "#475569",
+  icon: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 19V5M4 19h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 15l4-4 3 2 5-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+},
   ];
 
   const handleOpen = (path) => {
