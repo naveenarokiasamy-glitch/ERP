@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
-import "./AccountsReport.css";
 
 const REPORT_STORAGE_KEY = "accountsReportTempRecords";
 
@@ -255,10 +255,17 @@ const handlePrint = async (record) => {
       <Header />
 
       <main className="accounts-report-page">
-        <div className="accounts-report-container">
+  <div className="accounts-report-container">
 
-          {/* Page heading */}
-          <div className="accounts-report-heading">
+    <div className="accounts-report-top">
+      <Link to="/accounts" className="erp-back-button">
+        <ArrowLeft size={16} />
+        Back
+      </Link>
+    </div>
+
+    {/* Page heading */}
+    <div className="accounts-report-heading">
             <h1>Reports</h1>
             <p>View and manage all accounting documents</p>
           </div>
