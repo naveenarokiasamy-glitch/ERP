@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
+import "./AccountsReport.css";
 
 const REPORT_STORAGE_KEY = "accountsReportTempRecords";
 
