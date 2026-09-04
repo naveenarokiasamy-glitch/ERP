@@ -10,7 +10,7 @@ import { summarizePOItems } from "../../utils/calculations";
 import "./PurchaseOrder.css";
 import "../../styles/form.css";
 import "../../styles/print.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Header from "../../components/Header";
 
@@ -114,26 +114,33 @@ function loadPurchaseOrderPrintEngine() {
 }
 
 export default function PurchaseOrderForm() {
-  
-const [data, setData] = useState(initialPOData);
-const [errors, setErrors] = useState({});
-const [savedAt, setSavedAt] = useState(null);
-const [includeAmountDetails, setIncludeAmountDetails] = useState(true);
+  const location = useLocation();
+
+  const [data, setData] = useState(initialPOData);
+  const [errors, setErrors] = useState({});
+  const [savedAt, setSavedAt] = useState(null);
+  const [includeAmountDetails, setIncludeAmountDetails] = useState(true);
 
   const [columns, setColumns] = useState(() => createDefaultColumns("po"));
   const [showColumnModal, setShowColumnModal] = useState(false);
   const [newColLabel, setNewColLabel] = useState("");
   const [newColType, setNewColType] = useState("text");
   const [newColOptions, setNewColOptions] = useState("");
-  
 
   useEffect(() => {
     const raw = localStorage.getItem(DRAFT_KEY);
+
     if (raw) {
       try {
         const parsed = JSON.parse(raw);
-        if (parsed && parsed.__version === DRAFT_VERSION && parsed.data) {
+
+        if (
+          parsed &&
+          parsed.__version === DRAFT_VERSION &&
+          parsed.data
+        ) {
           setData(parsed.data);
+
           setColumns(
             parsed.columns && parsed.columns.length
               ? parsed.columns
@@ -149,14 +156,25 @@ const [includeAmountDetails, setIncludeAmountDetails] = useState(true);
   }, []);
 
   useEffect(() => {
-loadPurchaseOrderPrintEngine().catch((error) => {
-console.error(
-"Purchase Order print engine preload failed:",
-error
-);
-});
-}, []);
+    const reportRecord = location.state?.reportRecord;
 
+    if (!reportRecord?.documentData) return;
+
+    if (reportRecord.type !== "Purchase Order") return;
+
+    setData(reportRecord.documentData);
+    setErrors({});
+    setSavedAt(null);
+  }, [location.state]);
+
+  useEffect(() => {
+    loadPurchaseOrderPrintEngine().catch((error) => {
+      console.error(
+        "Purchase Order print engine preload failed:",
+        error
+      );
+    });
+  }, []);
 
   const set = (key, value) => setData((d) => ({ ...d, [key]: value }));
   const setNested = (group, key, value) =>

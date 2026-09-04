@@ -122,6 +122,32 @@ export default function AccountsHome() {
         </svg>
       ),
     },
+
+    {
+  title: "Report",
+  short: "RP",
+  description: "View and manage all accounting reports.",
+  path: "/accounts/Report",
+  color: "#374151",
+  icon: (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 4h16v16H4z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 16v-4M12 16V8M16 16v-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+},
   ];
 
   const handleOpen = (path) => {

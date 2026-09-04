@@ -315,3 +315,7 @@
     min-height: 150px;
   }
 }
+
+.accounts-grid .accounts-card:nth-child(6) {
+  grid-column: 3 / span 2;
+}

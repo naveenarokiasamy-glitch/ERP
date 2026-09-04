@@ -42,7 +42,7 @@ import Salary from "./pages/hr/Salary.jsx";
 import Attendance from "./pages/hr/Attendancewages.jsx";
 import { AttendanceProvider } from "./pages/hr/Attendancewages.jsx";
 import { SalaryAdjustmentsProvider } from "./pages/hr/Salary.jsx";
-
+import AccountsReport from"./pages/accounts/AccountsReport.jsx";
 import EmployeeProfile from "./pages/hr/EmployeeProfile.jsx";
 export default function App() {
   return (
@@ -300,6 +300,14 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+  path="/accounts/Report"
+  element={
+    <ProtectedRoute>
+      <AccountsReport />
+    </ProtectedRoute>
+  }
+/>
               <Route
                 path="/hr/employees"
                 element={
