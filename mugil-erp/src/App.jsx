@@ -44,6 +44,7 @@ import { AttendanceProvider } from "./pages/hr/Attendancewages.jsx";
 import { SalaryAdjustmentsProvider } from "./pages/hr/Salary.jsx";
 import AccountsReport from"./pages/accounts/AccountsReport.jsx";
 import EmployeeProfile from "./pages/hr/EmployeeProfile.jsx";
+import ExpenseProfit from "./pages/accounts/ExpenseProfit.jsx";
 export default function App() {
   return (
     <AuthProvider>
@@ -305,6 +306,15 @@ export default function App() {
   element={
     <ProtectedRoute>
       <AccountsReport />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/accounts/ExpenseProfit"
+  element={
+    <ProtectedRoute>
+      <ExpenseProfit />
     </ProtectedRoute>
   }
 />

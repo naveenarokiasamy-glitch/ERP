@@ -276,6 +276,10 @@
   .accounts-card:nth-child(5) {
     grid-column: span 2;
   }
+  .accounts-card:nth-child(6),
+.accounts-card:nth-child(7) {
+  grid-column: span 2;
+}
 }
 
 
@@ -314,8 +318,20 @@
   .accounts-card {
     min-height: 150px;
   }
+  .accounts-card:nth-child(6),
+.accounts-card:nth-child(7) {
+  grid-column: 1;
+}
 }
 
+/* =========================================================
+   THIRD ROW — TWO CARDS CENTERED
+========================================================= */
+
 .accounts-grid .accounts-card:nth-child(6) {
-  grid-column: 3 / span 2;
+  grid-column: 2 / span 2;
+}
+
+.accounts-grid .accounts-card:nth-child(7) {
+  grid-column: 4 / span 2;
 }
