@@ -313,7 +313,7 @@ return (
 {showExpenseForm && (
   <div className="expense-profit-section">
     <div className="expense-profit-section-header">
-      <h2>Add Transaction</h2>
+      <h2>Add Expense</h2>
 
       <button
         type="button"
@@ -499,7 +499,7 @@ return (
           type="submit"
           className="expense-form-save"
         >
-          Save Transaction
+          Save Expense
         </button>
       </div>
     </form>
