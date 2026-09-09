@@ -150,9 +150,9 @@ export default function AccountsHome() {
 },
 
 {
-  title: "Expense & Profit",
-  short: "EP",
-  description: "Track expenses, income and profitability.",
+  title: "Journal",
+  short: "JR",
+  description: "Record and manage financial transactions.",
   path: "/accounts/ExpenseProfit",
   color: "#475569",
   icon: (

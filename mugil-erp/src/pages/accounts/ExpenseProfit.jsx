@@ -188,7 +188,7 @@ return (
           </Link>
 
           <div className="expense-profit-heading">
-            <h1>Expense &amp; Profit</h1>
+            <h1>Journal</h1>
             <p>
               Track expenses, income and profitability
             </p>
@@ -353,7 +353,7 @@ return (
 
 {/* DOCUMENT */}
 <label className="expense-form-field">
-  <span>Document</span>
+  <span>Document Type</span>
 
   <input
     type="text"
@@ -424,7 +424,7 @@ return (
                 <tr>
                   <th>S.No</th>
                   <th>Date</th>
-                  <th>Type</th>
+                  <th>Transaction Type</th>
                   <th>Category</th>
                   <th>Description</th>
                   <th>Amount</th>

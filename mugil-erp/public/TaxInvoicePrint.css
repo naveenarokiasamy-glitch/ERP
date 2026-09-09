@@ -781,3 +781,8 @@ body {
 .tip-words-table .tip-tax-value {
   border-right: 0.5px solid #000 !important;
 }
+
+/* Left-align all item table data */
+.tip-items-table tbody td {
+  text-align: left !important;
+}
