@@ -358,7 +358,7 @@ body {
   text-align: center;
   font-weight: 700;
   font-size: 10.5px;
-  background: #f1f5f9;
+  background: #ffffff;
 }
 
 .tip-party-table p {
@@ -375,7 +375,7 @@ body {
    ======================================================================== */
 
 .tip-items-table th {
-  background: #f1f5f9;
+  background: #ffffff;
   font-weight: 700;
   font-size: 9.5px;
   text-align: center;
@@ -520,7 +520,7 @@ body {
 
 .tip-grand-total-row td {
   font-weight: 700;
-  background: #f1f5f9;
+  background: #ffffff;
 }
 
 /* ========================================================================
@@ -866,4 +866,9 @@ body {
 /* Do not add another top border to the first tax row */
 .tip-words-table tbody tr:first-child td {
   border-top: 0 !important;
+}
+
+/* Restore the horizontal line between Items and Amount in Words */
+.tip-items-table tbody tr:last-child td {
+  border-bottom: 1px solid #000 !important;
 }
