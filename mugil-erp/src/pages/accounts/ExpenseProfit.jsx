@@ -16,7 +16,8 @@ const TEMP_RECORDS = [
     description: "Material delivery",
     amount: 2500,
     paymentMode: "UPI",
-    reference: "TRN-001",
+    documentNumber: "TRN-001",
+    document: "",
     notes: "",
   },
   {
@@ -81,7 +82,8 @@ const [expenseForm, setExpenseForm] = useState({
   description: "",
   amount: "",
   paymentMode: "Cash",
-  reference: "",
+  documentNumber: "",
+document: "",
   notes: "",
 });
 
@@ -144,7 +146,8 @@ const handleSaveExpense = (e) => {
     description: expenseForm.description.trim(),
     amount: Number(expenseForm.amount),
     paymentMode: expenseForm.paymentMode,
-    reference: expenseForm.reference.trim(),
+    documentNumber: expenseForm.documentNumber.trim(),
+document: expenseForm.document.trim(),
     notes: expenseForm.notes.trim(),
   };
 
@@ -164,7 +167,8 @@ setExpenseForm({
   description: "",
   amount: "",
   paymentMode: "Cash",
-  reference: "",
+  documentNumber: "",
+document: "",
   notes: "",
 });
   setShowExpenseForm(false);
@@ -191,124 +195,7 @@ return (
           </div>
         </div>
 
-        {/* SUMMARY CARDS */}
-        <div className="expense-profit-summary">
 
-          <div className="expense-profit-summary-card">
-            <span className="summary-label">
-              TOTAL EXPENSE
-            </span>
-
-            <strong className="summary-value">
-              {formatAmount(totalExpense)}
-            </strong>
-          </div>
-
-          <div className="expense-profit-summary-card">
-            <span className="summary-label">
-              TOTAL INCOME
-            </span>
-
-            <strong className="summary-value">
-              {formatAmount(totalIncome)}
-            </strong>
-          </div>
-
-          <div className="expense-profit-summary-card">
-            <span className="summary-label">
-              NET PROFIT
-            </span>
-
-            <strong
-              className={`summary-value ${
-                netProfit < 0 ? "loss-value" : "profit-value"
-              }`}
-            >
-              {formatAmount(netProfit)}
-            </strong>
-          </div>
-
-        </div>
-
-        {/* EXPENSE SUMMARY */}
-        <div className="expense-profit-section">
-          <div className="expense-profit-section-header">
-            <h2>Expense Summary</h2>
-          </div>
-
-          <div className="expense-summary-table-wrapper">
-            <table className="expense-summary-table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {[
-                  "Purchase",
-                  "Transport",
-                  "Salary",
-                  "Rent",
-                  "Electricity",
-                  "Maintenance",
-                  "Office",
-                  "Other",
-                ].map((category) => {
-                  const categoryTotal = records
-                    .filter(
-                      (record) =>
-                        record.type === "Expense" &&
-                        record.category === category
-                    )
-                    .reduce(
-                      (total, record) =>
-                        total + Number(record.amount || 0),
-                      0
-                    );
-
-                  return (
-                    <tr key={category}>
-                      <td>{category}</td>
-                      <td>{formatAmount(categoryTotal)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* PROFIT SUMMARY */}
-        <div className="expense-profit-section">
-          <div className="expense-profit-section-header">
-            <h2>Profit Summary</h2>
-          </div>
-
-          <div className="profit-summary-grid">
-            <div>
-              <span>Total Income</span>
-              <strong>{formatAmount(totalIncome)}</strong>
-            </div>
-
-            <div>
-              <span>Total Expenses</span>
-              <strong>{formatAmount(totalExpense)}</strong>
-            </div>
-
-            <div>
-              <span>Net Profit</span>
-              <strong
-                className={
-                  netProfit < 0 ? "loss-value" : "profit-value"
-                }
-              >
-                {formatAmount(netProfit)}
-              </strong>
-            </div>
-          </div>
-        </div>
 {/* ADD EXPENSE FORM */}
 {showExpenseForm && (
   <div className="expense-profit-section">
@@ -450,22 +337,33 @@ return (
           </select>
         </label>
 
-        {/* REFERENCE */}
-        <label className="expense-form-field">
-          <span>Reference</span>
+        {/* DOCUMENT NUMBER */}
+<label className="expense-form-field">
+  <span>Document Number</span>
 
-          <input
-            type="text"
-            value={expenseForm.reference}
-            onChange={(e) =>
-              handleExpenseChange(
-                "reference",
-                e.target.value
-              )
-            }
-            placeholder="e.g. EXP-001"
-          />
-        </label>
+  <input
+    type="text"
+    value={expenseForm.documentNumber}
+    onChange={(e) =>
+      handleExpenseChange("documentNumber", e.target.value)
+    }
+    placeholder="e.g. EXP-001"
+  />
+</label>
+
+{/* DOCUMENT */}
+<label className="expense-form-field">
+  <span>Document</span>
+
+  <input
+    type="text"
+    value={expenseForm.document}
+    onChange={(e) =>
+      handleExpenseChange("document", e.target.value)
+    }
+    placeholder="Enter document"
+  />
+</label>
 
         {/* NOTES */}
         <label className="expense-form-field expense-form-field-wide">
@@ -531,7 +429,8 @@ return (
                   <th>Description</th>
                   <th>Amount</th>
                   <th>Payment Mode</th>
-                  <th>Reference</th>
+                  <th>Document Number</th>
+<th>Document</th>
                 </tr>
               </thead>
 
@@ -555,7 +454,8 @@ return (
                     <td>{record.description}</td>
                     <td>{formatAmount(record.amount)}</td>
                     <td>{record.paymentMode}</td>
-                    <td>{record.reference}</td>
+                    <td>{record.documentNumber}</td>
+<td>{record.document}</td>
                   </tr>
                 ))}
               </tbody>

@@ -679,4 +679,10 @@ body {
   background: none;
 }
 
+.qp-closing p:first-child {
+  margin-top: 1.5em !important;
+}
 
+.qp-closing p:nth-child(2) {
+  margin-top: 1.5em !important;
+}

@@ -734,13 +734,14 @@ function buildCustomerNode(vendor) {
     return ol;
   }
 
-  function buildClosingNode() {
-    return el(
-      "div",
-      "qp-closing",
-      "<p>We look forward to receiving your valuable order.</p><p>Thanking You,</p>"
-    );
-  }
+ function buildClosingNode() {
+  return el(
+    "div",
+    "qp-closing",
+    '<p class="qp-closing-spaced">We look forward to receiving your valuable order.</p>' +
+    '<p class="qp-closing-spaced">Thanking You,</p>'
+  );
+}
 
   function buildSignatureNode(companyName, signatures, designation) {
     var sigHtml =
