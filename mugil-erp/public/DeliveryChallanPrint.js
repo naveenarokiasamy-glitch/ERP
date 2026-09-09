@@ -184,10 +184,11 @@ function customerExtras(customer) {
     const customer = data.customer;
 
     container.innerHTML = `
-      <div class="dc-print-controls" aria-label="Print controls">
-        <button type="button" class="dc-back-button">Back</button>
-        <button type="button" class="dc-print-button">Print / Save PDF</button>
-      </div>
+  <div class="dc-print-controls" aria-label="Print controls">
+    <button type="button" class="dc-save-button">Save</button>
+    <button type="button" class="dc-back-button">Back</button>
+    <button type="button" class="dc-print-button">Print / Save PDF</button>
+  </div>
       <article class="dc-sheet" aria-label="Delivery Challan">
         <header class="dc-header">
   <div class="dc-header-top">

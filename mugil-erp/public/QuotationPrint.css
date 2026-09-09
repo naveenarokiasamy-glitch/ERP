@@ -71,6 +71,12 @@ body {
   color: #1f2937;
 }
 
+.qp-btn--save {
+  background: #fff;
+  border-color: #d0d7e2;
+  color: #1f2937;
+}
+
 .qp-error {
   margin: 60px auto;
   max-width: 520px;

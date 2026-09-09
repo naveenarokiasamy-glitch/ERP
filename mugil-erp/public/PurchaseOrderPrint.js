@@ -1641,6 +1641,14 @@ var items = Array.isArray(data.items)
         ),
     );
 
+    var saveBtn = el(
+  "button",
+  "pop-btn pop-btn--save",
+  "Save",
+);
+
+saveBtn.type = "button";
+
     var closeBtn = el(
       "button",
       "pop-btn pop-btn--ghost",
@@ -1672,6 +1680,7 @@ var items = Array.isArray(data.items)
     );
 
     toolbar.appendChild(status);
+    toolbar.appendChild(saveBtn);
     toolbar.appendChild(closeBtn);
     toolbar.appendChild(printBtn);
 

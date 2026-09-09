@@ -271,8 +271,24 @@ const handlePrint = async (record) => {
             <p>View and manage all accounting documents</p>
           </div>
 
-          {/* Report table */}
-          <div className="accounts-report-table-wrapper">
+          <div className="accounts-report-filter">
+  <label htmlFor="document-type-filter">Document Type</label>
+
+  <select
+    id="document-type-filter"
+    className="accounts-report-filter-select"
+  >
+    <option value="all">ALL</option>
+    <option value="PO">PO</option>
+    <option value="QO">QO</option>
+    <option value="TI">TI</option>
+    <option value="DC">DC</option>
+    <option value="PI">PI</option>
+  </select>
+</div>
+
+{/* Report table */}
+<div className="accounts-report-table-wrapper">
             <table className="accounts-report-table">
               <thead>
                 <tr>
@@ -304,24 +320,30 @@ const handlePrint = async (record) => {
                       </td>
 
                       <td>
-                        <span
-                          className={`report-status payment-${record.paymentStatus
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
-                        >
-                          {record.paymentStatus}
-                        </span>
-                      </td>
+<select
+  className={`report-status-select payment-status-${record.paymentStatus
+    .toLowerCase()
+    .replace("/", "")}`}
+  defaultValue={record.paymentStatus}
+>
+  <option value="Paid">Paid</option>
+  <option value="Pending">Pending</option>
+  <option value="N/A">N/A</option>
+</select>
+</td>
 
                       <td>
-                        <span
-                          className={`report-status delivery-${record.deliveryStatus
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
-                        >
-                          {record.deliveryStatus}
-                        </span>
-                      </td>
+<select
+  className={`report-status-select delivery-status-${record.deliveryStatus
+    .toLowerCase()
+    .replace("/", "")}`}
+  defaultValue={record.deliveryStatus}
+>
+  <option value="Delivered">Delivered</option>
+  <option value="Pending">Pending</option>
+  <option value="N/A">N/A</option>
+</select>
+</td>
 
                       <td>
                         <button

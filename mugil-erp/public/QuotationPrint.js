@@ -784,6 +784,8 @@ function buildCustomerNode(vendor) {
     // ---- toolbar (screen-only) ----
     var toolbar = el("div", "qp-toolbar");
     var status = el("span", "qp-toolbar__status", "Quotation " + escapeHtml(data.quotationNumber || ""));
+    var saveBtn = el("button", "qp-btn qp-btn--save", "Save");
+saveBtn.type = "button";
     var closeBtn = el("button", "qp-btn qp-btn--ghost", "Close");
     closeBtn.type = "button";
     closeBtn.addEventListener("click", function () {
@@ -795,6 +797,7 @@ function buildCustomerNode(vendor) {
       window.print();
     });
     toolbar.appendChild(status);
+    toolbar.appendChild(saveBtn);
     toolbar.appendChild(closeBtn);
     toolbar.appendChild(printBtn);
     root.appendChild(toolbar);

@@ -642,6 +642,10 @@ tbody.appendChild(taxRow("TOTAL", "", totals.grandTotal, true));
       "tip-toolbar__status",
       "Proforma Invoice " + escapeHtml(formData.proformaNo || "")
     );
+
+    var saveBtn = el("button", "tip-btn tip-btn--save", "Save");
+saveBtn.type = "button";
+
     var closeBtn = el("button", "tip-btn tip-btn--ghost", "Close");
     closeBtn.type = "button";
     closeBtn.addEventListener("click", function () {
@@ -653,6 +657,7 @@ tbody.appendChild(taxRow("TOTAL", "", totals.grandTotal, true));
       window.print();
     });
     toolbar.appendChild(status);
+    toolbar.appendChild(saveBtn);
     toolbar.appendChild(closeBtn);
     toolbar.appendChild(printBtn);
     root.appendChild(toolbar);

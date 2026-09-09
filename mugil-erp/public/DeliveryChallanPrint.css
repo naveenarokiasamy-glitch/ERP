@@ -52,6 +52,12 @@ body {
   font: 600 13px/1 Arial, sans-serif;
 }
 
+.dc-print-controls .dc-save-button {
+  background: #fff;
+  border-color: #a6b2c9;
+  color: #1e3770;
+}
+
 .dc-print-controls .dc-print-button {
   border-color: var(--dc-ink);
   background: var(--dc-ink);

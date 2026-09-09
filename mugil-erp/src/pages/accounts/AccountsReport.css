@@ -26,6 +26,39 @@
   color: #6b7280;
 }
 
+/* Document filter */
+
+.accounts-report-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.accounts-report-filter label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.accounts-report-filter-select {
+  min-width: 120px;
+  height: 38px;
+  padding: 0 34px 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.accounts-report-filter-select:focus {
+  border-color: #9ca3af;
+}
+
 /* Table container */
 .accounts-report-table-wrapper {
   width: 100%;
@@ -116,6 +149,47 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+}
+
+.report-status-select {
+  min-width: 110px;
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Green */
+.payment-status-paid,
+.delivery-status-delivered {
+  color: #166534;
+  border-color: #86efac;
+  background: #dcfce7;
+}
+
+/* Orange */
+.payment-status-pending,
+.delivery-status-pending {
+  color: #92400e;
+  border-color: #fcd34d;
+  background: #fef3c7;
+}
+
+/* Red */
+.payment-status-na,
+.delivery-status-na {
+  color: #b91c1c;
+  border-color: #fca5a5;
+  background: #fee2e2;
+}
+
+.report-status-select:focus {
+  outline: none;
 }
 
 .payment-paid,

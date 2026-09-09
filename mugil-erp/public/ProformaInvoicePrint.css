@@ -72,7 +72,11 @@ body {
   border-color: #d0d7e2;
   color: #1f2937;
 }
-
+.tip-btn--save {
+  background: #fff;
+  border-color: #d0d7e2;
+  color: #1f2937;
+}
 .tip-error {
   margin: 60px auto;
   max-width: 520px;
