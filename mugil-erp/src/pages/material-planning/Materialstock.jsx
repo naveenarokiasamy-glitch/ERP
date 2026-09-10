@@ -15,7 +15,7 @@ import {
   Boxes,
 } from "lucide-react";
 import Header from "../../components/Header";
-import "./MaterialStock.css";
+import "./Materialstock.css";
 
 // =====================================================================
 // Mock reference data

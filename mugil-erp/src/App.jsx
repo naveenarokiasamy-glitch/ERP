@@ -12,6 +12,7 @@ import WelcomePage from "./pages/WelcomePage.jsx";
 import Inventory from "./pages/material-planning/Inventory.jsx";
 // import Material from "./pages/material-planning/Material.jsx";
 import Consumable from "./pages/material-planning/Consumable.jsx";
+import { PayrollProvider } from "./pages/hr/Payroll.jsx";
 
 // import MaterialGRN from "./pages/material-planning/Materialgrn";
 // import MaterialStock from "./pages/material-planning/Materialstock";
@@ -66,6 +67,7 @@ export default function App() {
       <EmployeesProvider>
         <AttendanceProvider>
           <SalaryAdjustmentsProvider>
+            <PayrollProvider>
             <Routes>
               <Route
                 path="/"
@@ -496,6 +498,7 @@ export default function App() {
                 element={<Navigate to="/production/login" replace />}
               />
             </Routes>
+            </PayrollProvider>
           </SalaryAdjustmentsProvider>
         </AttendanceProvider>
       </EmployeesProvider>

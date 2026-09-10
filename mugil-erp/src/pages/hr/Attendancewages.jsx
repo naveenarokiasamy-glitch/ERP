@@ -6,7 +6,17 @@ import {
   useCallback,
 } from 'react'
 import { useEmployees } from './Employees.jsx'
+import { useAdvances, AdvanceStatusBadge, EmployeeAdvancesModal } from './Payroll.jsx'
 import './Attendance.css'
+import './Payroll.css'
+
+/* NOTE: Attendancewages.jsx <-> Payroll.jsx is a deliberate two-way import.
+   Payroll.jsx only reuses pure date helpers from here (monthRange,
+   currentMonthStr, todayISO, startOfWeek, endOfWeek, formatDisplayDate),
+   and only inside function bodies — never at module top level — so the
+   circular reference resolves fine at runtime. This keeps a single source
+   of truth for both the attendance/date helpers and the advance data model
+   instead of duplicating either. */
 
 /* ==========================================================================
    CONSTANTS
@@ -399,6 +409,16 @@ function StatusPill({ status }) {
   return <span className={`aw-status-pill aw-status-${cls}`}>{statusLabel(status)}</span>
 }
 
+/* Small "Advance: ₹X outstanding" badge — informational only, never
+   deducts anything. Advance deduction happens only through Salary/Payroll
+   (see Payroll.jsx / Salary.jsx). */
+function AdvanceIndicator({ employeeId }) {
+  const { getOutstandingAdvance } = useAdvances()
+  const outstanding = getOutstandingAdvance(employeeId)
+  if (!outstanding) return null
+  return <span className="pll-advance-indicator">Advance: {formatINR(outstanding)} outstanding</span>
+}
+
 function EmployeeSelect({ value, onChange, employees, includeAll = false }) {
   return (
     <select
@@ -681,11 +701,13 @@ function AttendanceFormModal({ editRecord, presetEmployeeId, presetDate, onClose
 function WageRatesPanel() {
   const { employees } = useEmployees()
   const { getWageConfig, setWageConfig } = useAttendance()
+  const { getOutstandingAdvance, getEmployeeAdvances } = useAdvances()
   const activeEmployees = employees.filter((e) => !e.archived)
   const [employeeId, setEmployeeId] = useState(activeEmployees[0]?.id || '')
   const config = getWageConfig(employeeId)
   const [draft, setDraft] = useState(config)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [showAdvances, setShowAdvances] = useState(false)
 
   useMemo(() => {
     setDraft(getWageConfig(employeeId))
@@ -766,6 +788,22 @@ function WageRatesPanel() {
         </label>
       </div>
 
+      {employee && (
+        <div className="pll-advance-summary" style={{ marginBottom: 18 }}>
+          <div className="pll-advance-summary-row">
+            <span>Outstanding Advance</span>
+            <strong>{formatINR(getOutstandingAdvance(employeeId))}</strong>
+          </div>
+          <p className="aw-hint" style={{ margin: '6px 0 10px' }}>
+            This is read-only here. Wage rate changes never modify an employee's outstanding
+            advance — advances are only created, adjusted, or repaid via Salary → Advance Management.
+          </p>
+          <button type="button" className="pll-btn-outline pll-btn-sm" onClick={() => setShowAdvances(true)}>
+            View Advances
+          </button>
+        </div>
+      )}
+
       <div className="aw-panel-sub">
         <h4>Leave &amp; Holiday Pay Policy</h4>
         <p>No existing payroll policy was found for these — defaulting to unpaid. Adjust per employee if your company pays for them.</p>
@@ -807,6 +845,15 @@ function WageRatesPanel() {
         <button type="button" className="aw-btn-primary" onClick={save}>Save Rate</button>
         {savedFlash && <span className="aw-saved-flash">Saved</span>}
       </div>
+
+      {showAdvances && employee && (
+        <EmployeeAdvancesModal
+          employeeId={employeeId}
+          employeeName={`${employee.firstName} ${employee.lastName}`}
+          advances={getEmployeeAdvances(employeeId)}
+          onClose={() => setShowAdvances(false)}
+        />
+      )}
     </div>
   )
 }
@@ -902,7 +949,10 @@ function DailyTab({ onAdd, onEdit }) {
             {filteredRows.map((r) => (
               <tr key={r.id}>
                 <td>{formatDisplayDate(r.date)}</td>
-                <td>{employeeName(r.employeeId)}</td>
+                <td>
+                  {employeeName(r.employeeId)}
+                  <AdvanceIndicator employeeId={r.employeeId} />
+                </td>
                 <td><StatusPill status={r.status} /></td>
                 <td>{r.loginTime || '—'}</td>
                 <td>{r.logoutTime || '—'}</td>
@@ -952,6 +1002,7 @@ function DailyTab({ onAdd, onEdit }) {
 function WeeklyTab() {
   const { employees } = useEmployees()
   const { records, getWageConfig } = useAttendance()
+  const { getOutstandingAdvance } = useAdvances()
   const [anchorDate, setAnchorDate] = useState(todayISO())
   const start = startOfWeek(anchorDate)
   const end = endOfWeek(anchorDate)
@@ -986,12 +1037,13 @@ function WeeklyTab() {
           <thead>
             <tr>
               <th>Employee</th><th className="aw-num">Days Worked</th><th className="aw-num">Total Hours</th>
-              <th className="aw-num">Hourly Rate</th><th className="aw-num">Total Wage</th><th>Status Breakdown</th>
+              <th className="aw-num">Hourly Rate</th><th className="aw-num">Total Wage</th>
+              <th className="aw-num">Outstanding Advance</th><th>Status Breakdown</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && (
-              <tr><td colSpan={6} className="aw-empty-row">No attendance recorded for this week.</td></tr>
+              <tr><td colSpan={7} className="aw-empty-row">No attendance recorded for this week.</td></tr>
             )}
             {rows.map(({ employee, bucket }) => (
               <tr key={employee.id}>
@@ -1000,6 +1052,7 @@ function WeeklyTab() {
                 <td className="aw-num">{bucket.totalHours.toFixed(2)}</td>
                 <td className="aw-num">₹{getWageConfig(employee.id).hourlyRate || bucket.lastRate}</td>
                 <td className="aw-num">{formatINR(bucket.totalWage)}</td>
+                <td className="aw-num">{formatINR(getOutstandingAdvance(employee.id))}</td>
                 <td className="aw-status-breakdown">
                   {Object.entries(bucket.statusCounts).map(([s, count]) => (
                     <span key={s} className="aw-mini-pill">{statusLabel(s)}: {count}</span>
@@ -1021,6 +1074,7 @@ function WeeklyTab() {
 function MonthlyTab({ onFixMissing }) {
   const { employees } = useEmployees()
   const { records } = useAttendance()
+  const { getOutstandingAdvance } = useAdvances()
   const [month, setMonth] = useState(currentMonthStr())
   const { start, end } = monthRange(month)
   const summary = summarizeRange(records, start, end)
@@ -1061,7 +1115,8 @@ function MonthlyTab({ onFixMissing }) {
           <thead>
             <tr>
               <th>Employee</th><th className="aw-num">Days Worked</th><th className="aw-num">Total Hours</th>
-              <th className="aw-num">Total Wage</th><th>Status Breakdown</th><th>Missing</th>
+              <th className="aw-num">Total Wage</th><th className="aw-num">Outstanding Advance</th>
+              <th>Status Breakdown</th><th>Missing</th>
             </tr>
           </thead>
           <tbody>
@@ -1071,6 +1126,7 @@ function MonthlyTab({ onFixMissing }) {
                 <td className="aw-num">{bucket.daysWorked}</td>
                 <td className="aw-num">{bucket.totalHours.toFixed(2)}</td>
                 <td className="aw-num">{formatINR(bucket.totalWage)}</td>
+                <td className="aw-num">{formatINR(getOutstandingAdvance(employee.id))}</td>
                 <td className="aw-status-breakdown">
                   {Object.entries(bucket.statusCounts).map(([s, count]) => (
                     <span key={s} className="aw-mini-pill">{statusLabel(s)}: {count}</span>
@@ -1106,6 +1162,7 @@ function MonthlyTab({ onFixMissing }) {
 function EmployeeSummaryTab() {
   const { employees } = useEmployees()
   const { records, getWageConfig } = useAttendance()
+  const { getEmployeeAdvances, getOutstandingAdvance, getAdvanceRepaymentLog } = useAdvances()
   const activeEmployees = employees.filter((e) => !e.archived)
   const [employeeId, setEmployeeId] = useState(activeEmployees[0]?.id || '')
 
@@ -1123,6 +1180,14 @@ function EmployeeSummaryTab() {
 
   const employee = activeEmployees.find((e) => e.id === employeeId)
 
+  const employeeAdvances = getEmployeeAdvances(employeeId)
+  const totalAdvanceReceived = employeeAdvances.reduce((s, a) => s + (Number(a.amount) || 0), 0)
+  const totalAdvanceRepaid = employeeAdvances.reduce((s, a) => s + (Number(a.totalRepaid) || 0), 0)
+  const outstandingAdvance = getOutstandingAdvance(employeeId)
+  const monthDeduction = getAdvanceRepaymentLog(employeeId)
+    .filter((r) => r.date >= mStart && r.date <= mEnd)
+    .reduce((s, r) => s + (Number(r.amount) || 0), 0)
+
   return (
     <div className="aw-tab">
       <div className="aw-toolbar">
@@ -1139,22 +1204,60 @@ function EmployeeSummaryTab() {
             <span className="aw-hint">{employee.id} · {employee.department}</span>
           </div>
 
-          <div className="aw-summary-grid">
-            <SummaryCard
-              label="Current Rate"
-              value={config.salaryType === 'HOURLY' ? `₹${config.hourlyRate || 0}/hr` : `₹${config.monthlySalary || 0}/mo`}
-            />
-            <SummaryCard
-              label="This Week"
-              value={formatHours(weekBucket?.totalHours || 0)}
-              sub={formatINR(weekBucket?.totalWage || 0)}
-            />
-            <SummaryCard
-              label="This Month"
-              value={formatHours(monthBucket?.totalHours || 0)}
-              sub={formatINR(monthBucket?.totalWage || 0)}
-            />
-            <SummaryCard label="Total Attendance" value={`${totalAttendance} days`} />
+          <div className="pll-section">
+            <h4>Attendance Summary</h4>
+            <div className="aw-summary-grid">
+              <SummaryCard
+                label="Current Rate"
+                value={config.salaryType === 'HOURLY' ? `₹${config.hourlyRate || 0}/hr` : `₹${config.monthlySalary || 0}/mo`}
+              />
+              <SummaryCard
+                label="This Week"
+                value={formatHours(weekBucket?.totalHours || 0)}
+                sub={formatINR(weekBucket?.totalWage || 0)}
+              />
+              <SummaryCard
+                label="This Month"
+                value={formatHours(monthBucket?.totalHours || 0)}
+                sub={formatINR(monthBucket?.totalWage || 0)}
+              />
+              <SummaryCard label="Total Attendance" value={`${totalAttendance} days`} />
+            </div>
+          </div>
+
+          <div className="pll-section">
+            <h4>Advance Summary</h4>
+            <div className="pll-summary-grid">
+              <SummaryCard label="Total Advance Received" value={formatINR(totalAdvanceReceived)} />
+              <SummaryCard label="Total Repaid" value={formatINR(totalAdvanceRepaid)} />
+              <SummaryCard label="Outstanding" value={formatINR(outstandingAdvance)} />
+              <SummaryCard label="This Month's Deduction" value={formatINR(monthDeduction)} />
+            </div>
+
+            {employeeAdvances.length > 0 && (
+              <div className="pll-table-wrap">
+                <table className="pll-table">
+                  <thead>
+                    <tr><th>Date</th><th className="pll-num">Amount</th><th className="pll-num">Repaid</th><th className="pll-num">Outstanding</th><th>Reason</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {employeeAdvances.map((a) => (
+                      <tr key={a.id}>
+                        <td>{formatDisplayDate(a.advanceDate)}</td>
+                        <td className="pll-num">{formatINR(a.amount)}</td>
+                        <td className="pll-num">{formatINR(a.totalRepaid)}</td>
+                        <td className="pll-num">{formatINR(a.outstandingAmount)}</td>
+                        <td>{a.reason || '—'}</td>
+                        <td><AdvanceStatusBadge status={a.status} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {employeeAdvances.length === 0 && (
+              <p className="aw-hint">No advances on record for this employee.</p>
+            )}
           </div>
         </div>
       )}
