@@ -10,21 +10,21 @@ import ProductionLoginPage from "./pages/production/LoginPage.jsx";
 import SupervisorLoginPage from "./pages/supervisor/LoginPage.jsx";
 import WelcomePage from "./pages/WelcomePage.jsx";
 import Inventory from "./pages/material-planning/Inventory.jsx";
-import Material from "./pages/material-planning/Material.jsx";
+// import Material from "./pages/material-planning/Material.jsx";
 import Consumable from "./pages/material-planning/Consumable.jsx";
 
-import MaterialGRN from "./pages/material-planning/Materialgrn";
-import MaterialStock from "./pages/material-planning/Materialstock";
+// import MaterialGRN from "./pages/material-planning/Materialgrn";
+// import MaterialStock from "./pages/material-planning/Materialstock";
 
-import IssueMaterialToCutting from "./pages/material-planning/issuematerialtocutting";
-import ReceiveFromCutting from "./pages/material-planning/Receivefromcutting";
-import CuttingBalanceStock from "./pages/material-planning/Cuttingbalancestock";
-import IssueToProduction from "./pages/material-planning/issuetoprod";
-import Scrap from "./pages/material-planning/Scrap";
-import Rejection from "./pages/material-planning/Rejection";
-import Rework from "./pages/material-planning/Rework";
-// import MaterialMovementHistory from "./pages/material-planning/Materialmovementhistory";
-import Reports from "./pages/material-planning/Reports";
+// import IssueMaterialToCutting from "./pages/material-planning/issuematerialtocutting";
+// import ReceiveFromCutting from "./pages/material-planning/Receivefromcutting";
+// import CuttingBalanceStock from "./pages/material-planning/Cuttingbalancestock";
+// import IssueToProduction from "./pages/material-planning/issuetoprod";
+// import Scrap from "./pages/material-planning/Scrap";
+// import Rejection from "./pages/material-planning/Rejection";
+// import Rework from "./pages/material-planning/Rework";
+// // import MaterialMovementHistory from "./pages/material-planning/Materialmovementhistory";
+// import Reports from "./pages/material-planning/Reports";
 import ConsumableGRN from "./pages/material-planning/ConsumableGRN";
 import ConsumableStock from "./pages/material-planning/ConsumableStock";
 import IssueConsumable from "./pages/material-planning/IssueConsumable";
@@ -45,6 +45,21 @@ import { SalaryAdjustmentsProvider } from "./pages/hr/Salary.jsx";
 import AccountsReport from"./pages/accounts/AccountsReport.jsx";
 import EmployeeProfile from "./pages/hr/EmployeeProfile.jsx";
 import ExpenseProfit from "./pages/accounts/ExpenseProfit.jsx";
+import MenuCard from "./pages/material-planning/MenuCard.jsx";
+import DwgBom from "./pages/material-planning/DwgBom.jsx";
+import POIntegration from "./pages/material-planning/POIntegration.jsx";
+import ReceiveGRN from "./pages/material-planning/ReceiveGRN.jsx";
+import MaterialStock from "./pages/material-planning/Materialstock.jsx";
+import IssueToJobWork from "./pages/material-planning/IssueToJobWork";
+import ReceiveFromJobWork from "./pages/material-planning/ReceiveFromJobWork";
+import IssueToProduction from "./pages/material-planning/IssueToProduction.jsx";
+import ProductionOperation from "./pages/material-planning/ProductionOperation.jsx";
+import ProductionAssemblyIntegration from "./pages/material-planning/ProductionAssemblyIntegration.jsx";
+import Rework from "./pages/material-planning/Rework.jsx";
+import Dispatch from "./pages/material-planning/Dispatch.jsx";
+import Reports from "./pages/material-planning/Reports";
+import Scrap from "./pages/material-planning/Scrap";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -88,14 +103,14 @@ export default function App() {
                 }
               />
 
-              <Route
+              {/* <Route
                 path="/inventory/material"
                 element={
                   <ProtectedRoute>
                     <Material />
                   </ProtectedRoute>
                 }
-              />
+              /> */}
 
               <Route
                 path="/inventory/consumable"
@@ -106,7 +121,7 @@ export default function App() {
                 }
               />
 
-              <Route
+              {/* <Route
                 path="/inventory/material/grn"
                 element={
                   <ProtectedRoute>
@@ -131,8 +146,8 @@ export default function App() {
                     <IssueMaterialToCutting />
                   </ProtectedRoute>
                 }
-              />
-              <Route
+              /> */}
+              {/* <Route
                 path="/inventory/material/receive-cutting"
                 element={
                   <ProtectedRoute>
@@ -201,14 +216,17 @@ export default function App() {
                 }
               /> */}
 
-              <Route
+              {/* <Route
                 path="/inventory/material/reports"
                 element={
                   <ProtectedRoute>
                     <Reports />
                   </ProtectedRoute>
                 }
-              />
+
+              />  */}
+
+
               <Route
                 path="/inventory/consumable/grn"
                 element={
@@ -301,6 +319,7 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+
               <Route
   path="/accounts/Report"
   element={
@@ -359,6 +378,118 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+                <Route
+                  path="/inventory/material"
+                  element={
+                    <ProtectedRoute>
+                      <MenuCard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/dwg-bom"
+                  element={
+                    <ProtectedRoute>
+                      <DwgBom />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/po-integration"
+                  element={
+                    <ProtectedRoute>
+                      <POIntegration />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/grn"
+                  element={
+                    <ProtectedRoute>
+                      <ReceiveGRN />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/material-stock"
+                  element={
+                    <ProtectedRoute>
+                      <MaterialStock />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/issue-to-jobwork"
+                  element={
+                    <ProtectedRoute>
+                      <IssueToJobWork />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/receive-from-jobwork"
+                  element={
+                    <ProtectedRoute>
+                      <ReceiveFromJobWork />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/issue-to-production"
+                  element={
+                    <ProtectedRoute>
+                      <IssueToProduction />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/production-operation"
+                  element={
+                    <ProtectedRoute>
+                      <ProductionOperation />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/production-assembly-integration"
+                  element={
+                    <ProtectedRoute>
+                      <ProductionAssemblyIntegration />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/rework"
+                  element={
+                    <ProtectedRoute>
+                      <Rework />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/dispatch"
+                  element={
+                    <ProtectedRoute>
+                      <Dispatch />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/scrap"
+                  element={
+                    <ProtectedRoute>
+                      <Scrap />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/inventory/material/reports"
+                  element={
+                    <ProtectedRoute>
+                      <Reports />
+                    </ProtectedRoute>
+                  }
+                />
 
               <Route
                 path="*"
