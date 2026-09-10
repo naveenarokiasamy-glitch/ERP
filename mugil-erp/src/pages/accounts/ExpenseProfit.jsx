@@ -430,7 +430,7 @@ return (
                   <th>Amount</th>
                   <th>Payment Mode</th>
                   <th>Document Number</th>
-<th>Document</th>
+<th>Document Type</th>
                 </tr>
               </thead>
 
