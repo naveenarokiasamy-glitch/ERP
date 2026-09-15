@@ -10,22 +10,8 @@ import ProductionLoginPage from "./pages/production/LoginPage.jsx";
 import SupervisorLoginPage from "./pages/supervisor/LoginPage.jsx";
 import WelcomePage from "./pages/WelcomePage.jsx";
 import Inventory from "./pages/material-planning/Inventory.jsx";
-// import Material from "./pages/material-planning/Material.jsx";
 import Consumable from "./pages/material-planning/Consumable.jsx";
 import { PayrollProvider } from "./pages/hr/Payroll.jsx";
-
-// import MaterialGRN from "./pages/material-planning/Materialgrn";
-// import MaterialStock from "./pages/material-planning/Materialstock";
-
-// import IssueMaterialToCutting from "./pages/material-planning/issuematerialtocutting";
-// import ReceiveFromCutting from "./pages/material-planning/Receivefromcutting";
-// import CuttingBalanceStock from "./pages/material-planning/Cuttingbalancestock";
-// import IssueToProduction from "./pages/material-planning/issuetoprod";
-// import Scrap from "./pages/material-planning/Scrap";
-// import Rejection from "./pages/material-planning/Rejection";
-// import Rework from "./pages/material-planning/Rework";
-// // import MaterialMovementHistory from "./pages/material-planning/Materialmovementhistory";
-// import Reports from "./pages/material-planning/Reports";
 import ConsumableGRN from "./pages/material-planning/ConsumableGRN";
 import ConsumableStock from "./pages/material-planning/ConsumableStock";
 import IssueConsumable from "./pages/material-planning/IssueConsumable";
@@ -105,15 +91,7 @@ export default function App() {
                 }
               />
 
-              {/* <Route
-                path="/inventory/material"
-                element={
-                  <ProtectedRoute>
-                    <Material />
-                  </ProtectedRoute>
-                }
-              /> */}
-
+            
               <Route
                 path="/inventory/consumable"
                 element={
@@ -123,110 +101,7 @@ export default function App() {
                 }
               />
 
-              {/* <Route
-                path="/inventory/material/grn"
-                element={
-                  <ProtectedRoute>
-                    <MaterialGRN />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/stock"
-                element={
-                  <ProtectedRoute>
-                    <MaterialStock />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/issue-cutting"
-                element={
-                  <ProtectedRoute>
-                    <IssueMaterialToCutting />
-                  </ProtectedRoute>
-                }
-              /> */}
-              {/* <Route
-                path="/inventory/material/receive-cutting"
-                element={
-                  <ProtectedRoute>
-                    <ReceiveFromCutting />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/stock/cutting-balance"
-                element={
-                  <ProtectedRoute>
-                    <CuttingBalanceStock />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/issue-production"
-                element={
-                  <ProtectedRoute>
-                    <IssueToProduction />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/material/rework"
-                element={
-                  <ProtectedRoute>
-                    <Rework />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/inventory/material/scrap"
-                element={
-                  <ProtectedRoute>
-                    <Scrap />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/rejection"
-                element={
-                  <ProtectedRoute>
-                    <Rejection />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/inventory/material/rework"
-                element={
-                  <ProtectedRoute>
-                    <Rework />
-                  </ProtectedRoute>
-                }
-              />
-              {/* <Route
-                path="/inventory/material/movement-history"
-                element={
-                  <ProtectedRoute>
-                    <MaterialMovementHistory />
-                  </ProtectedRoute>
-                }
-              /> */}
-
-              {/* <Route
-                path="/inventory/material/reports"
-                element={
-                  <ProtectedRoute>
-                    <Reports />
-                  </ProtectedRoute>
-                }
-
-              />  */}
+          
 
 
               <Route
