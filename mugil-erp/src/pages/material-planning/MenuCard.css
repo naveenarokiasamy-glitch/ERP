@@ -1,11 +1,10 @@
 /* =====================================================================
-   MenuCard.css - Material Management page styling
+   MenuCard.css - Updated with blue/indigo color scheme
    All main styling comes from Consumable.css with color overrides
-   Renamed classes: consumable-* → material-* to avoid conflicts
 ===================================================================== */
 
 /* Color override for Material Management page */
-.material-page {
+.consumable-page.material-page {
   --accent: #1d4ed8;
   --accent-dark: #1739ac;
   --accent-deep: #0f2b7a;
@@ -15,68 +14,68 @@
 }
 
 /* Apply to the page when material-page class is added */
-.material-page .material-sidebar {
+.material-page .consumable-sidebar {
   background: linear-gradient(180deg, #1739ac 0%, #1d4ed8 52%, #0f2b7a 100%) !important;
 }
 
-.material-page .material-sidebar-item-active {
+.material-page .consumable-sidebar-item-active {
   background: rgba(23, 57, 172, 0.26) !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.82) !important;
 }
 
-.material-page .material-sidebar-footer {
+.material-page .consumable-sidebar-footer {
   background: rgba(23, 57, 172, 0.22) !important;
 }
 
-.material-page .material-featured::before {
+.material-page .consumable-featured::before {
   background: #1d4ed8 !important;
 }
 
-.material-page .material-featured:hover {
+.material-page .consumable-featured:hover {
   border-color: #b3c9f7 !important;
 }
 
-.material-page .material-featured-icon {
+.material-page .consumable-featured-icon {
   background: #e7edfd !important;
   border-color: #b3c9f7 !important;
   color: #1d4ed8 !important;
 }
 
-.material-page .material-featured:hover .material-featured-icon {
+.material-page .consumable-featured:hover .consumable-featured-icon {
   background: #d0dffb !important;
 }
 
-.material-page .material-card::before {
+.material-page .consumable-card::before {
   background: #1d4ed8 !important;
 }
 
-.material-page .material-card:hover {
+.material-page .consumable-card:hover {
   border-color: #b3c9f7 !important;
 }
 
-.material-page .material-icon {
+.material-page .consumable-icon {
   background: #e7edfd !important;
   border-color: #b3c9f7 !important;
   color: #1d4ed8 !important;
 }
 
-.material-page .material-card:hover .material-icon {
+.material-page .consumable-card:hover .consumable-icon {
   background: #d0dffb !important;
 }
 
-.material-page .material-eyebrow {
+.material-page .consumable-eyebrow {
   border-color: #b3c9f7 !important;
   background: #e7edfd !important;
   color: #1d4ed8 !important;
 }
 
-.material-page .material-back-link:hover {
+.material-page .consumable-back-link:hover {
   color: #1d4ed8 !important;
 }
 
-/* Ensure the material-page works with menu content */
-.material-page {
+/* Ensure the consumable-page works with menu content */
+.consumable-page {
   --ink: #1b2430;
   --muted: #64748b;
   --canvas: #f3f5f8;
@@ -133,7 +132,7 @@
 }
 
 /* Ensure sidebar navigation works */
-.material-sidebar-nav {
+.consumable-sidebar-nav {
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -145,150 +144,150 @@
   scrollbar-color: rgba(255, 255, 255, 0.24) transparent;
 }
 
-.material-sidebar-nav::-webkit-scrollbar {
+.consumable-sidebar-nav::-webkit-scrollbar {
   width: 4px;
 }
 
-.material-sidebar-nav::-webkit-scrollbar-track {
+.consumable-sidebar-nav::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.material-sidebar-nav::-webkit-scrollbar-thumb {
+.consumable-sidebar-nav::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.24);
   border-radius: 999px;
 }
 
 /* Responsive overrides - keep in sync with Consumable.css */
 @media (max-width: 1200px) {
-  .material-layout {
+  .consumable-layout {
     grid-template-columns: 230px minmax(0, 1fr);
   }
-  .material-main {
+  .consumable-main {
     padding: 22px 24px 32px;
   }
-  .material-grid {
+  .consumable-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 850px) {
-  .material-page {
+  .consumable-page {
     padding: 12px;
   }
-  .material-layout {
+  .consumable-layout {
     min-height: auto;
     display: block;
     border-radius: 18px;
   }
-  .material-sidebar {
+  .consumable-sidebar {
     width: 100%;
     padding: 18px;
   }
-  .material-sidebar-brand {
+  .consumable-sidebar-brand {
     padding: 0 0 16px;
     margin-bottom: 12px;
   }
-  .material-sidebar-nav {
+  .consumable-sidebar-nav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     padding: 0;
   }
-  .material-sidebar-item {
+  .consumable-sidebar-item {
     min-height: 50px;
   }
-  .material-sidebar-footer {
+  .consumable-sidebar-footer {
     margin-top: 12px;
   }
-  .material-main {
+  .consumable-main {
     padding: 24px;
   }
 }
 
 @media (max-width: 560px) {
-  .material-page {
+  .consumable-page {
     padding: 8px;
   }
-  .material-layout {
+  .consumable-layout {
     border-radius: 14px;
   }
-  .material-sidebar {
+  .consumable-sidebar {
     padding: 16px 14px;
   }
-  .material-sidebar-brand-icon {
+  .consumable-sidebar-brand-icon {
     width: 38px;
     height: 38px;
   }
-  .material-sidebar-title {
+  .consumable-sidebar-title {
     font-size: 17px;
   }
-  .material-sidebar-nav {
+  .consumable-sidebar-nav {
     grid-template-columns: 1fr;
   }
-  .material-sidebar-item {
+  .consumable-sidebar-item {
     min-height: 48px;
   }
-  .material-sidebar-footer {
+  .consumable-sidebar-footer {
     padding: 13px;
   }
-  .material-main {
+  .consumable-main {
     padding: 20px 16px 24px;
   }
-  .material-title {
+  .consumable-title {
     font-size: 27px;
   }
-  .material-featured {
+  .consumable-featured {
     padding: 18px;
   }
-  .material-featured-header {
+  .consumable-featured-header {
     align-items: flex-start;
   }
-  .material-featured-icon {
+  .consumable-featured-icon {
     width: 44px;
     height: 44px;
   }
-  .material-featured-title {
+  .consumable-featured-title {
     font-size: 18px;
   }
-  .material-grid {
+  .consumable-grid {
     grid-template-columns: 1fr;
   }
-  .material-card {
+  .consumable-card {
     min-height: 140px;
   }
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .material-back-link,
-  .material-back-link svg,
-  .material-sidebar-item,
-  .material-sidebar-item-icon,
-  .material-featured,
-  .material-featured-icon,
-  .material-card,
-  .material-card::before,
-  .material-icon {
+  .consumable-back-link,
+  .consumable-back-link svg,
+  .consumable-sidebar-item,
+  .consumable-sidebar-item-icon,
+  .consumable-featured,
+  .consumable-featured-icon,
+  .consumable-card,
+  .consumable-card::before,
+  .consumable-icon {
     transition: none !important;
   }
 }
 
 /* Ensure interactive elements are clickable */
-.material-sidebar-item,
-.material-card,
-.material-featured {
+.consumable-sidebar-item,
+.consumable-card,
+.consumable-featured {
   cursor: pointer;
 }
 
-.material-featured:hover {
+.consumable-featured:hover {
   transform: translateY(-2px);
 }
 
-.material-featured:active {
+.consumable-featured:active {
   transform: translateY(0);
 }
 
-.material-back-link {
+.consumable-back-link {
   position: relative;
   z-index: 9999;
   pointer-events: auto;
@@ -305,21 +304,21 @@
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.material-back-link:hover {
+.consumable-back-link:hover {
   color: var(--accent);
   transform: none !important;
 }
 
-.material-back-link svg {
+.consumable-back-link svg {
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
 
-.material-back-link:hover svg {
+.consumable-back-link:hover svg {
   transform: none !important;
 }
 
-.material-header,
-.material-featured {
+.consumable-header,
+.consumable-featured {
   position: relative;
 }

@@ -130,27 +130,27 @@ export default function MenuCard() {
     <>
       <Header />
 
-      <div className="material-page">
-        <div className="material-layout">
+      <div className="consumable-page material-page">
+        <div className="consumable-layout">
 
           {/* ================= SIDEBAR ================= */}
-          <aside className="material-sidebar">
+          <aside className="consumable-sidebar">
 
-            <div className="material-sidebar-brand">
-              <div className="material-sidebar-brand-icon">
+            <div className="consumable-sidebar-brand">
+              <div className="consumable-sidebar-brand-icon">
                 <Package size={21} strokeWidth={1.8} />
               </div>
               <div>
-                <span className="material-sidebar-label">
+                <span className="consumable-sidebar-label">
                   Inventory Module
                 </span>
-                <h2 className="material-sidebar-title">
+                <h2 className="consumable-sidebar-title">
                   Materials
                 </h2>
               </div>
             </div>
 
-            <nav className="material-sidebar-nav">
+            <nav className="consumable-sidebar-nav">
               {menuCards.map((card) => {
                 const Icon = card.icon;
                 const isActive = card.code === "STK";
@@ -158,8 +158,8 @@ export default function MenuCard() {
                 return (
                   <div
                     key={card.title}
-                    className={`material-sidebar-item ${
-                      isActive ? "material-sidebar-item-active" : ""
+                    className={`consumable-sidebar-item ${
+                      isActive ? "consumable-sidebar-item-active" : ""
                     }`}
                     onClick={() => navigate(card.path)}
                     role="button"
@@ -170,15 +170,15 @@ export default function MenuCard() {
                       }
                     }}
                   >
-                    <span className="material-sidebar-item-icon">
+                    <span className="consumable-sidebar-item-icon">
                       <Icon size={18} strokeWidth={1.8} />
                     </span>
 
-                    <span className="material-sidebar-item-content">
-                      <span className="material-sidebar-item-code">
+                    <span className="consumable-sidebar-item-content">
+                      <span className="consumable-sidebar-item-code">
                         {card.code}
                       </span>
-                      <span className="material-sidebar-item-title">
+                      <span className="consumable-sidebar-item-title">
                         {card.title}
                       </span>
                     </span>
@@ -187,8 +187,8 @@ export default function MenuCard() {
               })}
             </nav>
 
-            <div className="material-sidebar-footer">
-              <div className="material-sidebar-footer-icon">
+            <div className="consumable-sidebar-footer">
+              <div className="consumable-sidebar-footer-icon">
                 <Boxes size={19} strokeWidth={1.8} />
               </div>
               <div>
@@ -200,30 +200,30 @@ export default function MenuCard() {
           </aside>
 
           {/* ================= MAIN CONTENT ================= */}
-          <main className="material-main">
+          <main className="consumable-main">
 
-            <header className="material-header">
-              <div className="material-back-link" onClick={() => navigate("/inventory")}>
+            <header className="consumable-header">
+              <div className="consumable-back-link" onClick={() => navigate("/inventory")}>
                 <ArrowLeft size={15} />
                 Inventory
               </div>
 
-              <span className="material-eyebrow">
+              <span className="consumable-eyebrow">
                 Materials
               </span>
 
-              <h1 className="material-title">
+              <h1 className="consumable-title">
                 Material Management
               </h1>
 
-              <p className="material-subtitle">
+              <p className="consumable-subtitle">
                 Track material from project drawings through BOM, purchase orders, receiving, stock and job work.
               </p>
             </header>
 
             {/* ================= FEATURED CARD ================= */}
             <section
-              className="material-featured"
+              className="consumable-featured"
               onClick={() => navigate(featuredCard.path)}
               role="button"
               tabIndex={0}
@@ -233,19 +233,19 @@ export default function MenuCard() {
                 }
               }}
             >
-              <div className="material-featured-header">
-                <div className="material-featured-icon">
+              <div className="consumable-featured-header">
+                <div className="consumable-featured-icon">
                   <featuredCard.icon size={26} strokeWidth={1.8} />
                 </div>
 
-                <div className="material-featured-heading">
-                  <span className="material-code">
+                <div className="consumable-featured-heading">
+                  <span className="consumable-code">
                     {featuredCard.code}
                   </span>
-                  <h2 className="material-featured-title">
+                  <h2 className="consumable-featured-title">
                     {featuredCard.title}
                   </h2>
-                  <p className="material-featured-desc">
+                  <p className="consumable-featured-desc">
                     {featuredCard.description}
                   </p>
                 </div>
@@ -253,13 +253,13 @@ export default function MenuCard() {
             </section>
 
             {/* ================= ACTION CARDS ================= */}
-            <div className="material-grid">
+            <div className="consumable-grid">
               {otherCards.map((card) => {
                 const Icon = card.icon;
 
                 return (
                   <div
-                    className="material-card"
+                    className="consumable-card"
                     key={card.title}
                     onClick={() => navigate(card.path)}
                     role="button"
@@ -270,20 +270,20 @@ export default function MenuCard() {
                       }
                     }}
                   >
-                    <div className="material-card-top">
-                      <div className="material-icon">
+                    <div className="consumable-card-top">
+                      <div className="consumable-icon">
                         <Icon size={22} strokeWidth={1.8} />
                       </div>
-                      <span className="material-code">
+                      <span className="consumable-code">
                         {card.code}
                       </span>
                     </div>
 
-                    <h3 className="material-card-title">
+                    <h3 className="consumable-card-title">
                       {card.title}
                     </h3>
 
-                    <p className="material-card-desc">
+                    <p className="consumable-card-desc">
                       {card.description}
                     </p>
                   </div>
