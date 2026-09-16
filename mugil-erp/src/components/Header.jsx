@@ -1,12 +1,15 @@
 
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 import "./Header.css";
 
 export default function Header({ navLinks = [] }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
+
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const username = user?.username || "User";
 
@@ -19,13 +22,24 @@ export default function Header({ navLinks = [] }) {
     navigate("/profile");
   };
 
+  const handleSupportToggle = () => {
+    setSupportOpen((previous) => !previous);
+  };
+
+  const handleHelp = () => {
+    setSupportOpen(false);
+    navigate("/help");
+  };
+
+  const handleContactUs = () => {
+    setSupportOpen(false);
+    navigate("/contact-us");
+  };
+
   return (
     <header className="erp-header">
 
-      {/* =========================
-          BRAND
-      ========================== */}
-
+      {/* BRAND */}
       <div className="erp-brand">
         <span className="erp-brand-line" />
 
@@ -35,16 +49,10 @@ export default function Header({ navLinks = [] }) {
       </div>
 
 
-      {/* =========================
-          RIGHT SIDE
-      ========================== */}
-
+      {/* RIGHT SIDE */}
       <div className="erp-user-area">
 
-        {/* =========================
-            CUSTOM PAGE NAVIGATION
-        ========================== */}
-
+        {/* CUSTOM PAGE NAVIGATION */}
         {navLinks.length > 0 && (
           <nav className="erp-custom-nav">
             {navLinks.map((link) => (
@@ -69,10 +77,7 @@ export default function Header({ navLinks = [] }) {
         )}
 
 
-        {/* =========================
-            PROFILE
-        ========================== */}
-
+        {/* PROFILE */}
         <div className="erp-profile-wrapper">
 
           <button
@@ -95,11 +100,8 @@ export default function Header({ navLinks = [] }) {
             <span>Profile</span>
           </button>
 
-
-          {/* Profile Hover Card */}
-
+          {/* PROFILE HOVER CARD */}
           <div className="erp-profile-hover-card">
-
             <div className="erp-profile-card-loader" />
 
             <div className="erp-profile-card-title">
@@ -109,21 +111,95 @@ export default function Header({ navLinks = [] }) {
             <div className="erp-profile-card-description">
               ERP User
             </div>
-
           </div>
 
         </div>
 
 
-        {/* Vertical Separator */}
+        {/* SUPPORT */}
+        <div className="erp-support-wrapper">
 
+          <button
+            type="button"
+            className={`erp-header-action erp-support-action ${
+              supportOpen ? "erp-support-action-active" : ""
+            }`}
+            onClick={handleSupportToggle}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9.5 9a2.5 2.5 0 1 1 4.5 1.5c-.9 1-2 1.3-2 2.5" />
+              <path d="M12 17h.01" />
+            </svg>
+
+            <span>Support</span>
+          </button>
+
+
+          {/* SUPPORT DROPDOWN */}
+          {supportOpen && (
+            <div className="erp-support-dropdown">
+
+              <button
+                type="button"
+                className="erp-support-dropdown-option"
+                onClick={handleHelp}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9.5 9a2.5 2.5 0 1 1 4.5 1.5c-.9 1-2 1.3-2 2.5" />
+                  <path d="M12 17h.01" />
+                </svg>
+
+                <span>Help</span>
+              </button>
+
+
+              <button
+                type="button"
+                className="erp-support-dropdown-option"
+                onClick={handleContactUs}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="m3 7 9 6 9-6" />
+                </svg>
+
+                <span>Contact Us</span>
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
+
+        {/* VERTICAL SEPARATOR */}
         <span className="erp-action-divider" />
 
 
-        {/* =========================
-            SIGN OUT
-        ========================== */}
-
+        {/* SIGN OUT */}
         <button
           type="button"
           className="erp-header-action erp-signout-action"
