@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./Header.css";
@@ -19,12 +20,8 @@ export default function Header() {
 
   return (
     <header className="erp-header">
-      {/* Background pattern */}
-      <div className="erp-header-pattern" />
 
-      {/* =========================
-          BRAND
-      ========================== */}
+      {/* Brand */}
       <div className="erp-brand">
         <span className="erp-brand-line" />
 
@@ -33,12 +30,10 @@ export default function Header() {
         </span>
       </div>
 
-      {/* =========================
-          RIGHT SIDE
-      ========================== */}
+      {/* Right Side */}
       <div className="erp-user-area">
 
-        {/* User information */}
+        {/* User Information */}
         <div className="erp-user-info">
 
           <div className="erp-avatar">
@@ -67,38 +62,51 @@ export default function Header() {
 
         </div>
 
-        {/* Vertical separator */}
         <span className="erp-action-divider" />
 
-        {/* =========================
-            PROFILE
-        ========================== */}
-        <button
-          type="button"
-          className="erp-header-action"
-          onClick={handleProfile}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {/* Profile */}
+        <div className="erp-profile-wrapper">
+
+          <button
+            type="button"
+            className="erp-header-action erp-profile-action"
+            onClick={handleProfile}
           >
-            <circle cx="12" cy="8" r="3.5" />
-            <path d="M5 20c.8-3.4 3.1-5 7-5s6.2 1.6 7 5" />
-          </svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c.8-3.4 3.1-5 7-5s6.2 1.6 7 5" />
+            </svg>
 
-          <span>Profile</span>
-        </button>
+            <span>Profile</span>
+          </button>
 
-        {/* Vertical separator */}
+          {/* Profile Hover Card */}
+          <div className="erp-profile-hover-card">
+
+            <div className="erp-profile-card-loader" />
+
+            <div className="erp-profile-card-title">
+              {username}
+            </div>
+
+            <div className="erp-profile-card-description">
+              ERP User
+            </div>
+
+          </div>
+
+        </div>
+
         <span className="erp-action-divider" />
 
-        {/* =========================
-            SIGN OUT
-        ========================== */}
+        {/* Sign Out */}
         <button
           type="button"
           className="erp-header-action erp-signout-action"
@@ -117,7 +125,13 @@ export default function Header() {
             <path d="M21 3v18" />
           </svg>
 
-          <span>Sign Out</span>
+          <span className="erp-signout-text">
+            Sign Out
+          </span>
+
+          <span className="erp-signout-hover-text">
+            Thanks!
+          </span>
         </button>
 
       </div>
