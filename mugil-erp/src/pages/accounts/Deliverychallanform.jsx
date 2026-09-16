@@ -407,24 +407,50 @@ export default function DeliveryChallanForm() {
                 </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="form-actions-top" style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-                <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleNewChallan}
-                >
-                    + New Challan
-                </button>
-                <button
-                    type="button"
-                    className="btn btn-outline-danger"
-                    onClick={handleClearDraft}
-                    style={{ color: '#dc3545', borderColor: '#dc3545' }}
-                >
-                    Clear Draft
-                </button>
-            </div>
+            
+{/* Action Buttons */}
+<div
+    className="form-actions-top"
+    style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        marginBottom: "16px",
+        flexWrap: "wrap",
+    }}
+>
+    <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={handleNewChallan}
+    >
+        + New Challan
+    </button>
+
+    <button
+        type="button"
+        className="btn btn-outline-danger"
+        onClick={handleClearDraft}
+        style={{
+            color: "#dc3545",
+            borderColor: "#dc3545",
+        }}
+    >
+        Clear Draft
+    </button>
+
+    {/* Duplicated Preview Button */}
+    <button
+        type="button"
+        className="btn btn-primary top-preview-btn"
+        onClick={handlePreview}
+        style={{
+            marginLeft: "auto",
+        }}
+    >
+        Preview & Print
+    </button>
+</div>
 
             {/* SECTION 1: Delivery Challan Details */}
             <section className="form-section">

@@ -32,6 +32,129 @@ const REPORT_TABS = [
   { key: "movement", label: "Movement History" },
 ];
 
+
+/* ============================================================
+   CONSUMABLE REPORT EXPORT HELPERS
+   Reuses the export approach from Reports.jsx
+   ============================================================ */
+
+const crptFmt = (value) => {
+  if (value === null || value === undefined || value === "") return "—";
+  return String(value);
+};
+
+function crptToCSV(columns, rows) {
+  const escape = (value) => {
+    const text = crptFmt(value);
+    return /[",\n]/.test(text)
+      ? `"${text.replace(/"/g, '""')}"`
+      : text;
+  };
+
+  const header = columns.map((column) => column.label).join(",");
+
+  const lines = rows.map((row) =>
+    columns
+      .map((column) =>
+        escape(
+          column.render
+            ? column.render(row)
+            : row[column.key],
+        ),
+      )
+      .join(","),
+  );
+
+  return [header, ...lines].join("\n");
+}
+
+function crptToHTMLTable(columns, rows, title) {
+  const head = columns
+    .map(
+      (column) =>
+        `<th style="border:1px solid #ccc;padding:6px;background:#f1f5f9;text-align:left;">${column.label}</th>`,
+    )
+    .join("");
+
+  const body = rows
+    .map(
+      (row) =>
+        `<tr>${columns
+          .map(
+            (column) =>
+              `<td style="border:1px solid #ccc;padding:6px;">${crptFmt(
+                column.render
+                  ? column.render(row)
+                  : row[column.key],
+              )}</td>`,
+          )
+          .join("")}</tr>`,
+    )
+    .join("");
+
+  return `
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <title>${title}</title>
+      </head>
+      <body>
+        <h2 style="font-family:sans-serif;">${title}</h2>
+        <table style="border-collapse:collapse;font-family:sans-serif;font-size:12px;width:100%;">
+          <thead>
+            <tr>${head}</tr>
+          </thead>
+          <tbody>${body}</tbody>
+        </table>
+      </body>
+    </html>
+  `;
+}
+
+function crptDownloadBlob(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
+function crptExportCSV(columns, rows, title) {
+  crptDownloadBlob(
+    crptToCSV(columns, rows),
+    `${title.replace(/\s+/g, "_")}.csv`,
+    "text/csv",
+  );
+}
+
+function crptExportExcel(columns, rows, title) {
+  crptDownloadBlob(
+    crptToHTMLTable(columns, rows, title),
+    `${title.replace(/\s+/g, "_")}.xls`,
+    "application/vnd.ms-excel",
+  );
+}
+
+function crptExportPDFOrPrint(columns, rows, title) {
+  const html = crptToHTMLTable(columns, rows, title);
+
+  const win = window.open("", "_blank");
+  if (!win) return;
+
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+
+  setTimeout(() => win.print(), 300);
+}
+
 export default function ConsumableReports() {
   const [purchaseOrders, setPurchaseOrders] = useState(
     consumableStore.getPurchaseOrders(),
@@ -146,6 +269,112 @@ export default function ConsumableReports() {
     [movements, term],
   );
 
+  
+/* ============================================================
+   REPORT EXPORT CONFIGURATION
+   ============================================================ */
+
+const exportConfigs = {
+  grn: {
+    title: "GRN Report",
+    columns: [
+      { key: "poNumber", label: "PO Number" },
+      { key: "supplier", label: "Supplier" },
+      { key: "consumableName", label: "Consumable" },
+      { key: "orderedQty", label: "Ordered Qty" },
+      { key: "receivedQty", label: "Received Qty" },
+      { key: "pendingQty", label: "Pending Qty" },
+      { key: "warehouse", label: "Warehouse" },
+      { key: "status", label: "Status" },
+    ],
+    rows: filteredGrnRows,
+  },
+
+  stock: {
+    title: "Stock Report",
+    columns: [
+      { key: "referenceNumber", label: "Reference Number" },
+      { key: "consumableName", label: "Consumable" },
+      { key: "warehouse", label: "Warehouse" },
+      { key: "availableQty", label: "Available Qty" },
+      { key: "unit", label: "Unit" },
+      { key: "status", label: "Status" },
+    ],
+    rows: filteredStockRows,
+  },
+
+  issue: {
+    title: "Issue Report",
+    columns: [
+      { key: "issueNumber", label: "Issue Number" },
+      { key: "consumableName", label: "Consumable" },
+      { key: "department", label: "Department" },
+      { key: "employeeName", label: "Employee" },
+      { key: "issuedQty", label: "Issued Qty" },
+      { key: "balanceQty", label: "Balance Qty" },
+      { key: "warehouse", label: "Warehouse" },
+      { key: "status", label: "Status" },
+    ],
+    rows: filteredIssueRows,
+  },
+
+  return: {
+    title: "Return Report",
+    columns: [
+      { key: "returnNumber", label: "Return Number" },
+      { key: "issueNumber", label: "Issue Number" },
+      { key: "consumableName", label: "Consumable" },
+      { key: "department", label: "Department" },
+      { key: "employeeName", label: "Employee" },
+      { key: "returnQty", label: "Return Qty" },
+      { key: "warehouse", label: "Warehouse" },
+      { key: "date", label: "Date" },
+    ],
+    rows: filteredReturnRows,
+  },
+
+  movement: {
+    title: "Movement History",
+    columns: [
+      { key: "date", label: "Date" },
+      { key: "time", label: "Time" },
+      { key: "type", label: "Type" },
+      { key: "consumableName", label: "Consumable" },
+      { key: "referenceNumber", label: "Reference" },
+      {
+        key: "quantity",
+        label: "Quantity",
+        render: (row) => `${row.quantity} ${row.unit || ""}`.trim(),
+      },
+      { key: "department", label: "Department" },
+      { key: "warehouse", label: "Warehouse" },
+      { key: "user", label: "User" },
+      { key: "remarks", label: "Remarks" },
+    ],
+    rows: filteredMovementRows,
+  },
+};
+
+/* ============================================================
+   EXPORT HANDLER
+   ============================================================ */
+
+const handleExport = (type) => {
+  const report = exportConfigs[activeTab];
+
+  if (!report) return;
+
+  const { title, columns, rows } = report;
+
+  if (type === "csv") {
+    crptExportCSV(columns, rows, title);
+  } else if (type === "excel") {
+    crptExportExcel(columns, rows, title);
+  } else {
+    crptExportPDFOrPrint(columns, rows, title);
+  }
+};
+
 return (
   <>
     <Header />
@@ -258,22 +487,59 @@ return (
           </div>
         </div>
 
-        <div className="crpt-tabs">
-          {REPORT_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              className={
-                activeTab === tab.key
-                  ? "crpt-tab crpt-tab-active"
-                  : "crpt-tab"
-              }
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        
+<div className="crpt-tabs">
+  {REPORT_TABS.map((tab) => (
+    <button
+      key={tab.key}
+      type="button"
+      className={
+        activeTab === tab.key
+          ? "crpt-tab crpt-tab-active"
+          : "crpt-tab"
+      }
+      onClick={() => setActiveTab(tab.key)}
+    >
+      {tab.label}
+    </button>
+  ))}
+
+  {/* ================= Export Buttons ================= */}
+
+  <div className="crpt-export-bar">
+    <button
+      type="button"
+      className="crpt-export-btn"
+      onClick={() => handleExport("pdf")}
+    >
+      Export PDF
+    </button>
+
+    <button
+      type="button"
+      className="crpt-export-btn"
+      onClick={() => handleExport("excel")}
+    >
+      Export Excel
+    </button>
+
+    <button
+      type="button"
+      className="crpt-export-btn"
+      onClick={() => handleExport("csv")}
+    >
+      Export CSV
+    </button>
+
+    <button
+      type="button"
+      className="crpt-export-btn"
+      onClick={() => handleExport("print")}
+    >
+      Print
+    </button>
+  </div>
+</div>
       </section>
 
       <div className="crpt-table-card">

@@ -641,69 +641,83 @@ export default function TaxInvoiceForm() {
             
           </div>
 
-          <div
+          
+<div
+  className="ti-form-invoice-io"
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "8px",
+    flexWrap: "wrap",
+    marginLeft: "auto",
+    transform: "translateX(-8px)",
+  }}
+>
+  <input
+    className="ti-form-input"
+    list="ti-form-saved-invoice-numbers"
+    placeholder="Invoice number to load"
+    value={loadInvoiceNumber}
+    onChange={(e) => setLoadInvoiceNumber(e.target.value)}
+    style={{ width: "180px" }}
+  />
 
-          
-          
-            className="ti-form-invoice-io"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              flexWrap: "wrap",
-            }}
-          >
-            <input
-              className="ti-form-input"
-              list="ti-form-saved-invoice-numbers"
-              placeholder="Invoice number to load"
-              value={loadInvoiceNumber}
-              onChange={(e) => setLoadInvoiceNumber(e.target.value)}
-              style={{ width: "180px" }}
-            />
-            <datalist id="ti-form-saved-invoice-numbers">
-              {savedInvoiceNumbers.map((num) => (
-                <option key={num} value={num} />
-              ))}
-            </datalist>
-            <button
-              type="button"
-              className="ti-form-load-btn"
-              onClick={() => loadInvoice(loadInvoiceNumber)}
-              style={{
-                padding: "8px 14px",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                background: "#fff",
-                cursor: "pointer",
-              }}
-            >
-              Load Invoice
-            </button>
-            <button
-              type="button"
-              className="ti-form-save-btn"
-              onClick={saveInvoice}
-              style={{
-                padding: "8px 14px",
-                borderRadius: "6px",
-                border: "1px solid #2563eb",
-                background: "#2563eb",
-                color: "#fff",
-                cursor: "pointer",
-              }}
-            >
-              Save Invoice
-            </button>
-            {saveStatus && (
-              <span
-                className="ti-form-save-status"
-                style={{ fontSize: "13px", color: "#555" }}
-              >
-                {saveStatus}
-              </span>
-            )}
-          </div>
+  <datalist id="ti-form-saved-invoice-numbers">
+    {savedInvoiceNumbers.map((num) => (
+      <option key={num} value={num} />
+    ))}
+  </datalist>
+
+  <button
+    type="button"
+    className="ti-form-load-btn"
+    onClick={() => loadInvoice(loadInvoiceNumber)}
+    style={{
+      padding: "8px 14px",
+      borderRadius: "6px",
+      border: "1px solid #ccc",
+      background: "#fff",
+      cursor: "pointer",
+    }}
+  >
+    Load Invoice
+  </button>
+
+  {/* Duplicated Preview Button */}
+  <button
+    type="button"
+    className="ti-form-preview-btn"
+    onClick={goToPrint}
+  >
+    Preview Invoice
+  </button>
+
+  <button
+    type="button"
+    className="ti-form-save-btn"
+    onClick={saveInvoice}
+    style={{
+      padding: "8px 14px",
+      borderRadius: "6px",
+      border: "1px solid #2563eb",
+      background: "#2563eb",
+      color: "#fff",
+      cursor: "pointer",
+    }}
+  >
+    Save Invoice
+  </button>
+
+  {saveStatus && (
+    <span
+      className="ti-form-save-status"
+      style={{ fontSize: "13px", color: "#555" }}
+    >
+      {saveStatus}
+    </span>
+  )}
+</div>
         </div>
 
         <div className="ti-form-content">

@@ -689,10 +689,20 @@ export default function ProformaInvoiceForm() {
                 color: "#fff",
                 cursor: "pointer",
               }}
-            >
-              Save Proforma
-            </button>
-            {saveStatus && (
+                      >
+            Save Proforma
+          </button>
+
+          {/* Duplicated Preview Button */}
+          <button
+            type="button"
+            className="ti-form-preview-btn"
+            onClick={goToPrint}
+          >
+            Preview Invoice
+          </button>
+
+          {saveStatus && (
               <span
                 className="ti-form-save-status"
                 style={{ fontSize: "13px", color: "#555" }}
