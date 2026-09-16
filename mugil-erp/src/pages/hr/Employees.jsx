@@ -8,6 +8,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import EmployeeForm from "./Employeeform.jsx";
 import "./Employee.css";
+import Header from "../../components/Header";
 
 /* =====================================================================+
    CONSTANTS — shared master lists used across the employee module.
@@ -1148,39 +1149,7 @@ const NAV_ITEMS = [
   "Configuration",
 ];
 
-function TopNav() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const links = [
-    { label: "Employees", path: "/hr/employees" },
-    { label: "Attendance & Wages", path: "/hr/attendance" },
-    { label: "Salary", path: "/hr/salary" },
-  ];
-  return (
-    <header className="emp-topnav">
-      <div className="emp-topnav-brand">
-        <span className="emp-topnav-mark">HR</span>
-        <span className="emp-topnav-title">People Ops</span>
-      </div>
-      <nav className="emp-topnav-links">
-        {links.map((link) => (
-          <button
-            key={link.path}
-            type="button"
-            className={`emp-topnav-link ${
-              location.pathname.startsWith(link.path)
-                ? "emp-topnav-link-active"
-                : ""
-            }`}
-            onClick={() => navigate(link.path)}
-          >
-            {link.label}
-          </button>
-        ))}
-      </nav>
-    </header>
-  );
-}
+
 
 /* ==========================================================================
    STATUS BADGE
@@ -1424,9 +1393,26 @@ export default function Employees() {
     </>
   );
 
-  return (
+return (
+  <>
+    <Header
+      navLinks={[
+        {
+          label: "Employees",
+          path: "/hr/employees",
+        },
+        {
+          label: "Attendance & Wages",
+          path: "/hr/attendance",
+        },
+        {
+          label: "Salary",
+          path: "/hr/salary",
+        },
+      ]}
+    />
+
     <div className="emp-app">
-      <TopNav />
 
       <div className="emp-page-header">
         <div className="emp-page-header-titles">
@@ -1803,5 +1789,6 @@ export default function Employees() {
         </div>
       )}
     </div>
+    </>
   );
 }
