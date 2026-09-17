@@ -46,13 +46,23 @@
   --shadow-inset: inset 0 1px 3px rgba(10, 15, 30, 0.08);
 }
 
-html, body, #root {
-  height: 100%;
+html,
+body,
+#root {
+  min-height: 100%;
   font-family: var(--font-body);
   color: var(--slate-700);
   -webkit-font-smoothing: antialiased;
 }
 
+html,
+body {
+  overflow-y: auto;
+}
+
+body {
+  background: var(--navy-950);
+}
 body {
   background: var(--navy-950);
 }

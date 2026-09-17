@@ -25,7 +25,8 @@ body,
 
 body {
   font-family: "Inter", Arial, sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: #f7f9fc;
 }
 
