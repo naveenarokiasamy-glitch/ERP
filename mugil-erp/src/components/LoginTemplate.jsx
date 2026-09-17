@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import CountUp from "react-countup";
 import {
   Factory,
   Settings,
@@ -7,9 +6,17 @@ import {
   Package,
   ShieldCheck,
   Wallet,
+  ChevronDown,
+  UserRound,
+  LockKeyhole,
+  ArrowRight,
+  AlertTriangle,
+  Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import industrialImage from "../assets/industrial-login.png";
+import mugilLogo from "../assets/mugil-logo.png";
 import "../styles/login.css";
 
 const DEPARTMENTS = [
@@ -17,48 +24,45 @@ const DEPARTMENTS = [
     label: "Production",
     value: "production",
     loginPath: "/production/login",
+    icon: Factory,
+    description: "Production & Operations",
   },
   {
     label: "Admin",
     value: "admin",
     loginPath: "/admin/login",
+    icon: Settings,
+    description: "Administration",
   },
   {
     label: "HR",
     value: "hr",
     loginPath: "/hr/login",
+    icon: Users,
+    description: "Human Resources",
   },
   {
     label: "Material Planning",
     value: "material-planning",
     loginPath: "/material-planning/login",
+    icon: Package,
+    description: "Material & Inventory",
   },
   {
     label: "Supervisor",
     value: "supervisor",
     loginPath: "/supervisor/login",
+    icon: ShieldCheck,
+    description: "Supervision & Control",
   },
   {
     label: "Accounts",
     value: "accounts",
     loginPath: "/accounts/login",
+    icon: Wallet,
+    description: "Finance & Accounts",
   },
 ];
-
-const DEPARTMENT_ICONS = {
-  production: Factory,
-  admin: Settings,
-  hr: Users,
-  "material-planning": Package,
-  supervisor: ShieldCheck,
-  accounts: Wallet,
-};
-
-function DepartmentIcon({ department }) {
-  const Icon = DEPARTMENT_ICONS[department] || Factory;
-
-  return <Icon aria-hidden="true" focusable="false" />;
-}
 
 const DEFAULT_DEPARTMENT = DEPARTMENTS[0];
 const AUTHENTICATION_DELAY_MS = 500;
@@ -70,110 +74,26 @@ function getDepartment(value) {
   );
 }
 
-function AlertTriangle() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function LockIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0110 0v4" />
-    </svg>
-  );
-}
-
-function ArrowRight() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function BriefcaseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-      <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-    </svg>
-  );
-}
-
 export default function LoginTemplate({
   currentDepartment = DEFAULT_DEPARTMENT.value,
 }) {
   const initialDepartment = getDepartment(currentDepartment);
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
   const [department, setDepartment] = useState(initialDepartment.value);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const mountedRef = useRef(false);
+  const dropdownRef = useRef(null);
+
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const selectedDepartment = getDepartment(department);
+  const SelectedDepartmentIcon = selectedDepartment.icon;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -196,16 +116,38 @@ export default function LoginTemplate({
     };
   }, [selectedDepartment.label]);
 
-  const handleDepartmentChange = (event) => {
-    const nextDepartment = DEPARTMENTS.find(
-      (item) => item.value === event.target.value,
-    );
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
 
-    if (!nextDepartment) {
-      return;
-    }
+    document.addEventListener("mousedown", handleOutsideClick);
 
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const handleDepartmentChange = (nextDepartment) => {
     setDepartment(nextDepartment.value);
+    setDropdownOpen(false);
+    setError("");
     navigate(nextDepartment.loginPath);
   };
 
@@ -280,160 +222,168 @@ export default function LoginTemplate({
   };
 
   return (
-    <div className={`login-root ${"light-theme"}`}>
-      <div className="theme-toggle">
-        <input
-          id="checkbox"
-          type="checkbox"
-          checked={darkMode}
-          onChange={() => setDarkMode((isDark) => !isDark)}
-          aria-label="Toggle dark and light theme"
-        />
-
-        {/* <label htmlFor="checkbox" className="switch">
-          <svg viewBox="0 0 512 512" aria-hidden="true" focusable="false">
-            <path d="M256 48C141.1 48 48 141.1 48 256s93.1 208 208 208 208-93.1 208-208S370.9 48 256 48z" />
-          </svg>
-        </label> */}
-      </div>
-
-      <div className="login-brand">
-  <h1 className="brand-name">
-    Mugil Engineering Industry
-  </h1>
-</div>
-
-      <div className="login-form-panel">
-        <div className="login-card">
-          <div className="card-header">
-           <div className="card-logo-mark">
-  <img src="/mugil-logo1.png" alt="Mugil Engineering Industries" />
-</div>
-
-            <h2 className="card-title">{selectedDepartment.label} Login</h2>
-
-            <p className="card-subtitle">
-              Mugil Industries ERP — Secure Access Portal
-            </p>
-
-            <div className="department-group">
-  <label className="form-label" htmlFor="department">
-    Department
-  </label>
-
-  <div className="input-wrapper department-input-wrapper">
-    <span className="input-icon department-input-icon">
-      <DepartmentIcon department={department} />
-    </span>
-
-    <select
-      id="department"
-      className="form-input department-select"
-      value={department}
-      onChange={handleDepartmentChange}
-      disabled={loading}
+    <div
+      className="login-root"
+      style={{ backgroundImage: `url(${industrialImage})` }}
     >
-      {DEPARTMENTS.map((item) => (
-        <option key={item.value} value={item.value}>
-          {item.label}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+      <div className="login-bg-overlay" aria-hidden="true" />
+
+      <section className="login-card-shell">
+        <form className="uiverse-form" onSubmit={handleSubmit} noValidate>
+          <div className="uiverse-logo">
+            <img src={mugilLogo} alt="Mugil Engineering Industries" />
+          </div>
+
+          <p className="uiverse-heading">{selectedDepartment.label} Login</p>
+
+          <p className="uiverse-subtitle">
+            Mugil Industries ERP — Secure Access Portal
+          </p>
+
+          <div className="department-group">
+            <label className="form-label" htmlFor="department-button">
+              Department
+            </label>
+
+            <div className="department-dropdown" ref={dropdownRef}>
+              <button
+                id="department-button"
+                type="button"
+                className={`department-trigger ${
+                  dropdownOpen ? "is-open" : ""
+                }`}
+                onClick={() => setDropdownOpen((isOpen) => !isOpen)}
+                disabled={loading}
+                aria-haspopup="listbox"
+                aria-expanded={dropdownOpen}
+              >
+                <span className="department-icon">
+                  <SelectedDepartmentIcon size={17} />
+                </span>
+
+                <span className="department-content">
+                  <strong>{selectedDepartment.label}</strong>
+                  <small>{selectedDepartment.description}</small>
+                </span>
+
+                <ChevronDown size={17} className="department-chevron" />
+              </button>
+
+              <div
+                className={`department-menu ${
+                  dropdownOpen ? "department-menu-open" : ""
+                }`}
+                role="listbox"
+                aria-label="Select department"
+              >
+                {DEPARTMENTS.map((item) => {
+                  const Icon = item.icon;
+                  const isSelected = item.value === department;
+
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      className={`department-option ${
+                        isSelected ? "selected" : ""
+                      }`}
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => handleDepartmentChange(item)}
+                    >
+                      <span className="department-option-icon">
+                        <Icon size={17} />
+                      </span>
+
+                      <span className="department-option-text">
+                        <strong>{item.label}</strong>
+                        <small>{item.description}</small>
+                      </span>
+
+                      {isSelected && (
+                        <Check size={16} className="department-check" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {error && (
             <div className="error-alert" id="login-error" role="alert">
-              <span className="error-alert-icon">
-                <AlertTriangle />
-              </span>
-              <span className="error-alert-text">{error}</span>
+              <AlertTriangle size={16} />
+              <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} noValidate aria-busy={loading}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="username">
-                Username
-              </label>
+          <div className="uiverse-field">
+            <UserRound size={17} className="uiverse-input-icon" />
+            <input
+              id="username"
+              name="username"
+              type="text"
+              className="uiverse-input"
+              placeholder="Username"
+              value={username}
+              onChange={(event) => {
+                setUsername(event.target.value);
+                setError("");
+              }}
+              autoComplete="username"
+              spellCheck="false"
+              maxLength={128}
+              required
+              disabled={loading}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? "login-error" : undefined}
+            />
+          </div>
 
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <UserIcon />
-                </span>
+          <div className="uiverse-field">
+            <LockKeyhole size={17} className="uiverse-input-icon" />
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className="uiverse-input"
+              placeholder="Password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setError("");
+              }}
+              autoComplete="current-password"
+              maxLength={256}
+              required
+              disabled={loading}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? "login-error" : undefined}
+            />
+          </div>
 
-                <input
-                  id="username"
-                  name="username"
-                  className={`form-input${error ? " input-error" : ""}`}
-                  type="text"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(event) => {
-                    setUsername(event.target.value);
-                    setError("");
-                  }}
-                  autoComplete="username"
-                  spellCheck="false"
-                  maxLength={128}
-                  required
-                  disabled={loading}
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={error ? "login-error" : undefined}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="password">
-                Password
-              </label>
-
-              <div className="input-wrapper">
-                <span className="input-icon">
-                  <LockIcon />
-                </span>
-
-                <input
-                  id="password"
-                  name="password"
-                  className={`form-input${error ? " input-error" : ""}`}
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value);
-                    setError("");
-                  }}
-                  autoComplete="current-password"
-                  maxLength={256}
-                  required
-                  disabled={loading}
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={error ? "login-error" : undefined}
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="btn-login" disabled={loading}>
-              <span className="btn-login-inner">
-                {loading ? (
-                  "Authenticating…"
-                ) : (
-                  <>
-                    Sign In <ArrowRight />
-                  </>
-                )}
-              </span>
+          <div className="uiverse-btn-wrapper">
+            <button type="submit" className="uiverse-btn" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="login-spinner" />
+                  Authenticating…
+                </>
+              ) : (
+                <>
+                  Sign in
+                  <ArrowRight size={17} />
+                </>
+              )}
             </button>
-          </form>
+          </div>
 
           <div className="login-footer">
-            © {new Date().getFullYear()} Mugil Industries · All rights reserved
+            <span>© {new Date().getFullYear()} Mugil Industries</span>
+            <a href="/privacy-policy">Privacy Policy</a>
           </div>
-        </div>
-      </div>
+        </form>
+      </section>
     </div>
   );
 }

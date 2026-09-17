@@ -106,18 +106,39 @@ const PRODUCTION_MATERIALS = {
 
 const materialById = (id) => PRODUCTION_MATERIALS[id];
 
+// Existing Delivery Challan module's route — Send to Outsourcing hands off
+// here instead of opening a second/duplicate Delivery Challan screen.
+const DELIVERY_CHALLAN_ROUTE = "/accounts/DeliveryChallan";
+
+// Sequential Delivery Challan reference used for traceability between a
+// "Send to Outsourcing" action here and the actual Delivery Challan record
+// raised in the existing Delivery Challan module — same convention as
+// generateAssemblyId() in Production Assembly Integration.
+let dcRefCounter = 458;
+const generateDcRef = () => `DC-${String(++dcRefCounter).padStart(3, "0")}`;
+
 // -------------------------------------------------------------------------
 // Stage factory — one entry per step of the process route ALREADY DEFINED
 // in Production Assembly Integration. Production Operation only ever
 // executes these steps; it never adds, removes or reorders them.
 // -------------------------------------------------------------------------
+// executionType / executionUnit / outsourcing are the exact configuration
+// created for this process in Production Assembly Integration. Production
+// Operation only ever READS these — it never asks In-House/Outsourcing,
+// Unit 1/Unit 2, or Vendor again.
 const stage = (sequence, name, id, qcRequired, overrides = {}) => ({
   sequence,
   name,
   id,
   qcRequired,
+  executionType: "In-House", // "In-House" | "Outsourcing" — from Assembly
+  executionUnit: "Unit 1", // "Unit 1" | "Unit 2" — from Assembly, In-House only
+  outsourcing: null, // { vendor, vendorContact, vendorLocation, expectedReturnDate, remarks } — from Assembly, Outsourcing only
   availableQty: 0,
   pendingOperationQty: 0,
+  sentQty: 0, // OUTSOURCING — cumulative quantity sent to the vendor
+  receivedQty: 0, // OUTSOURCING — cumulative quantity returned by the vendor
+  dcRefs: [], // OUTSOURCING — Delivery Challan references raised for this stage
   awaitingQcQty: 0,
   reworkQty: 0,
   releasedQty: 0,
@@ -125,10 +146,30 @@ const stage = (sequence, name, id, qcRequired, overrides = {}) => ({
   lastOperation: null,
   lastQc: null,
   lastRework: null,
+  lastOutsourcing: null, // last send/receive event, for the detail view
   ...overrides,
 });
 
 const hist = (date, event) => ({ date, event });
+
+// Same outsourcing details configured for these processes in Production
+// Assembly Integration — kept here only as seed data for this demo; in the
+// real app these fields arrive already attached to processChain via the
+// assembly record, never re-entered here.
+const paintingOutsourcing = () => ({
+  vendor: "ABC Painting Works",
+  vendorContact: "98765 43210",
+  vendorLocation: "Chennai",
+  expectedReturnDate: "2026-09-20",
+  remarks: "",
+});
+const ndtOutsourcing = () => ({
+  vendor: "Precision Metal Works",
+  vendorContact: "90000 11111",
+  vendorLocation: "Trichy",
+  expectedReturnDate: "2026-09-25",
+  remarks: "",
+});
 
 // -------------------------------------------------------------------------
 // Seed assemblies — created in Production Assembly Integration. Only
@@ -190,7 +231,12 @@ const initialAssemblies = [
         availableQty: 4,
         pendingOperationQty: 4,
       }),
-      stage(4, "Painting", "PNT01", true, { availableQty: 0 }),
+      stage(4, "Painting", "PNT01", true, {
+        availableQty: 0,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: paintingOutsourcing(),
+      }),
     ],
     history: [
       hist("2026-08-29", "ASM-001 created — Project BHEL-001"),
@@ -251,7 +297,10 @@ const initialAssemblies = [
           rejectedQty: 0,
         },
       }),
-      stage(3, "Inspection", "INS01", true, { availableQty: 0 }),
+      stage(3, "Inspection", "INS01", true, {
+        availableQty: 0,
+        executionUnit: "Unit 2",
+      }),
     ],
     history: [
       hist("2026-09-02", "ASM-002 created — Project BHEL-001"),
@@ -278,8 +327,18 @@ const initialAssemblies = [
     processChain: [
       stage(1, "Fit-up", "FIT01", true, { availableQty: 0 }),
       stage(2, "Welding", "WEL01", true, { availableQty: 0 }),
-      stage(3, "NDT", "NDT01", true, { availableQty: 0 }),
-      stage(4, "Painting", "PNT01", true, { availableQty: 0 }),
+      stage(3, "NDT", "NDT01", true, {
+        availableQty: 0,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: ndtOutsourcing(),
+      }),
+      stage(4, "Painting", "PNT01", true, {
+        availableQty: 0,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: paintingOutsourcing(),
+      }),
     ],
     history: [
       hist("2026-09-04", "ASM-003 created — Project BHEL-001"),
@@ -354,7 +413,13 @@ const initialAssemblies = [
           rejectedQty: 0,
         },
       }),
-      stage(4, "Painting", "PNT01", true, { availableQty: 5 }),
+      stage(4, "Painting", "PNT01", true, {
+        availableQty: 5,
+        pendingOperationQty: 5,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: paintingOutsourcing(),
+      }),
     ],
     history: [
       hist("2026-08-15", "ASM-004 created — Project BHEL-002"),
@@ -489,6 +554,19 @@ const computeOverallStatus = (
   if (currentIndex === -1) return "Completed";
 
   if (currentStage.reworkQty > 0) return "Rework Required";
+
+  // Outsourcing-specific states. executionType/outsourcing come straight
+  // from Production Assembly Integration for this process — nothing here
+  // is re-derived or re-asked.
+  if (currentStage.executionType === "Outsourcing") {
+    const pendingReturn = currentStage.sentQty - currentStage.receivedQty;
+    if (pendingReturn > 0) {
+      return currentStage.receivedQty > 0
+        ? "Partially Received"
+        : "Waiting for Return";
+    }
+  }
+
   if (
     currentStage.awaitingQcQty > 0 &&
     currentStage.pendingOperationQty === 0
@@ -501,12 +579,20 @@ const computeOverallStatus = (
       s.releasedQty === 0 &&
       s.awaitingQcQty === 0 &&
       s.reworkQty === 0 &&
-      !s.lastOperation
+      !s.lastOperation &&
+      !s.lastOutsourcing
   );
   if (nothingStartedAnywhere) {
     return materialAvailability.pendingQty > 0
       ? "Material Pending"
       : "Ready for Production";
+  }
+
+  if (
+    currentStage.executionType === "Outsourcing" &&
+    currentStage.pendingOperationQty > 0
+  ) {
+    return "Outsourcing";
   }
 
   const stageFullyDrainedForNow =
@@ -560,6 +646,13 @@ const buildAssemblyRow = (assembly, assemblies) => {
     currentIndex,
     currentStage,
     currentProcessName: currentIndex === -1 ? "—" : currentStage.name,
+    executionType: currentIndex === -1 ? null : currentStage.executionType,
+    executionLabel:
+      currentIndex === -1
+        ? "—"
+        : currentStage.executionType === "Outsourcing"
+        ? `Outsourcing — ${currentStage.outsourcing?.vendor || "—"}`
+        : `In-House — ${currentStage.executionUnit || "Unit 1"}`,
     qcStatusLabel: computeQcStatusLabel(currentStage),
     overallStatus,
   };
@@ -576,6 +669,7 @@ const FILTER_FIELDS = [
   { key: "sizeText", label: "Size", type: "text" },
   { key: "unit", label: "Unit", type: "select" },
   { key: "currentProcessName", label: "Current Process", type: "select" },
+  { key: "executionLabel", label: "Execution", type: "select" },
   { key: "qcStatusLabel", label: "QC Status", type: "select" },
   { key: "overallStatus", label: "Overall Status", type: "select" },
 ];
@@ -640,6 +734,15 @@ const emptyReworkForm = () => ({
   date: today(),
   remarks: "",
   reworkRef: "",
+});
+const emptySendOutsourcingForm = (s) => ({
+  qty: s ? String(s.pendingOperationQty || "") : "",
+  expectedReturnDate: s?.outsourcing?.expectedReturnDate || "",
+  remarks: "",
+});
+const emptyReceiveOutsourcingForm = () => ({
+  receivedQty: "",
+  remarks: "",
 });
 
 export default function ProductionOperation() {
@@ -724,10 +827,16 @@ export default function ProductionOperation() {
   const openAction = (assemblyId, sequence, mode) => {
     setActionState({ assemblyId, sequence, mode });
     setFormError("");
+    const targetStage = assemblies
+      .find((a) => a.assemblyId === assemblyId)
+      ?.processChain.find((s) => s.sequence === sequence);
     if (mode === "start") setForm(emptyStartForm());
     else if (mode === "complete") setForm(emptyCompleteForm());
     else if (mode === "qc") setForm(emptyQcForm());
-    else setForm(emptyReworkForm());
+    else if (mode === "rework") setForm(emptyReworkForm());
+    else if (mode === "send-outsourcing")
+      setForm(emptySendOutsourcingForm(targetStage));
+    else setForm(emptyReceiveOutsourcingForm());
   };
   const closeAction = () => {
     setActionState(null);
@@ -759,7 +868,11 @@ export default function ProductionOperation() {
               ...a,
               processChain: a.processChain.map((s) =>
                 s.sequence === sequence + 1
-                  ? { ...s, availableQty: s.availableQty + deltaQty }
+                  ? {
+                      ...s,
+                      availableQty: s.availableQty + deltaQty,
+                      pendingOperationQty: s.pendingOperationQty + deltaQty,
+                    }
                   : s
               ),
             }
@@ -943,6 +1056,129 @@ export default function ProductionOperation() {
     closeAction();
   };
 
+  // -----------------------------------------------------------------------
+  // OUTSOURCING — Send / Receive
+  // -----------------------------------------------------------------------
+  // Execution Type, Unit and Vendor are never asked here — they are read
+  // straight off actionStage.executionType / .executionUnit / .outsourcing,
+  // which came from Production Assembly Integration.
+  const handleSaveSendOutsourcing = () => {
+    const qty = Number(form.qty) || 0;
+    if (qty <= 0)
+      return setFormError("Enter the quantity to send to the vendor.");
+    if (qty > actionStage.pendingOperationQty) {
+      return setFormError(
+        `Quantity cannot exceed what is available to send (${actionStage.pendingOperationQty}).`
+      );
+    }
+    const { assemblyId, sequence } = actionState;
+    const vendor = actionStage.outsourcing?.vendor || "vendor";
+    const dcRef = generateDcRef();
+    // Hand off to the existing Delivery Challan module — same data shape
+    // it already uses (customer = vendor here), not a second DC system.
+    try {
+      window.localStorage.setItem(
+        "pendingDeliveryChallanPrefill",
+        JSON.stringify({
+          dcNumber: dcRef,
+          deliveryAt: actionStage.outsourcing?.vendorLocation || "",
+          customer: {
+            companyName: vendor,
+            address: actionStage.outsourcing?.vendorLocation || "",
+            phone: actionStage.outsourcing?.vendorContact || "",
+            returnable: true,
+          },
+          items: [
+            {
+              description: `${actionAssembly.assemblyId} — ${actionStage.name} (${actionStage.id})`,
+              quantity: qty,
+              remarks: `Job work — expected return ${
+                form.expectedReturnDate ||
+                actionStage.outsourcing?.expectedReturnDate ||
+                "—"
+              }`,
+            },
+          ],
+        })
+      );
+    } catch (e) {
+      /* non-fatal — DC reference is still recorded here either way */
+    }
+    updateStage(assemblyId, sequence, (s) => ({
+      ...s,
+      pendingOperationQty: s.pendingOperationQty - qty,
+      sentQty: s.sentQty + qty,
+      dcRefs: [...s.dcRefs, dcRef],
+      lastOutsourcing: {
+        action: "sent",
+        qty,
+        vendor,
+        dcRef,
+        date: today(),
+        remarks: form.remarks.trim(),
+        expectedReturnDate:
+          form.expectedReturnDate || s.outsourcing?.expectedReturnDate || "",
+      },
+    }));
+    pushHistory(
+      assemblyId,
+      `${qty} Nos sent to ${vendor} for ${actionStage.name} — Delivery Challan ${dcRef} generated`
+    );
+    pushHistory(assemblyId, `${actionStage.name} status: Waiting for Return`);
+    closeAction();
+    // Sending hands off to the existing Delivery Challan module — open it
+    // pre-filled so the user can review/print/submit it. This does NOT
+    // mean the process is complete; that only happens on full return
+    // (+ QC, if required) — see handleSaveReceiveOutsourcing.
+    navigate(DELIVERY_CHALLAN_ROUTE);
+  };
+
+  const handleSaveReceiveOutsourcing = () => {
+    const pendingReturn = actionStage.sentQty - actionStage.receivedQty;
+    const qty = Number(form.receivedQty) || 0;
+    if (qty <= 0)
+      return setFormError("Enter the quantity received from the vendor.");
+    if (qty > pendingReturn) {
+      return setFormError(
+        `Received quantity cannot exceed the quantity still pending from the vendor (${pendingReturn}).`
+      );
+    }
+    const { assemblyId, sequence } = actionState;
+    const qcRequired = actionStage.qcRequired;
+    const vendor = actionStage.outsourcing?.vendor || "vendor";
+    updateStage(assemblyId, sequence, (s) => ({
+      ...s,
+      receivedQty: s.receivedQty + qty,
+      awaitingQcQty: qcRequired ? s.awaitingQcQty + qty : s.awaitingQcQty,
+      releasedQty: qcRequired ? s.releasedQty : s.releasedQty + qty,
+      lastOutsourcing: {
+        action: "received",
+        qty,
+        vendor,
+        date: today(),
+        remarks: form.remarks.trim(),
+      },
+    }));
+    if (!qcRequired && qty > 0) cascadeNext(assemblyId, sequence, qty);
+    const remaining = pendingReturn - qty;
+    pushHistory(
+      assemblyId,
+      `${qty} Nos received back from ${vendor} for ${actionStage.name}` +
+        (remaining > 0
+          ? ` — ${remaining} Nos still pending from vendor`
+          : " — full quantity returned")
+    );
+    if (!qcRequired && qty > 0) {
+      pushHistory(
+        assemblyId,
+        `${qty} Nos released to ${nextStageName(actionAssembly, sequence)}`
+      );
+    } else if (qcRequired && qty > 0) {
+      pushHistory(assemblyId, `${actionStage.name} status: QC Pending`);
+    }
+    closeAction();
+  };
+
   // ---------------- Back Handler ----------------
   function handleBack() {
     navigate("/inventory/material");
@@ -1022,6 +1258,7 @@ export default function ProductionOperation() {
                     <th>Available Qty</th>
                     <th>Pending Qty</th>
                     <th>Current Process</th>
+                    <th>Execution</th>
                     <th>QC Status</th>
                     <th>Overall Status</th>
                     <th className="cell-action">Action</th>
@@ -1030,7 +1267,7 @@ export default function ProductionOperation() {
                 <tbody>
                   {filteredRows.length === 0 && (
                     <tr>
-                      <td colSpan={11}>
+                      <td colSpan={12}>
                         <div className="empty-state">
                           <div className="empty-state-icon">🏭</div>
                           <p className="empty-state-title">
@@ -1093,6 +1330,17 @@ export default function ProductionOperation() {
                       </td>
                       <td data-label="Current Process">
                         {row.currentProcessName}
+                      </td>
+                      <td data-label="Execution">
+                        <span
+                          className={`exec-pill ${
+                            row.executionType === "Outsourcing"
+                              ? "exec-pill-outsource"
+                              : "exec-pill-inhouse"
+                          }`}
+                        >
+                          {row.executionLabel}
+                        </span>
                       </td>
                       <td data-label="QC Status">
                         <QcStatusBadge status={row.qcStatusLabel} />
@@ -1232,6 +1480,8 @@ export default function ProductionOperation() {
                         complete: handleSaveComplete,
                         qc: handleSaveQc,
                         rework: handleSaveRework,
+                        "send-outsourcing": handleSaveSendOutsourcing,
+                        "receive-outsourcing": handleSaveReceiveOutsourcing,
                       }[actionState.mode]
                     }
                     className="btn btn-primary"
@@ -1253,12 +1503,16 @@ const ACTION_TITLES = {
   complete: "Complete Process",
   qc: "QC Verification",
   rework: "Rework Done — Confirm & Continue",
+  "send-outsourcing": "Send to Outsourcing",
+  "receive-outsourcing": "Receive from Outsourcing",
 };
 const ACTION_SAVE_LABELS = {
   start: "Save & Start",
   complete: "Save Completion",
   qc: "Save QC Verification",
   rework: "Confirm Done & Continue",
+  "send-outsourcing": "Save & Send",
+  "receive-outsourcing": "Save Receipt",
 };
 
 const nextStageName = (assembly, sequence) => {
@@ -1404,7 +1658,37 @@ function AssemblyActionButtons({ row, onOpen }) {
       </button>
     );
   }
-  if (s.pendingOperationQty > 0) {
+  if (s.executionType === "Outsourcing") {
+    const pendingReturn = s.sentQty - s.receivedQty;
+    if (s.pendingOperationQty > 0) {
+      buttons.push(
+        <button
+          key="send-outsourcing"
+          type="button"
+          onClick={() => onOpen(row.assemblyId, s.sequence, "send-outsourcing")}
+          className="btn btn-outsource btn-sm"
+        >
+          🚚 Send to Outsourcing ({s.pendingOperationQty})
+        </button>
+      );
+    }
+    if (pendingReturn > 0) {
+      buttons.push(
+        <button
+          key="receive-outsourcing"
+          type="button"
+          onClick={() =>
+            onOpen(row.assemblyId, s.sequence, "receive-outsourcing")
+          }
+          className="btn btn-primary btn-sm"
+        >
+          {s.receivedQty > 0
+            ? `↩ Receive Remaining (${pendingReturn})`
+            : `↩ Receive From Outsourcing (${pendingReturn})`}
+        </button>
+      );
+    }
+  } else if (s.pendingOperationQty > 0) {
     buttons.push(
       s.started ? (
         <button
@@ -1444,6 +1728,9 @@ function OverallStatusBadge({ status }) {
     "Material Pending": "status-badge-warning",
     "Ready for Production": "status-badge-info",
     "In Progress": "status-badge-info",
+    Outsourcing: "status-badge-purple",
+    "Waiting for Return": "status-badge-warning",
+    "Partially Received": "status-badge-warning",
     "QC Pending": "status-badge-warning",
     "QC Rejected": "status-badge-danger",
     "Rework Required": "status-badge-danger",
@@ -1487,10 +1774,14 @@ function ProcessRouteTimeline({ assembly }) {
         } else if (idx === currentIndex) {
           stepClass += " process-chain-current";
           icon = "●";
-          tag =
-            s.awaitingQcQty > 0 && s.pendingOperationQty === 0
-              ? "AWAITING QC"
-              : "CURRENT";
+          const pendingReturn = s.sentQty - s.receivedQty;
+          if (s.executionType === "Outsourcing" && pendingReturn > 0) {
+            tag = s.receivedQty > 0 ? "PARTIALLY RECEIVED" : "WAITING FOR RETURN";
+          } else if (s.awaitingQcQty > 0 && s.pendingOperationQty === 0) {
+            tag = "AWAITING QC";
+          } else {
+            tag = "CURRENT";
+          }
         } else {
           stepClass += " process-chain-locked";
           icon = s.availableQty === 0 ? "🔒" : "○";
@@ -1510,6 +1801,17 @@ function ProcessRouteTimeline({ assembly }) {
             {!s.qcRequired && (
               <span className="process-chain-noqc">QC not required</span>
             )}
+            <span
+              className={`process-chain-exec ${
+                s.executionType === "Outsourcing"
+                  ? "process-chain-exec-outsource"
+                  : ""
+              }`}
+            >
+              {s.executionType === "Outsourcing"
+                ? `Outsourced — ${s.outsourcing?.vendor || "—"}`
+                : `In-House — ${s.executionUnit || "Unit 1"}`}
+            </span>
             {tag && <span className="process-chain-tag">{tag}</span>}
           </li>
         );
@@ -1537,6 +1839,17 @@ function ActionModalBody({ assembly, stage: s, mode, form, setForm }) {
           <ReadonlyField label="Process ID" value={s.id} />
           <ReadonlyField label="Planned Quantity" value={assembly.plannedQty} />
           <ReadonlyField label="Available At This Stage" value={s.availableQty} />
+          {s.executionType === "Outsourcing" ? (
+            <>
+              <ReadonlyField label="Execution" value="Outsourcing" emphasize />
+              <ReadonlyField label="Vendor" value={s.outsourcing?.vendor || "—"} />
+            </>
+          ) : (
+            <ReadonlyField
+              label="Execution"
+              value={`In-House — ${s.executionUnit || "Unit 1"}`}
+            />
+          )}
           {mode === "complete" && (
             <ReadonlyField
               label="Pending Operation Qty"
@@ -1557,6 +1870,24 @@ function ActionModalBody({ assembly, stage: s, mode, form, setForm }) {
               value={s.reworkQty}
               emphasize
             />
+          )}
+          {mode === "send-outsourcing" && (
+            <ReadonlyField
+              label="Available To Send"
+              value={s.pendingOperationQty}
+              emphasize
+            />
+          )}
+          {mode === "receive-outsourcing" && (
+            <>
+              <ReadonlyField label="Sent To Vendor" value={s.sentQty} />
+              <ReadonlyField label="Received So Far" value={s.receivedQty} />
+              <ReadonlyField
+                label="Pending From Vendor"
+                value={s.sentQty - s.receivedQty}
+                emphasize
+              />
+            </>
           )}
         </div>
       </div>
@@ -1809,6 +2140,111 @@ function ActionModalBody({ assembly, stage: s, mode, form, setForm }) {
           </p>
         </div>
       )}
+
+      {mode === "send-outsourcing" && (
+        <div className="modal-card">
+          <h3 className="modal-card-title">Outsourcing Details (from Assembly)</h3>
+          <p className="modal-card-subtitle">
+            Vendor and location were configured in Production Assembly
+            Integration and cannot be changed here.
+          </p>
+          <div className="readonly-grid">
+            <ReadonlyField label="Vendor" value={s.outsourcing?.vendor || "—"} emphasize />
+            <ReadonlyField
+              label="Vendor Contact"
+              value={s.outsourcing?.vendorContact || "—"}
+            />
+            <ReadonlyField
+              label="Vendor Location"
+              value={s.outsourcing?.vendorLocation || "—"}
+            />
+          </div>
+          <div className="form-grid" style={{ marginTop: 12 }}>
+            <div className="form-field">
+              <label>Quantity to Send</label>
+              <input
+                type="number"
+                min="1"
+                value={form.qty}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, qty: e.target.value }))
+                }
+              />
+            </div>
+            <div className="form-field">
+              <label>Expected Return Date</label>
+              <input
+                type="date"
+                value={form.expectedReturnDate}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    expectedReturnDate: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="form-field" style={{ marginTop: 12 }}>
+            <label>Remarks</label>
+            <textarea
+              rows={3}
+              placeholder="Optional notes..."
+              value={form.remarks}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, remarks: e.target.value }))
+              }
+            />
+          </div>
+          <p className="modal-card-footnote">
+            Saving opens the Delivery Challan form pre-filled with this
+            vendor and quantity, and moves {s.name} to{" "}
+            <strong>Waiting for Return</strong>. Creating the Delivery
+            Challan does not complete this process — the process only
+            completes once the vendor returns the material
+            {s.qcRequired ? " and QC accepts it" : ""}.
+          </p>
+        </div>
+      )}
+
+      {mode === "receive-outsourcing" && (
+        <div className="modal-card">
+          <h3 className="modal-card-title">Receive From Outsourcing</h3>
+          <p className="modal-card-subtitle">
+            Partial returns are supported — enter only what the vendor has
+            actually sent back. The remainder stays{" "}
+            <strong>Waiting for Return</strong>.
+          </p>
+          <div className="form-grid">
+            <div className="form-field">
+              <label>Received Quantity</label>
+              <input
+                type="number"
+                min="0"
+                value={form.receivedQty}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, receivedQty: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+          <div className="form-field" style={{ marginTop: 12 }}>
+            <label>Remarks</label>
+            <textarea
+              rows={3}
+              value={form.remarks}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, remarks: e.target.value }))
+              }
+            />
+          </div>
+          <p className="modal-card-footnote">
+            {s.qcRequired
+              ? "Received quantity moves to QC Pending — it does not advance on its own."
+              : "This process has no QC requirement, so received quantity is released straight to the next process."}
+          </p>
+        </div>
+      )}
     </>
   );
 }
@@ -1817,6 +2253,7 @@ function ActionModalBody({ assembly, stage: s, mode, form, setForm }) {
 // Eye view
 // =========================================================================
 function EyeViewBody({ assembly, assemblies, onJump }) {
+  const navigate = useNavigate();
   const materialAvailability = computeMaterialAvailability(
     assembly,
     assemblies
@@ -2013,6 +2450,14 @@ function EyeViewBody({ assembly, assemblies, onJump }) {
             />
             <ReadonlyField label="Process ID" value={currentStage.id} />
             <ReadonlyField
+              label="Execution"
+              value={
+                currentStage.executionType === "Outsourcing"
+                  ? `Outsourcing — ${currentStage.outsourcing?.vendor || "—"}`
+                  : `In-House — ${currentStage.executionUnit || "Unit 1"}`
+              }
+            />
+            <ReadonlyField
               label="Available At Stage"
               value={currentStage.availableQty}
             />
@@ -2040,6 +2485,67 @@ function EyeViewBody({ assembly, assemblies, onJump }) {
           </div>
         )}
       </div>
+
+      {/* SECTION 5b — Outsourcing (only when the current process is
+          configured as Outsourcing in Production Assembly Integration) */}
+      {currentIndex !== -1 && currentStage.executionType === "Outsourcing" && (
+        <div className="modal-card">
+          <h3 className="modal-card-title">5b. Outsourcing</h3>
+          <div className="readonly-grid">
+            <ReadonlyField
+              label="Vendor"
+              value={currentStage.outsourcing?.vendor || "—"}
+              emphasize
+            />
+            <ReadonlyField
+              label="Vendor Contact"
+              value={currentStage.outsourcing?.vendorContact || "—"}
+            />
+            <ReadonlyField
+              label="Vendor Location"
+              value={currentStage.outsourcing?.vendorLocation || "—"}
+            />
+            <ReadonlyField
+              label="Expected Return"
+              value={
+                currentStage.lastOutsourcing?.expectedReturnDate ||
+                currentStage.outsourcing?.expectedReturnDate ||
+                "—"
+              }
+            />
+            <ReadonlyField label="Sent Qty" value={currentStage.sentQty} />
+            <ReadonlyField label="Received Qty" value={currentStage.receivedQty} />
+            <ReadonlyField
+              label="Pending From Vendor"
+              value={currentStage.sentQty - currentStage.receivedQty}
+              emphasize
+            />
+          </div>
+          {currentStage.dcRefs.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <p className="modal-card-subtitle" style={{ marginBottom: 6 }}>
+                Delivery Challans raised for this process:
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {currentStage.dcRefs.map((ref) => (
+                  <button
+                    key={ref}
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => navigate(DELIVERY_CHALLAN_ROUTE)}
+                  >
+                    Open {ref}
+                  </button>
+                ))}
+              </div>
+              <p className="modal-card-footnote" style={{ marginTop: 8 }}>
+                Opens the existing Delivery Challan module at{" "}
+                {DELIVERY_CHALLAN_ROUTE}.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* SECTION 6 */}
       <div className="modal-card">

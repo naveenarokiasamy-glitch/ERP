@@ -363,6 +363,17 @@ a {
   border-color: var(--danger);
 }
 
+.btn-outsource {
+  background: var(--purple);
+  color: #ffffff;
+  border-color: var(--purple);
+}
+
+.btn-outsource:hover:not(:disabled) {
+  background: #5b21b6;
+  border-color: #5b21b6;
+}
+
 .btn-rework:hover:not(:disabled) {
   background: #b91c1c;
   border-color: #b91c1c;
@@ -1111,6 +1122,42 @@ a {
   font-size: 10.5px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.process-chain-exec {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--info-soft);
+  color: var(--info);
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.process-chain-exec-outsource {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.exec-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.exec-pill-inhouse {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.exec-pill-outsource {
+  background: var(--purple-soft);
+  color: var(--purple);
 }
 
 .process-chain-tag {

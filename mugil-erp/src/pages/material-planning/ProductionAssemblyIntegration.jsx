@@ -8,6 +8,8 @@ import {
   Pencil,
   Trash2,
   Clock,
+  Building2,
+  Truck,
 } from "lucide-react";
 import Header from "../../components/Header";
 import "./ProductionAssemblyIntegration.css";
@@ -137,12 +139,37 @@ let assemblyCounter = 3;
 const generateAssemblyId = () =>
   `ASM-${String(++assemblyCounter).padStart(3, "0")}`;
 
+// Same vendor list / naming convention already used for outsourcing in
+// Issue To Job Work — reused here rather than inventing a second list.
+const VENDORS = [
+  "Shree Fabricators",
+  "Om Engineering Works",
+  "Precision Metal Works",
+  "Bharat CNC Solutions",
+  "ABC Blasting Works",
+  "ABC Painting Works",
+];
+
+// "Execution" describes HOW a process is carried out — In-House (and which
+// unit) or Outsourcing (and to which vendor). This is configured once here
+// and Production Operation only ever reads it; it is never asked again.
+const emptyOutsourcing = () => ({
+  vendor: "",
+  vendorContact: "",
+  vendorLocation: "",
+  expectedReturnDate: "",
+  remarks: "",
+});
+
 let processRowSeq = 1;
 const newProcessRow = (overrides = {}) => ({
   rowId: `proc-${processRowSeq++}`,
   name: "",
   processId: "",
   qcRequired: false,
+  executionType: "In-House", // "In-House" | "Outsourcing"
+  executionUnit: "Unit 1", // "Unit 1" | "Unit 2" — used when In-House
+  outsourcing: null, // emptyOutsourcing() shape — used when Outsourcing
   ...overrides,
 });
 
@@ -164,10 +191,44 @@ const initialAssemblies = [
       { sourceType: "material", sourceId: "PM-PI01", useQty: 3 },
     ],
     processes: [
-      { name: "Fit-up", processId: "FIT01", qcRequired: true },
-      { name: "Welding", processId: "WEL01", qcRequired: true },
-      { name: "Grinding", processId: "GRD01", qcRequired: false },
-      { name: "Painting", processId: "PNT01", qcRequired: true },
+      {
+        name: "Fit-up",
+        processId: "FIT01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Welding",
+        processId: "WEL01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Grinding",
+        processId: "GRD01",
+        qcRequired: false,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Painting",
+        processId: "PNT01",
+        qcRequired: true,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: {
+          vendor: "ABC Painting Works",
+          vendorContact: "98765 43210",
+          vendorLocation: "Chennai",
+          expectedReturnDate: "2026-09-20",
+          remarks: "",
+        },
+      },
     ],
     status: "In Progress",
     createdDate: "2026-08-29",
@@ -180,9 +241,30 @@ const initialAssemblies = [
       { sourceType: "material", sourceId: "PM-PI02", useQty: 3 },
     ],
     processes: [
-      { name: "Fit-up", processId: "FIT01", qcRequired: true },
-      { name: "Welding", processId: "WEL01", qcRequired: true },
-      { name: "Inspection", processId: "INS01", qcRequired: true },
+      {
+        name: "Fit-up",
+        processId: "FIT01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Welding",
+        processId: "WEL01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Inspection",
+        processId: "INS01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 2",
+        outsourcing: null,
+      },
     ],
     status: "Planned",
     createdDate: "2026-09-02",
@@ -195,10 +277,50 @@ const initialAssemblies = [
       { sourceType: "assembly", sourceId: "ASM-002", useQty: 1 },
     ],
     processes: [
-      { name: "Fit-up", processId: "FIT01", qcRequired: true },
-      { name: "Welding", processId: "WEL01", qcRequired: true },
-      { name: "NDT", processId: "NDT01", qcRequired: true },
-      { name: "Painting", processId: "PNT01", qcRequired: true },
+      {
+        name: "Fit-up",
+        processId: "FIT01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "Welding",
+        processId: "WEL01",
+        qcRequired: true,
+        executionType: "In-House",
+        executionUnit: "Unit 1",
+        outsourcing: null,
+      },
+      {
+        name: "NDT",
+        processId: "NDT01",
+        qcRequired: true,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: {
+          vendor: "Precision Metal Works",
+          vendorContact: "90000 11111",
+          vendorLocation: "Trichy",
+          expectedReturnDate: "2026-09-25",
+          remarks: "",
+        },
+      },
+      {
+        name: "Painting",
+        processId: "PNT01",
+        qcRequired: true,
+        executionType: "Outsourcing",
+        executionUnit: null,
+        outsourcing: {
+          vendor: "ABC Painting Works",
+          vendorContact: "98765 43210",
+          vendorLocation: "Chennai",
+          expectedReturnDate: "2026-09-28",
+          remarks: "",
+        },
+      },
     ],
     status: "Planned",
     createdDate: "2026-09-04",
@@ -661,6 +783,37 @@ export default function ProductionAssemblyIntegration() {
       ),
     }));
 
+  // Switching Execution Type resets the fields that belong to the OTHER
+  // type, so a process can never carry stale Unit + Vendor data at once.
+  const setProcessExecutionType = (rowId, executionType) =>
+    setForm((f) => ({
+      ...f,
+      processes: f.processes.map((p) =>
+        p.rowId === rowId
+          ? {
+              ...p,
+              executionType,
+              executionUnit: executionType === "In-House" ? "Unit 1" : null,
+              outsourcing:
+                executionType === "Outsourcing" ? emptyOutsourcing() : null,
+            }
+          : p
+      ),
+    }));
+
+  const updateProcessOutsourcing = (rowId, field, value) =>
+    setForm((f) => ({
+      ...f,
+      processes: f.processes.map((p) =>
+        p.rowId === rowId
+          ? {
+              ...p,
+              outsourcing: { ...(p.outsourcing || emptyOutsourcing()), [field]: value },
+            }
+          : p
+      ),
+    }));
+
   const addProcess = () =>
     setForm((f) => ({ ...f, processes: [...f.processes, newProcessRow()] }));
 
@@ -740,6 +893,15 @@ export default function ProductionAssemblyIntegration() {
       if ((hasName || hasId) && !(hasName && hasId)) {
         return "Every production step needs both a name and a Process ID.";
       }
+      if (hasName && hasId) {
+        if (p.executionType === "Outsourcing") {
+          if (!p.outsourcing || !p.outsourcing.vendor.trim()) {
+            return `Select a vendor for "${p.name}" (Execution: Outsourcing).`;
+          }
+        } else if (!p.executionUnit) {
+          return `Select an execution unit for "${p.name}" (Execution: In-House).`;
+        }
+      }
     }
     const validProcesses = form.processes.filter(
       (p) => p.name.trim() && p.processId.trim()
@@ -773,6 +935,19 @@ export default function ProductionAssemblyIntegration() {
         name: p.name.trim(),
         processId: p.processId.trim(),
         qcRequired: !!p.qcRequired,
+        executionType: p.executionType === "Outsourcing" ? "Outsourcing" : "In-House",
+        executionUnit:
+          p.executionType === "Outsourcing" ? null : p.executionUnit || "Unit 1",
+        outsourcing:
+          p.executionType === "Outsourcing"
+            ? {
+                vendor: (p.outsourcing?.vendor || "").trim(),
+                vendorContact: (p.outsourcing?.vendorContact || "").trim(),
+                vendorLocation: (p.outsourcing?.vendorLocation || "").trim(),
+                expectedReturnDate: p.outsourcing?.expectedReturnDate || "",
+                remarks: (p.outsourcing?.remarks || "").trim(),
+              }
+            : null,
       }));
 
     const hasPending = cleanInputs.some(
@@ -1687,6 +1862,197 @@ export default function ProductionAssemblyIntegration() {
                                 </select>
                               </div>
                             </div>
+
+                            {/* ---- Execution: In-House vs Outsourcing ---- */}
+                            <div className="process-execution">
+                              <div className="form-field">
+                                <label
+                                  title="How this process is carried out. Production Operation reads this and never asks again."
+                                >
+                                  Execution Type
+                                </label>
+                                <div
+                                  className="segment-toggle"
+                                  role="group"
+                                  aria-label="Execution Type"
+                                >
+                                  <button
+                                    type="button"
+                                    className={`segment-btn ${
+                                      process.executionType === "In-House"
+                                        ? "segment-btn-active"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      setProcessExecutionType(
+                                        process.rowId,
+                                        "In-House"
+                                      )
+                                    }
+                                  >
+                                    <Building2 size={14} /> In-House
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className={`segment-btn ${
+                                      process.executionType === "Outsourcing"
+                                        ? "segment-btn-active"
+                                        : ""
+                                    }`}
+                                    onClick={() =>
+                                      setProcessExecutionType(
+                                        process.rowId,
+                                        "Outsourcing"
+                                      )
+                                    }
+                                  >
+                                    <Truck size={14} /> Outsourcing
+                                  </button>
+                                </div>
+                              </div>
+
+                              {process.executionType === "In-House" ? (
+                                <div className="form-field">
+                                  <label>Execution Unit</label>
+                                  <div
+                                    className="segment-toggle"
+                                    role="group"
+                                    aria-label="Execution Unit"
+                                  >
+                                    <button
+                                      type="button"
+                                      className={`segment-btn ${
+                                        process.executionUnit === "Unit 1"
+                                          ? "segment-btn-active"
+                                          : ""
+                                      }`}
+                                      onClick={() =>
+                                        updateProcess(
+                                          process.rowId,
+                                          "executionUnit",
+                                          "Unit 1"
+                                        )
+                                      }
+                                    >
+                                      Unit 1
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className={`segment-btn ${
+                                        process.executionUnit === "Unit 2"
+                                          ? "segment-btn-active"
+                                          : ""
+                                      }`}
+                                      onClick={() =>
+                                        updateProcess(
+                                          process.rowId,
+                                          "executionUnit",
+                                          "Unit 2"
+                                        )
+                                      }
+                                    >
+                                      Unit 2
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="outsourcing-block">
+                                  <div className="outsourcing-block-title">
+                                    Outsourcing Details
+                                  </div>
+                                  <div className="form-field">
+                                    <label>Vendor</label>
+                                    <select
+                                      value={process.outsourcing?.vendor || ""}
+                                      onChange={(e) =>
+                                        updateProcessOutsourcing(
+                                          process.rowId,
+                                          "vendor",
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select vendor</option>
+                                      {VENDORS.map((v) => (
+                                        <option key={v}>{v}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="form-row-2">
+                                    <div className="form-field">
+                                      <label>Vendor Contact</label>
+                                      <input
+                                        placeholder="Phone / email"
+                                        value={
+                                          process.outsourcing?.vendorContact ||
+                                          ""
+                                        }
+                                        onChange={(e) =>
+                                          updateProcessOutsourcing(
+                                            process.rowId,
+                                            "vendorContact",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div className="form-field">
+                                      <label>Vendor Location</label>
+                                      <input
+                                        placeholder="Vendor works address / city"
+                                        value={
+                                          process.outsourcing
+                                            ?.vendorLocation || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateProcessOutsourcing(
+                                            process.rowId,
+                                            "vendorLocation",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="form-row-2">
+                                    <div className="form-field">
+                                      <label>Expected Return Date</label>
+                                      <input
+                                        type="date"
+                                        value={
+                                          process.outsourcing
+                                            ?.expectedReturnDate || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateProcessOutsourcing(
+                                            process.rowId,
+                                            "expectedReturnDate",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div className="form-field">
+                                      <label>Remarks (optional)</label>
+                                      <input
+                                        placeholder="Optional notes"
+                                        value={
+                                          process.outsourcing?.remarks || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateProcessOutsourcing(
+                                            process.rowId,
+                                            "remarks",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
                             <div className="process-order-btns">
                               <button
                                 type="button"
@@ -1829,6 +2195,16 @@ export default function ProductionAssemblyIntegration() {
                                     QC
                                   </span>
                                 )}
+                                <span
+                                  className="exec-badge"
+                                  style={{ marginLeft: 8 }}
+                                >
+                                  {p.executionType === "Outsourcing"
+                                    ? `Outsourcing — ${
+                                        p.outsourcing?.vendor || "No vendor selected"
+                                      }`
+                                    : `In-House — ${p.executionUnit || "Unit 1"}`}
+                                </span>
                               </li>
                             ))}
                         </ol>
@@ -2287,6 +2663,11 @@ function AssemblyEyeView({ assembly, assemblies, activeTab, onOpenNested }) {
                 }`}
               >
                 {p.qcRequired ? "QC Required" : "No QC"}
+              </span>
+              <span className="exec-badge">
+                {p.executionType === "Outsourcing"
+                  ? `Outsourcing — ${p.outsourcing?.vendor || "—"}`
+                  : `In-House — ${p.executionUnit || "Unit 1"}`}
               </span>
             </li>
           ))}

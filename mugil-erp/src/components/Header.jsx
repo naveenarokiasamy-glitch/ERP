@@ -2,6 +2,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
+
 import "./Header.css";
 
 export default function Header({ navLinks = [] }) {
@@ -32,9 +33,9 @@ export default function Header({ navLinks = [] }) {
   };
 
   const handleContactUs = () => {
-    setSupportOpen(false);
-    navigate("/contact-us");
-  };
+  setSupportOpen(false);
+  navigate("/contact");
+};
 
   return (
     <header className="erp-header">
