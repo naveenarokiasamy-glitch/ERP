@@ -46,7 +46,7 @@ import Rework from "./pages/material-planning/Rework.jsx";
 import Dispatch from "./pages/material-planning/Dispatch.jsx";
 import Reports from "./pages/material-planning/Reports";
 import Scrap from "./pages/material-planning/Scrap";
-import Contact from "./components/ContactUS.jsx";
+import Contact from "./components/ContactUs.jsx";
 
 export default function App() {
   return (
