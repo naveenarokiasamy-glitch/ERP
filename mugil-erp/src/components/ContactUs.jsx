@@ -3,7 +3,7 @@
 // No backend calls, no Gmail sending, no credentials of any kind live here.
 // Payload is shaped to be dropped straight into: POST /api/contact/
 import { useState, useRef } from "react";
-import "./ContactUs.css";
+import "./ContactUS.css";
 
 /* ---------- inline icons (kept dependency-free, matches Profile.jsx style) ------------ */
 const IconSend = () => (
