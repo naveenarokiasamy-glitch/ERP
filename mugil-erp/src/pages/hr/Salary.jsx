@@ -38,6 +38,7 @@ import {
 } from "./Payroll.jsx";
 import "./Salary.css";
 import "./Payroll.css";
+import Header from "../../components/Header";
 
 /* ==========================================================================
    NOTE ON SCOPE
@@ -1216,7 +1217,25 @@ export default function Salary() {
   }
 
   return (
-    <div className="sal-page">
+    <>
+      <Header
+        navLinks={[
+          {
+            label: "Employees",
+            path: "/hr/employees",
+          },
+          {
+            label: "Attendance & Wages",
+            path: "/hr/attendance",
+          },
+          {
+            label: "Salary",
+            path: "/hr/salary",
+          },
+        ]}
+      />
+
+      <div className="sal-page">
       <div className="sal-page-header">
         <div className="sal-page-header-left">
           <button
@@ -1293,6 +1312,7 @@ export default function Salary() {
           onPrint={(r) => printSingleSalary(r, employees)}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 }

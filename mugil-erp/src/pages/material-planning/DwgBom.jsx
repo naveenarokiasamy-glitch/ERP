@@ -21,6 +21,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import "./DwgBom.css";
+import Header from "../../components/Header";
 
 // ---------- Data ----------
 const projects = [
@@ -390,66 +391,20 @@ function ConfirmDialog({
   );
 }
 
-// ---------- Header Component ----------
-function AppHeader({ pageName, onBack }) {
-  const navigate = useNavigate();
-  const [profileOpen, setProfileOpen] = useState(false);
 
-  return (
-    <header className="app-header">
-      <div className="app-header-left">
-        <div className="app-header-brand">
-          <div className="app-header-brand-icon">
-            <Layers size={18} strokeWidth={1.8} />
-          </div>
-          <div>
-            <span className="app-header-brand-label">Material Mgmt</span>
-            <span className="app-header-brand-title">ERP</span>
-          </div>
-        </div>
-      </div>
-      <div className="app-header-right">
-        <div className="app-header-profile-wrap">
-          <button
-            className="app-header-profile"
-            onClick={() => setProfileOpen((v) => !v)}
-          >
-            <span className="app-header-avatar">RK</span>
-            <span className="app-header-profile-name">R. Kumar</span>
-            <ChevronDown size={14} />
-          </button>
-          {profileOpen && (
-            <div className="app-header-profile-menu">
-              <span className="app-header-profile-role">
-                Stores &amp; Purchase
-              </span>
-              <button type="button">Profile settings</button>
-              <button type="button">Sign out</button>
-            </div>
-          )}
-        </div>
-        <button className="app-header-icon-btn" aria-label="Notifications">
-          <Bell size={17} strokeWidth={1.8} />
-        </button>
-      </div>
-    </header>
-  );
-}
 
 // ---------- Page Shell ----------
-function PageShell({ pageName, children }) {
-  const navigate = useNavigate();
-
+function PageShell({ children }) {
   return (
     <div className="page-shell">
-      <AppHeader pageName={pageName} />
+      <Header />
+
       <div className="page-shell-main">
         <div className="page-shell-content">{children}</div>
       </div>
     </div>
   );
 }
-
 // ---------- Main Component ----------
 const emptyProjectForm = {
   name: "",
@@ -680,7 +635,7 @@ export default function DwgBom() {
   }
 
   return (
-    <PageShell pageName="DWG & BOM">
+    <PageShell>
       {/* Page Header with Back Button */}
       <div className="page-header-wrap">
         <div className="page-header-left">

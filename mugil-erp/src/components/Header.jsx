@@ -37,6 +37,11 @@ export default function Header({ navLinks = [] }) {
   navigate("/contact");
 };
 
+const handlePrivacyPolicy = () => {
+  setSupportOpen(false);
+  navigate("/privacy-policy");
+};
+
   return (
     <header className="erp-header">
 
@@ -140,7 +145,7 @@ export default function Header({ navLinks = [] }) {
               <path d="M12 17h.01" />
             </svg>
 
-            <span>Support</span>
+            <span>More</span>
           </button>
 
 
@@ -189,6 +194,28 @@ export default function Header({ navLinks = [] }) {
 
                 <span>Contact Us</span>
               </button>
+
+              <button
+  type="button"
+  className="erp-support-dropdown-option"
+  onClick={handlePrivacyPolicy}
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="5" y="3" width="14" height="18" rx="2" />
+    <path d="M9 8h6" />
+    <path d="M9 12h6" />
+    <path d="M9 16h4" />
+  </svg>
+
+  <span>Privacy Policy</span>
+</button>
 
             </div>
           )}

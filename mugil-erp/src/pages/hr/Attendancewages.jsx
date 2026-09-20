@@ -9,6 +9,7 @@ import { useEmployees } from './Employees.jsx'
 import { useAdvances, AdvanceStatusBadge, EmployeeAdvancesModal } from './Payroll.jsx'
 import './Attendance.css'
 import './Payroll.css'
+import Header from "../../components/Header";
 
 /* NOTE: Attendancewages.jsx <-> Payroll.jsx is a deliberate two-way import.
    Payroll.jsx only reuses pure date helpers from here (monthRange,
@@ -1313,7 +1314,25 @@ export default function AttendanceWages() {
     setModal({ editRecord: null, presetEmployeeId: employeeId, presetDate: date })
   }
 
-  return (
+return (
+  <>
+    <Header
+      navLinks={[
+        {
+          label: "Employees",
+          path: "/hr/employees",
+        },
+        {
+          label: "Attendance & Wages",
+          path: "/hr/attendance",
+        },
+        {
+          label: "Salary",
+          path: "/hr/salary",
+        },
+      ]}
+    />
+
     <div className="aw-page">
       <div className="aw-page-header">
         <div className="aw-page-header-left">
@@ -1376,6 +1395,7 @@ export default function AttendanceWages() {
           onJumpToEdit={(record) => setModal({ editRecord: record })}
         />
       )}
-    </div>
-  )
+      </div>
+  </>
+)
 }
