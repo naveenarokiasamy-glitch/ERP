@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import "./MenuCard.css";
 import Header from "../../components/Header";
+import InventoryModuleSwitcher from "../../components/InventoryModuleSwitcher";
 
 // ============================================================
 // MENU CARDS DATA
@@ -202,11 +203,23 @@ export default function MenuCard() {
           {/* ================= MAIN CONTENT ================= */}
           <main className="consumable-main">
 
-            <header className="consumable-header">
-              <div className="consumable-back-link" onClick={() => navigate("/inventory")}>
-                <ArrowLeft size={15} />
-                Inventory
-              </div>
+
+
+<header className="consumable-header">
+
+  <div className="consumable-header-top">
+
+    <div
+      className="consumable-back-link"
+      onClick={() => navigate("/inventory")}
+    >
+      <ArrowLeft size={15} />
+      Inventory
+    </div>
+
+    <InventoryModuleSwitcher />
+
+  </div>
 
               <span className="consumable-eyebrow">
                 Materials
@@ -295,6 +308,6 @@ export default function MenuCard() {
 
         </div>
       </div>
-    </>
+    </> 
   );
 }

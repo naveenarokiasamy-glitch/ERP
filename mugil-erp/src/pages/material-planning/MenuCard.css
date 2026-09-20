@@ -322,3 +322,19 @@
 .consumable-featured {
   position: relative;
 }
+
+.consumable-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.consumable-header-top .consumable-back-link {
+  margin: 0;
+}
+
+.consumable-header-top .inventory-module-switcher {
+  margin: 0;
+}

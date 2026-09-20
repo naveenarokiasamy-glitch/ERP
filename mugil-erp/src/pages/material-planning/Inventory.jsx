@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Layers, Wrench, ArrowRight } from "lucide-react";
 import "./Inventory.css";
 import Header from "../../components/Header";
+import InventoryModuleSwitcher from "../../components/InventoryModuleSwitcher";
 
 const inventoryModules = [
   {
