@@ -104,9 +104,9 @@ export default function WelcomePage() {
             <BriefcaseIcon />
           </div>
           <span className="topbar-brand">
-            Mugil Industries
-            <span>ERP Platform</span>
-          </span>
+  NXT GENZ
+  <span>ERP Platform</span>
+</span>
         </div>
         <div className="topbar-right">
           <div className="topbar-user">
@@ -125,12 +125,12 @@ export default function WelcomePage() {
       <main className="welcome-content">
         <section className="welcome-hero">
           <p className="hero-eyebrow">ERP Dashboard</p>
-          <h1 className="hero-heading">Welcome to Mugil Industries ERP</h1>
-          <p className="hero-body">
-            We are happy to work with you. Please share your business
-            requirements, workflows, and operational needs so we can build a
-            customized ERP solution for Mugil Industries.
-          </p>
+<h1 className="hero-heading">Welcome to NXT GENZ ERP</h1>
+<p className="hero-body">
+  We are happy to work with you. Please share your business
+  requirements, workflows, and operational needs so we can build a
+  customized ERP solution for NXT GENZ.
+</p>
           <div className="hero-cta-row">
             <div className="tooltip-wrapper">
               <button className="btn-primary">Share Requirements</button>
@@ -264,8 +264,8 @@ export default function WelcomePage() {
           <span className="status-pill">v2.4.1</span>
         </div>
         <div className="statusbar-right">
-          © {new Date().getFullYear()} Mugil Industries · Confidential
-        </div>
+  © {new Date().getFullYear()} NXT GENZ · Confidential
+</div>
       </footer>
     </div>
   );

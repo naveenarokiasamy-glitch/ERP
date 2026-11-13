@@ -45,14 +45,14 @@ function loadTaxInvoicePrintEngine() {
 }
 
 const COMPANY = {
-  name: "MUGIL ENGINEERING INDUSTRY",
-  worksLine1: "Works : 2/89. SF No 105, Thanjavur Main Road,",
-  worksLine2: "Devarayaneri, Assoor Post, Trichy - 620 015.",
-  gstin: "33AHDPR8644K1ZX",
-  ssiNo: "18.13.18257 dt 31.01.2001",
-  cell1: "98424-52887",
-  cell2: "89039-52887",
-  pan: "AHDPR8644K",
+  name: "NXT GENZ",
+  worksLine1: "Company Address: Not Provided",
+  worksLine2: "",
+  gstin: "N/A",
+  ssiNo: "N/A",
+  cell1: "Not Provided",
+  cell2: "Not Provided",
+  pan: "N/A",
 };
 
 const COMPANY_ADDRESSES = [
@@ -81,16 +81,15 @@ const customers = [
     state: "Tamil Nadu",
     stateCode: "33",
   },
-  {
-    gst: "33AHDPR8644K1ZX",
-    companyName: "MUGIL ENGINEERING INDUSTRY",
-    address:
-      "2/89 SF No 105 Thanjavur Main Road, Devarayaneri, Assoor Post, Trichy - 620015",
-    phone: "9842452887",
-    email: "info@mugil.com",
-    state: "Tamil Nadu",
-    stateCode: "33",
-  },
+{
+  gst: "",
+  companyName: "NXT GENZ",
+  address: "",
+  phone: "",
+  email: "",
+  state: "",
+  stateCode: "",
+},
   {
     gst: "33AALCC1724F1Z1",
     companyName: "COIMBATORE CASTINGS PVT LTD",
@@ -868,8 +867,8 @@ export default function TaxInvoiceForm() {
                 {formData.receiverGst === COMPANY.gstin && (
                   <div className="ti-form-field ti-form-customer-select">
                     <label className="ti-form-label">
-                      Mugil Industry — Address
-                    </label>
+  NXT GENZ — Address
+</label>
                     <select
                       className="ti-form-select"
                       value={formData.receiverAddressOptionId}
@@ -1008,8 +1007,8 @@ export default function TaxInvoiceForm() {
                 {formData.consigneeGst === COMPANY.gstin && (
                   <div className="ti-form-field ti-form-customer-select">
                     <label className="ti-form-label">
-                      Mugil Industry — Address
-                    </label>
+  NXT GENZ — Address
+</label>
                     <select
                       className="ti-form-select"
                       value={formData.consigneeAddressOptionId}

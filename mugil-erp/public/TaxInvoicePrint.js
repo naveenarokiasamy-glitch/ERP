@@ -22,12 +22,13 @@
     headerGap: 0,
   };
 
- var LOGO_LEFT_SRC = "/mugil-logo.png";
-var LOGO_RIGHT_SRC = "/globe-logo.png";
+var LOGO_LEFT_SRC = "/nxt-genz-logo.png";
+var LOGO_RIGHT_SRC = "/company-logo.png";
 
-var FOOTER_BLOOD_SRC = "/eye-donation.png";
-var FOOTER_EYE_SRC = "/blood-donation.png"; 
-  var DEFAULT_TAGLINE = "கண்தானம் செய்வீர்! இரத்ததானம் செய்வீர்!!";
+var FOOTER_BLOOD_SRC = "/blood-donation.png";
+var FOOTER_EYE_SRC = "/eye-donation.png";
+
+var DEFAULT_TAGLINE = "Innovate • Create • Grow";
 
   /* ================================ HELPERS ================================ */
 
@@ -237,9 +238,9 @@ var FOOTER_EYE_SRC = "/blood-donation.png";
     var worksLine1 = company.worksLine1 || "Works: 2/89. SF No 105, Thanjavur Main Road, Devarayaneri, Assoor Post, Trichy - 620 015.";
     var worksLine2 = company.worksLine2 || "";
     
-    companyTd.innerHTML =
+companyTd.innerHTML =
       '<div class="tip-company-name">' +
-      escapeHtml(company.name || "MUGIL ENGINEERING INDUSTRY") +
+      escapeHtml(company.name || "NXT GENZ") +
       "</div>" +
       '<div class="tip-works-line">' + escapeHtml(worksLine1) + "</div>" +
       (worksLine2 ? '<div class="tip-works-line">' + escapeHtml(worksLine2) + "</div>" : "");

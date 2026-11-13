@@ -231,14 +231,14 @@ export default function LoginTemplate({
       <section className="login-card-shell">
         <form className="uiverse-form" onSubmit={handleSubmit} noValidate>
           <div className="uiverse-logo">
-            <img src={mugilLogo} alt="Mugil Engineering Industries" />
-          </div>
+          <img src={mugilLogo} alt="NXT GENZ" />
+</div>
 
-          <p className="uiverse-heading">{selectedDepartment.label} Login</p>
+<p className="uiverse-heading">{selectedDepartment.label} Login</p>
 
-          <p className="uiverse-subtitle">
-            Mugil Industries ERP — Secure Access Portal
-          </p>
+<p className="uiverse-subtitle">
+  NXT GENZ ERP — Secure Access Portal
+</p>
 
           <div className="department-group">
             <label className="form-label" htmlFor="department-button">
@@ -379,9 +379,9 @@ export default function LoginTemplate({
           </div>
 
           <div className="login-footer">
-            <span>© {new Date().getFullYear()} Mugil Industries</span>
-            <a href="/privacy-policy">Privacy Policy</a>
-          </div>
+  <span>© {new Date().getFullYear()} NXT GENZ</span>
+  <a href="/privacy-policy">Privacy Policy</a>
+</div>
         </form>
       </section>
     </div>

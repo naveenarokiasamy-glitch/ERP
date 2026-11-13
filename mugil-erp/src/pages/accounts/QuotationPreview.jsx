@@ -11,13 +11,13 @@ import "./QuotationPreview.css";
    and overrides LETTERHEAD.name when supplied.
    ========================================================================= */
 const LETTERHEAD = {
-  name: "Mugil Engineering Industry",
-  regNo: "Udyam Reg No: UDYAM - TN - 27 - 0010156",
-  gstin: "GSTIN: 33AHDPR8644K1ZX",
-  address: "4/211, S.F. No.105, Thanjavur Main Road, Devarayanery, Assor (P.O.), Trichy - 620 015.",
-  phones: ["98424-52887", "99446-51887", "89039-52887"],
-  email: "mugilengg@gmail.com",
-  tagline: "கண்தானம் செய்வீர்!  இரத்ததானம் செய்வீர்!!",
+  name: "NXT GENZ",
+  regNo: "Registration Number: N/A",
+  gstin: "GSTIN: N/A",
+  address: "Company Address: Not Provided.",
+  phones: ["Not Provided"],
+  email: "Not Provided",
+  tagline: "Innovate • Create • Grow",
 };
 
 /* ---------------------------- helpers ---------------------------------- */
@@ -421,27 +421,27 @@ export default function QuotationPreviewNew({ data, summary, onBack }) {
      <QuotationPreviewNew data={sampleQuotationData} summary={sampleSummary} />
    ========================================================================= */
 export const sampleQuotationData = {
-  quotationNumber: "MEI/QTN/0626-05",
+  quotationNumber: "NXT/QTN/SAMPLE-001",
   quotationDate: "2026-06-26",
   validity: "7 days from the date of issue",
   deliveryTime: "4 weeks",
   vendor: {
-    companyName: "MKK METAL SECTIONS PVT LTD",
-    city: "CHENNAI",
-    attention: "Mr.P.JERNAUS.",
-    phone: "9095388478",
-    email: "mkkmarketing@mkkmetal.in",
+    companyName: "Sample Customer",
+    city: "",
+    attention: "",
+    phone: "",
+    email: "",
   },
-  subject: "Quotation for Manufacturing and Supply of Fabricated M.S. Longitudinal Pipes",
+  subject: "Sample Quotation",
   intro:
-    "We thank you for your valuable enquiry and are pleased to submit our quotation for the manufacturing and supply of fabricated Mild Steel Pipes as per your requirements.",
+    "Thank you for your enquiry. We are pleased to submit our quotation based on your requirements.",
   items: [
     {
-      description: "Fabricated MS Pipe",
-      size: "600 MM OD X 20 MM THK - 6 Mtrs Each",
-      qty: 350,
-      unit: "Mtrs",
-      rate: 32900,
+      description: "Sample Product",
+      size: "Standard",
+      qty: 1,
+      unit: "Nos",
+      rate: 1000,
     },
   ],
   gstPercent: 18,
@@ -451,28 +451,25 @@ export const sampleQuotationData = {
   technicalDetails: [
     {
       heading: "Material",
-      points: ["Mild Steel Plates conforming to IS 2062 Grade. Plate Thickness: 20 mm."],
+      points: ["Material specifications to be provided."],
     },
     {
-      heading: "Pipe Specification",
+      heading: "Product Specification",
       points: [
-        "Type of Pipe: Fabricated Mild Steel Pipe",
-        "Internal Diameter (I.D.): 540 mm",
-        "Standard Pipe Length: 6.0 metres",
+        "Product specifications to be provided.",
       ],
     },
   ],
-  paymentTerms: "80% advance along with the Purchase Order and the balance 20% before dispatch of the materials.",
+  paymentTerms: "Payment terms to be confirmed.",
   terms: [
-    "This quotation shall remain valid for a period of 7 days from the date of issue.",
-    "The quoted price is inclusive of the cost of M.S. plates, fabrication charges, welding consumables, grinding and finishing, labour, and loading.",
-    "Transportation of the finished fabricated pipes to the project site shall be charged extra.",
-    "GST @ 18% shall be charged extra as applicable.",
+    "Quotation validity is subject to confirmation.",
+    "Prices are subject to applicable taxes.",
+    "Delivery charges will be confirmed separately.",
   ],
   notes: "",
-  signatures: { preparedBy: "P. Rajappa" },
-  companyName: "Mugil Engineering Industry",
-  designation: "Proprietor",
+  signatures: { preparedBy: "" },
+  companyName: "NXT GENZ",
+  designation: "",
 };
 
 export const sampleSummary = {

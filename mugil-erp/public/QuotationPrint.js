@@ -101,15 +101,15 @@
      company-level information the form does not collect, so it lives here
      as a constant. data.companyName still overrides the printed name.
      ========================================================================= */
-  var LETTERHEAD = {
-    name: "Mugil Engineering Industry",
-    regNo: "Udyam Reg No: UDYAM - TN - 27 - 0010156",
-    gstin: "GSTIN: 33AHDPR8644K1ZX",
+var LETTERHEAD = {
+    name: "NXT GENZ",
+    regNo: "Registration Number: N/A",
+    gstin: "GSTIN: N/A",
     address:
-      "4/211, S.F. No.105, Thanjavur Main Road, Devarayanery, Assor (P.O.), Trichy - 620 015.",
-    phones: ["98424-52887", "99446-51887", "89039-52887"],
-    email: "mugilengg@gmail.com",
-    tagline: "கண்தானம் செய்வீர்!  இரத்ததானம் செய்வீர்!!",
+      "Company Address: Not Provided",
+    phones: ["Not Provided"],
+    email: "Not Provided",
+    tagline: "Innovate • Create • Grow",
   };
 
   /* ================================ HELPERS ================================ */
@@ -266,11 +266,11 @@ function buildHeaderNode(companyName) {
    * The image must be placed in the public folder:
    * public/mugil-logo.png
    */
-  var logoLeft = el(
+var logoLeft = el(
     "div",
     "qp-logo",
     '<img src="/mugil-logo.png" ' +
-      'alt="Mugil Engineering Industry" ' +
+      'alt="NXT GENZ" ' +
       'style="width:80px;height:80px;object-fit:contain;" />'
   );
 

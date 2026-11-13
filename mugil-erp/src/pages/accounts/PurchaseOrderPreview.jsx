@@ -238,12 +238,10 @@ export default function PurchaseOrderPreview({
           <div className="purchase-order-preview__company">
 
             <div className="purchase-order-preview__company-name">
-              Mugil
-              <br />
-              Engineering
-              <br />
-              Industry
-            </div>
+  NXT
+  <br />
+  GENZ
+</div>
 
             <div className="purchase-order-preview__company-details">
               Udyam Reg No: UDYAM-TN-27-
@@ -620,9 +618,9 @@ export default function PurchaseOrderPreview({
           </strong>
 
           <div>
-            {data.companyName ||
-              "M/s. Mugil Engineering Industry"}
-          </div>
+  {data.companyName ||
+    "M/s. NXT GENZ"}
+</div>
 
           <div>
             {data.location ||

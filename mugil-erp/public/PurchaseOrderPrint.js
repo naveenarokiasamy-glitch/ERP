@@ -82,24 +82,22 @@
      document remains independent from the Quotation files.
      ======================================================================= */
 
-  var LETTERHEAD = {
-    name: "Mugil Engineering Industry",
-    regNo: "Udyam Reg No: UDYAM - TN - 27 - 0010156",
-    gstin: "GSTIN: 33AHDPR8644K1ZX",
+var LETTERHEAD = {
+    name: "NXT GENZ",
+    regNo: "Registration Number: N/A",
+    gstin: "GSTIN: N/A",
 
     address:
-      "4/211, S.F. No.105, Thanjavur Main Road, Devarayanery, Assor (P.O.), Trichy - 620 015.",
+      "Company Address: Not Provided",
 
     phones: [
-      "98424-52887",
-      "99446-51887",
-      "89039-52887",
+      "Not Provided",
     ],
 
-    email: "mugilengg@gmail.com",
+    email: "Not Provided",
 
     tagline:
-      "கண்தானம் செய்வீர்!  இரத்ததானம் செய்வீர்!!",
+      "Innovate • Create • Grow",
   };
 
   /* =======================================================================
@@ -369,7 +367,7 @@
     var logoLeft = el(
       "div",
       "pop-logo",
-      '<img src="/mugil-logo.png" alt="Mugil Engineering Industry" style="width:90px;height:90px;object-fit:contain;" />',
+      '<img src="/mugil-logo.png" alt="NXT GENZ" style="width:90px;height:90px;object-fit:contain;" />',
     );
 
     /* ---------------------------------------------------------------

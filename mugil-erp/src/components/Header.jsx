@@ -45,14 +45,14 @@ const handlePrivacyPolicy = () => {
   return (
     <header className="erp-header">
 
-      {/* BRAND */}
-      <div className="erp-brand">
-        <span className="erp-brand-line" />
+{/* BRAND */}
+<div className="erp-brand">
+  <span className="erp-brand-line" />
 
-        <span className="erp-brand-name">
-          Mugil Engineering Industry
-        </span>
-      </div>
+  <span className="erp-brand-name">
+    NXT GENZ
+  </span>
+</div>
 
 
       {/* RIGHT SIDE */}

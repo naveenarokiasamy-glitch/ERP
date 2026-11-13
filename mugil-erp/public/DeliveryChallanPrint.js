@@ -209,13 +209,13 @@ function customerExtras(customer) {
   <span class="dc-logo-wrap dc-logo-wrap--left">
     <img
       src="/mugil-logo.png"
-      alt="Mugil Engineering Industry"
+      alt="NXT GENZ"
       style="width:90px;height:90px;object-fit:contain;"
     >
   </span>
 
   <div class="dc-brand-copy">
-    <div class="dc-company-name">MUGIL ENGINEERING INDUSTRY</div>
+    <div class="dc-company-name">NXT GENZ</div>
 
     <div class="dc-company-address">
       Works: ${escapeHtml(
@@ -278,7 +278,7 @@ function customerExtras(customer) {
         </section>
         <div class="dc-authorization">
           <section class="dc-signature">
-            <div class="dc-signature-company">For Mugil Engineering Industry</div>
+            <div class="dc-signature-company">For NXT GENZ</div>
             <div class="dc-signature-block">
               <div class="dc-signature-space"></div>
               <div class="dc-signature-label">Signature</div>
